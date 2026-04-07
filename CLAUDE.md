@@ -1,31 +1,49 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project Configuration
 
-- **Language**: TypeScript
-- **Package Manager**: yarn
-- **Add-ons**: prettier, eslint, sveltekit-adapter, mcp
+- **Language**: TypeScript (strict mode)
+- **Package Manager**: yarn (v4 — use `yarn`, never `npm` or `pnpm`)
+- **Framework**: SvelteKit 2 + Svelte 5 with runes mode enabled globally
+- **Deployment**: Netlify (`@sveltejs/adapter-netlify`)
 
 ---
 
-You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
+## Commands
 
-## Available MCP Tools:
+```bash
+yarn dev           # Start dev server (localhost:5173)
+yarn build         # Production build
+yarn preview       # Preview production build
 
-### 1. list-sections
+yarn check         # Type-check with svelte-check
+yarn check:watch   # Watch mode type checking
+yarn lint          # prettier --check
+yarn format        # prettier --write
+```
 
-Use this FIRST to discover all available documentation sections. Returns a structured list with titles, use_cases, and paths.
-When asked about Svelte or SvelteKit topics, ALWAYS use this tool at the start of the chat to find relevant sections.
+There are no test commands configured yet.
 
-### 2. get-documentation
+---
 
-Retrieves full documentation content for specific sections. Accepts single or multiple sections.
-After calling the list-sections tool, you MUST analyze the returned documentation sections (especially the use_cases field) and then use the get-documentation tool to fetch ALL documentation sections that are relevant for the user's task.
+## Architecture
 
-### 3. svelte-autofixer
+Standard SvelteKit file-based routing under `src/routes/`. Shared code lives in `src/lib/` and is importable via the `$lib` alias.
 
-Analyzes Svelte code and returns issues and suggestions.
-You MUST use this tool whenever writing Svelte code before sending it to the user. Keep calling it until no issues or suggestions are returned.
+**Key conventions:**
+- Svelte 5 runes are enabled globally (`$state`, `$derived`, `$effect`, `$props`, etc.) — use rune syntax, not the legacy Options API
+- 2-space indentation, single quotes, trailing commas (ES5), semicolons, 100-char line width (enforced by Prettier)
 
-### 4. playground-link
+---
 
-Generates a Svelte Playground link with the provided code.
-After completing the code, ask the user if they want a playground link. Only call this tool after user confirmation and NEVER if code was written to files in their project.
+## Svelte MCP Tools
+
+You have access to the Svelte MCP server with comprehensive Svelte 5 and SvelteKit documentation.
+
+### Usage workflow (required):
+1. **`list-sections`** — Call this FIRST when working on any Svelte/SvelteKit topic to discover relevant documentation sections
+2. **`get-documentation`** — After listing sections, fetch ALL sections relevant to the task (analyze the `use_cases` field to decide)
+3. **`svelte-autofixer`** — Run on ALL Svelte code before sending to the user; keep calling until no issues remain
+4. **`playground-link`** — Only generate after explicit user confirmation; NEVER call if code was written to project files

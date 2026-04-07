@@ -1,0 +1,52 @@
+:root {
+  /* ==========================================================
+     Colors
+     ========================================================== */
+
+  --color-brand: #e20000;
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-bg: #efe6e6;
+
+  /* ==========================================================
+     Fonts
+     ========================================================== */
+
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'PT Mono', monospace;
+
+  /* ==========================================================
+     Type scale — fluid via clamp()
+     Reference point: ~1280px viewport (laptop, from design screenshots)
+     ========================================================== */
+
+  /* Large section headings: "novo novo novo", "emisije", "o nama"
+     ~40px mobile → ~77px at 1280px → 80px max */
+  --text-display: clamp(2.5rem, 6vw, 5rem);
+
+  /* Nav links, player track name, section subtitles
+     ~20px mobile → ~32px at 1280px → 32px max */
+  --text-title: clamp(1.25rem, 2.5vw, 2rem);
+
+  /* Show and article card titles
+     ~16px mobile → ~22px at 1280px → 22px max */
+  --text-card: clamp(1rem, 1.7vw, 1.375rem);
+
+  /* Body text, descriptions
+     ~14px mobile → ~16px at 1280px → 16px max */
+  --text-body: clamp(0.875rem, 1.25vw, 1rem);
+
+  /* Dates, author names, tag labels, read time — PT Mono
+     Fixed, no scaling needed: 12px */
+  --text-meta: 0.75rem;
+
+  /* ==========================================================
+     Breakpoints (for reference in comments — use in media queries)
+
+     sm:  640px  — large phone / portrait tablet
+     md:  1024px — landscape tablet
+     lg:  1280px — laptop (design reference)
+     xl:  1920px — desktop
+     2xl: 2560px — 4K
+     ========================================================== */
+}
