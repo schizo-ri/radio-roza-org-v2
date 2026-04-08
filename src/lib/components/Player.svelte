@@ -183,23 +183,45 @@
     }
   };
 
-  // Reset HLS to live edge when tab regains focus while paused
-  // Prevents playing a stale buffer that accumulated while tab was hidden
+  // Reset HLS to live edge when tab regains focus while paused.
+  // startLoad(-1) alone doesn't help — the audio element already has stale data buffered.
+  // detachMedia() removes the MediaSource from the element (clears the buffer),
+  // then loadSource + attachMedia restart from live edge without destroying the HLS instance.
+  // Reset HLS to live edge when tab regains focus while paused.
+  // detachMedia() removes the MediaSource from the element (clears stale buffer),
+  // then loadSource + attachMedia restart from live edge without destroying the HLS instance.
   $effect(() => {
     if (!browser) return;
 
-    function onVisibilityChange() {
-      if (document.visibilityState !== 'visible') return;
-      if (isPlaying || !playerState.isLive) return;
+    let resetPending = false;
 
-      if (hlsInstance) {
-        hlsInstance.stopLoad();
-        hlsInstance.startLoad(-1); // -1 = live edge
-      }
+    function resetToLiveEdge() {
+      if (resetPending) return;
+      resetPending = true;
+      setTimeout(() => { resetPending = false; }, 500);
+
+      hlsInstance!.stopLoad();
+      hlsInstance!.detachMedia();
+      hlsInstance!.loadSource(playerState.src);
+      hlsInstance!.attachMedia(audioEl!);
     }
 
+    function onRegainFocus() {
+      if (document.visibilityState !== 'visible') return;
+      if (isPlaying || !playerState.isLive || !hlsInstance || !audioEl) return;
+      resetToLiveEdge();
+    }
+
+    const onVisibilityChange = () => onRegainFocus();
+    const onWindowFocus = () => onRegainFocus();
+
     document.addEventListener('visibilitychange', onVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', onWindowFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('focus', onWindowFocus);
+    };
   });
 
   // Poll only when playing the live stream
