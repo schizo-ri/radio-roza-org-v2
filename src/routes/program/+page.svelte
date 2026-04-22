@@ -1,5 +1,6 @@
 <script lang="ts">
   import { program, blocks, type Day } from '$lib/utils/program';
+  import Tag from '$lib/components/Tag.svelte';
 
   const DAYS_ORDER: Day[] = [
     'Monday',
@@ -104,12 +105,18 @@
 
       <ul class="show-list">
         {#each showsByDay[day] as show (show.title + show.show_start)}
+          {@const block = blocks.find((b) => b.title === show.title)}
           <li class="show-row">
             <span class="show-time">{show.show_start}</span>
             <div class="show-info">
               <h3 class="show-title">{show.title}</h3>
-              {#if blocks[show.title]}
-                <p class="show-desc">{blocks[show.title]}</p>
+              {#if block}
+                <p class="show-desc">{block.description}</p>
+                <div class="show-tags">
+                  {#each block.tags as tag (tag)}
+                    <Tag label={tag} color="none" />
+                  {/each}
+                </div>
               {/if}
             </div>
           </li>
@@ -276,6 +283,13 @@
     font-size: var(--text-body);
     color: rgb(0 0 0 / 0.55);
     line-height: 1.5;
+  }
+
+  .show-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
   }
 
   /* Tablet+ */

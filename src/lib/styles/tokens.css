@@ -50,3 +50,9 @@
      2xl: 2560px — 4K
      ========================================================== */
 }
+
+/* Scale up ~10% on wide screens (≥ 1920px → ~17.6px at 2560px 4K).
+   Uses root font-size so all rem-based tokens (text + spacing) scale together. */
+:root {
+  font-size: clamp(1rem, calc(11.2px + 0.25vw), 1.25rem);
+}

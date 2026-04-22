@@ -10,6 +10,7 @@
     excerpt?: string;
     image?: string;
     tags?: string[];
+    category?: string;
     showKomentar?: boolean;
   }
 
@@ -22,6 +23,7 @@
     excerpt,
     image,
     tags,
+    category,
     showKomentar = false,
   }: Props = $props();
 </script>
@@ -60,6 +62,12 @@
       </div>
     {/if}
 
+    {#if category}
+      <div class="card-tags">
+        <Tag label={category} color="none" />
+      </div>
+    {/if}
+
     {#if showKomentar}
       <a href="{href}#komentari" class="card-komentar">komentar</a>
     {/if}
@@ -70,7 +78,10 @@
   .article-card {
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgb(0 0 0 / 0.2);
+    /*border-right: 2px solid black;*/
+    /*border-bottom: 2px solid black;*/
+    background-color: var(--color-bg);
+    padding: 4px 12px;
   }
 
   /* Cover image */
@@ -108,12 +119,11 @@
   .card-date {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
-    color: rgb(0 0 0 / 0.45);
   }
 
   .card-title {
     font-family: var(--font-display);
-    font-size: var(--text-card);
+    font-size: var(--text-title);
     font-weight: 400;
     line-height: 1.2;
   }
@@ -131,7 +141,6 @@
   .card-meta {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
-    color: rgb(0 0 0 / 0.45);
     display: flex;
     flex-wrap: wrap;
     align-items: center;

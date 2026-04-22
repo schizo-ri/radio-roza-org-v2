@@ -38,7 +38,7 @@
       </div>
     {/if}
 
-    <a {href} class="card-listen">poslušaj</a>
+    <!-- <a {href} class="card-listen">poslušaj</a> -->
   </div>
 </article>
 
@@ -46,6 +46,8 @@
   .show-card {
     display: flex;
     flex-direction: column;
+    background-color: var(--color-bg);
+    padding: 8px;
   }
 
   /* Cover image — square */
@@ -77,6 +79,7 @@
   .card-body {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     gap: 0.4rem;
     padding: 0.5rem 0 0.75rem;
   }
@@ -84,7 +87,6 @@
   .card-date {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
-    color: rgb(0 0 0 / 0.45);
   }
 
   .card-title {
@@ -92,6 +94,11 @@
     font-size: var(--text-card);
     font-weight: 400;
     line-height: 1.2;
+    /* max 3 lines */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
   }
 
   .card-title a {
@@ -107,7 +114,8 @@
   .card-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: 0.25rem;
+    margin-top: auto;
   }
 
   /* Listen button */

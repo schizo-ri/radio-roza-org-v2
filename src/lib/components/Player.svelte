@@ -9,15 +9,23 @@
   import { getCurrentShow, getNextShow, blocks } from '$lib/utils/program';
 
   let audioEl = $state<HTMLAudioElement | undefined>(undefined);
+  let now = $state(new Date());
+
+  $effect(() => {
+    const id = setInterval(() => { now = new Date(); }, 60_000);
+    return () => clearInterval(id);
+  });
   let hlsInstance: Hls | null = null;
   let isPlaying = $state(false);
   let loading = $state(false);
   let error = $state<string | null>(null);
   let expanded = $state(false);
 
-  const currentShow = $derived(playerState.isLive ? getCurrentShow() : null);
-  const nextShow = $derived(playerState.isLive ? getNextShow() : null);
-  const currentDescription = $derived(currentShow ? (blocks[currentShow.title] ?? null) : null);
+  const currentShow = $derived(now && playerState.isLive ? getCurrentShow() : null);
+  const nextShow = $derived(now && playerState.isLive ? getNextShow() : null);
+  const currentDescription = $derived(
+    currentShow ? (blocks.find((b) => b.title === currentShow.title)?.description ?? null) : null,
+  );
 
   // Artwork state — updated on each song change
   let artwork = $state<ArtworkSizes | null>(null);
@@ -30,6 +38,7 @@
 
   // Stream retry internals
   let retryTimeout: ReturnType<typeof setTimeout> | null = null;
+  let userPaused = false; // true when user explicitly paused; prevents retry loop
 
   function clearRetry() {
     if (retryTimeout) {
@@ -42,7 +51,7 @@
     clearRetry();
     retryTimeout = setTimeout(() => {
       retryTimeout = null;
-      if (!audioEl || isPlaying) return;
+      if (!audioEl || isPlaying || userPaused) return;
       if (hlsInstance) {
         hlsInstance.stopLoad();
         hlsInstance.startLoad(-1); // reload from live edge
@@ -52,6 +61,40 @@
       audioEl.play().catch(() => {});
       scheduleRetry(); // keep retrying until playing or paused
     }, 10_000);
+  }
+
+  // Reload button — shown after 5s of stuck loading, or on fatal error
+  let showReload = $state(false);
+  let showReloadTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function armReloadBtn() {
+    if (showReloadTimer || showReload) return;
+    showReloadTimer = setTimeout(() => {
+      showReload = true;
+      showReloadTimer = null;
+    }, 5000);
+  }
+
+  function hideReloadBtn() {
+    if (showReloadTimer) {
+      clearTimeout(showReloadTimer);
+      showReloadTimer = null;
+    }
+    showReload = false;
+  }
+
+  // Manual reconnect — reinitialises HLS and attempts playback
+  let reconnectKey = $state(0);
+  let reconnectShouldPlay = false;
+
+  function reconnect() {
+    if (!audioEl) return;
+    error = null;
+    loading = true;
+    hideReloadBtn();
+    clearRetry();
+    reconnectShouldPlay = true;
+    reconnectKey++;
   }
 
   const NOW_PLAYING_URL = 'https://radio.radio-roza.org/api/nowplaying_static/radioroza.json';
@@ -184,10 +227,6 @@
   };
 
   // Reset HLS to live edge when tab regains focus while paused.
-  // startLoad(-1) alone doesn't help — the audio element already has stale data buffered.
-  // detachMedia() removes the MediaSource from the element (clears the buffer),
-  // then loadSource + attachMedia restart from live edge without destroying the HLS instance.
-  // Reset HLS to live edge when tab regains focus while paused.
   // detachMedia() removes the MediaSource from the element (clears stale buffer),
   // then loadSource + attachMedia restart from live edge without destroying the HLS instance.
   $effect(() => {
@@ -252,7 +291,9 @@
     if (!browser || !audioEl) return;
 
     const src = playerState.src;
-    const wasPlaying = untrack(() => isPlaying);
+    const _key = reconnectKey; // re-run on manual reconnect
+    const wasPlaying = untrack(() => isPlaying) || reconnectShouldPlay;
+    reconnectShouldPlay = false;
 
     hlsInstance?.destroy();
     hlsInstance = null;
@@ -282,6 +323,10 @@
             hls.recoverMediaError();
           } else {
             error = 'Stream nije dostupan.';
+            loading = false;
+            showReload = true;
+            clearRetry();
+            hideReloadBtn();
             hls.destroy();
             if (hlsInstance === hls) hlsInstance = null;
           }
@@ -299,7 +344,10 @@
     const onPlaying = () => {
       isPlaying = true;
       loading = false;
+      error = null;
+      userPaused = false;
       clearRetry();
+      hideReloadBtn();
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'playing';
         updateMediaSessionMetadata();
@@ -308,15 +356,19 @@
     const onPause = () => {
       isPlaying = false;
       clearRetry();
+      hideReloadBtn();
       if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
     };
     const onWaiting = () => {
       loading = true;
       scheduleRetry();
+      armReloadBtn();
     };
     const onCanPlay = () => {
       loading = false;
+      error = null;
       clearRetry();
+      hideReloadBtn();
     };
 
     el.addEventListener('playing', onPlaying);
@@ -326,6 +378,7 @@
 
     return () => {
       clearRetry();
+      hideReloadBtn();
       hlsInstance?.destroy();
       hlsInstance = null;
       el.removeEventListener('playing', onPlaying);
@@ -339,8 +392,10 @@
     if (!audioEl) return;
     error = null;
     if (isPlaying) {
+      userPaused = true;
       audioEl.pause();
     } else {
+      userPaused = false;
       loading = true;
       scheduleRetry();
       audioEl.play().catch((e: unknown) => {
@@ -430,8 +485,13 @@
     </button>
   </div>
 
-  {#if error}
-    <p class="player-error">{error}</p>
+  {#if error || showReload}
+    <div class="player-status">
+      {#if error}
+        <span class="player-error">{error}</span>
+      {/if}
+      <button class="reload-btn" onclick={reconnect}>osvježi</button>
+    </div>
   {/if}
 
   {#if expanded}
@@ -605,11 +665,33 @@
     color: var(--color-black);
   }
 
+  .player-status {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.25rem 1rem 0.5rem;
+  }
+
   .player-error {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
     color: var(--color-brand);
-    padding: 0.25rem 1rem 0.5rem;
+  }
+
+  .reload-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-brand);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .reload-btn:hover {
+    opacity: 0.7;
   }
 
   /* Expanded panel */

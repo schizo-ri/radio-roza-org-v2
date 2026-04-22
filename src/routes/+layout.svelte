@@ -34,5 +34,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 </style>

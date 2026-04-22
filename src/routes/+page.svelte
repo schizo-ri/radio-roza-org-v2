@@ -1,57 +1,302 @@
 <script lang="ts">
   import ArticleCard from '$lib/components/ArticleCard.svelte';
+  import ArticleGrid from '$lib/components/ArticleGrid.svelte';
+  import ShowCard from '$lib/components/ShowCard.svelte';
+  import SeeAll from '$lib/components/SeeAll.svelte';
   import Tag from '$lib/components/Tag.svelte';
+  import { browser } from '$app/environment';
   import { program, blocks, type Day } from '$lib/utils/program';
 
   // --- Program danas ---
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }) as Day;
-  const currentTime = new Date().getHours() * 60 + new Date().getMinutes();
+  let now = $state(new Date());
 
-  const todayShows = program
-    .filter((s) => s.day === today)
-    .sort((a, b) => a.show_start.localeCompare(b.show_start));
-
-  // Split into past and upcoming — show last 1 aired + next 4 upcoming
-  const pastShows = todayShows.filter((s) => {
-    const [h, m] = s.show_start.split(':').map(Number);
-    return h * 60 + m <= currentTime;
-  });
-  const upcomingShows = todayShows.filter((s) => {
-    const [h, m] = s.show_start.split(':').map(Number);
-    return h * 60 + m > currentTime;
+  $effect(() => {
+    if (!browser) return;
+    const id = setInterval(() => {
+      now = new Date();
+    }, 60_000);
+    return () => clearInterval(id);
   });
 
-  const currentShow = pastShows.at(-1) ?? null;
-  const programPreview = [
-    ...(currentShow ? [currentShow] : []),
-    ...upcomingShows.slice(0, 4),
-  ].slice(0, 5);
+  const today = $derived(now.toLocaleDateString('en-US', { weekday: 'long' }) as Day);
+  const currentTime = $derived(now.getHours() * 60 + now.getMinutes());
+
+  const todayShows = $derived(
+    program.filter((s) => s.day === today).sort((a, b) => a.show_start.localeCompare(b.show_start))
+  );
+
+  const currentShow = $derived(
+    todayShows.findLast((s) => {
+      const [h, m] = s.show_start.split(':').map(Number);
+      return h * 60 + m <= currentTime;
+    }) ?? null
+  );
+
+  const programPreview = $derived(
+    [
+      ...(currentShow ? [currentShow] : []),
+      ...todayShows
+        .filter((s) => {
+          const [h, m] = s.show_start.split(':').map(Number);
+          return h * 60 + m > currentTime;
+        })
+        .slice(0, 4),
+    ].slice(0, 5)
+  );
 
   // --- Mock data — replace with CMS ---
   const excerpt =
     'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.';
 
   const newArticles = [
-    { href: '/citaj-radio/rijecka-underground', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Hip hop', 'Rap'] },
-    { href: '/citaj-radio/zvukovi-2', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Kultura'] },
-    { href: '/citaj-radio/rijecka-3', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Intervju'] },
-    { href: '/citaj-radio/zvukovi-4', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Glazba'] },
+    {
+      href: '/citaj-radio/rijecka-underground-1',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Hip hop', 'Rap'],
+      image: 'images/1.jpg',
+    },
+    {
+      href: '/citaj-radio/zvukovi-2',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Kultura'],
+      image: 'images/2.png',
+    },
+    {
+      href: '/citaj-radio/rijecka-3',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Intervju'],
+      image: 'images/3.png',
+    },
+    {
+      href: '/citaj-radio/zvukovi-4',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Glazba'],
+      image: 'images/4.jpeg',
+    },
+    {
+      href: '/citaj-radio/rijecka-underground-3',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Hip hop', 'Rap'],
+      image: 'images/1.jpg',
+    },
+    {
+      href: '/citaj-radio/zvukovi-5',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Kultura'],
+      image: 'images/5.jpg',
+    },
+    {
+      href: '/citaj-radio/rijecka-6',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Intervju'],
+      image: 'images/2.png',
+    },
+    {
+      href: '/citaj-radio/zvukovi-7',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Glazba'],
+      image: 'images/3.png',
+    },
+    {
+      href: '/citaj-radio/rijecka-underground-4',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Hip hop', 'Rap'],
+      image: 'images/4.jpeg',
+    },
+    {
+      href: '/citaj-radio/zvukovi-8',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Kultura'],
+      image: 'images/5.jpg',
+    },
+    {
+      href: '/citaj-radio/rijecka-9',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Intervju'],
+      image: 'images/1.jpg',
+    },
+    {
+      href: '/citaj-radio/zvukovi-10',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Glazba'],
+      image: 'images/3.png',
+    },
+    {
+      href: '/citaj-radio/rijecka-underground-11',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Hip hop', 'Rap'],
+      image: 'images/4.jpeg',
+    },
+    {
+      href: '/citaj-radio/zvukovi-12',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Kultura'],
+      image: 'images/5.jpg',
+    },
+    {
+      href: '/citaj-radio/rijecka-13',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Intervju'],
+      image: 'images/1.jpg',
+    },
+    {
+      href: '/citaj-radio/zvukovi-14',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Glazba'],
+      image: 'images/2.png',
+    },
   ];
 
   const citajRadioPreview = [
-    { href: '/citaj-radio/a', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/b', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/c', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/d', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
+    {
+      href: '/citaj-radio/album',
+      title: 'Bambi Molesters: Dumb Loud Hollow Twang',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt:
+        'Istražujemo kako riječki underground prostori i kolektivi stvaraju  jedinstvenu glazbenu kulturu koja odolijevia mainstream pritiscima.',
+      image: 'images/1.jpg',
+      category: 'album tjedna',
+    },
+    {
+      href: '/citaj-radio/a',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'komentar',
+    },
+    {
+      href: '/citaj-radio/b',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'ćakule',
+    },
+    {
+      href: '/citaj-radio/c',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'aktualno',
+    },
+    {
+      href: '/citaj-radio/d',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'komentar',
+    },
   ];
 
+  const albumTjedna = citajRadioPreview.find((a) => a.category === 'album tjedna') ?? null;
+  const citajRadioList = citajRadioPreview.filter((a) => a.category !== 'album tjedna');
+
   const archiveArticles = [
-    { href: '/citaj-radio/arc-1', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Hip hop'] },
-    { href: '/citaj-radio/arc-2', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Rock'] },
-    { href: '/citaj-radio/arc-3', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Kultura'] },
-    { href: '/citaj-radio/arc-4', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Intervju'] },
-    { href: '/citaj-radio/arc-5', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Glazba'] },
-    { href: '/citaj-radio/arc-6', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', tags: ['Hip hop'] },
+    {
+      href: '/citaj-radio/arc-1',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Hip hop'],
+    },
+    {
+      href: '/citaj-radio/arc-2',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Rock'],
+    },
+    {
+      href: '/citaj-radio/arc-3',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Kultura'],
+    },
+    {
+      href: '/citaj-radio/arc-4',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Intervju'],
+    },
+    {
+      href: '/citaj-radio/arc-5',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Glazba'],
+    },
+    {
+      href: '/citaj-radio/arc-6',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      tags: ['Hip hop'],
+    },
   ];
 </script>
 
@@ -63,12 +308,14 @@
 <section class="home-section">
   <div class="section-header">
     <h2 class="section-title">novo novo novo</h2>
-    <a href="/citaj-radio" class="section-link">sve →</a>
   </div>
-  <div class="grid-cover">
-    {#each newArticles as article (article.href)}
-      <ArticleCard {...article} image="" />
-    {/each}
+  <ArticleGrid items={newArticles}>
+    {#snippet card(item)}
+      <ShowCard {...item} />
+    {/snippet}
+  </ArticleGrid>
+  <div class="section-link">
+    <SeeAll href="/citaj-radio" label="Vidi sve " />
   </div>
 </section>
 
@@ -78,18 +325,23 @@
   <section class="mid-col mid-col--program">
     <div class="section-header">
       <h2 class="section-title">program danas</h2>
-      <a href="/program" class="section-link">cijeli program →</a>
     </div>
 
     <ul class="program-list">
       {#each programPreview as show (show.title + show.show_start)}
         {@const isNow = show === currentShow}
+        {@const block = blocks.find((b) => b.title === show.title)}
         <li class="program-row" class:is-now={isNow}>
           <span class="program-time">{show.show_start}</span>
           <div class="program-info">
             <span class="program-name">{show.title}</span>
-            {#if blocks[show.title]}
-              <p class="program-desc">{blocks[show.title]}</p>
+            {#if block}
+              <p class="program-desc">{block.description}</p>
+              <div class="program-tags">
+                {#each block.tags as tag (tag)}
+                  <Tag label={tag} />
+                {/each}
+              </div>
             {/if}
           </div>
           {#if isNow}
@@ -98,18 +350,49 @@
         </li>
       {/each}
     </ul>
+    <div class="section-link">
+      <SeeAll href="/program" label="Pogledaj cijeli program" />
+    </div>
   </section>
 
   <!-- Čitaj radio preview -->
   <section class="mid-col mid-col--citaj">
     <div class="section-header">
       <h2 class="section-title">čitaj radio</h2>
-      <a href="/citaj-radio" class="section-link">sve →</a>
     </div>
-    <div class="grid-text">
-      {#each citajRadioPreview as article (article.href)}
-        <ArticleCard {...article} />
-      {/each}
+
+    {#if albumTjedna}
+      <a href={albumTjedna.href} class="album-card">
+        {#if albumTjedna.image}
+          <img src={albumTjedna.image} alt={albumTjedna.title} class="album-image" />
+        {/if}
+        <div class="album-body">
+          <p class="album-meta">
+            {albumTjedna.date}
+          </p>
+          <h3 class="album-title">{albumTjedna.title}</h3>
+          <p class="album-meta">
+            {#if albumTjedna.author}{albumTjedna.author}{/if}
+            {#if albumTjedna.readTime}({albumTjedna.readTime}){/if}
+          </p>
+          {#if albumTjedna.excerpt}
+            <p class="album-excerpt">{albumTjedna.excerpt}</p>
+          {/if}
+          <div class="album-tag">
+            <Tag label="album tjedna" color="red" />
+          </div>
+        </div>
+      </a>
+    {/if}
+
+    <ArticleGrid items={citajRadioList}>
+      {#snippet card(item)}
+        <ArticleCard {...item} />
+      {/snippet}
+    </ArticleGrid>
+
+    <div class="section-link">
+      <SeeAll href="/citaj-radio" label="Pročitaj radio" />
     </div>
   </section>
 </div>
@@ -118,12 +401,14 @@
 <section class="home-section">
   <div class="section-header">
     <h2 class="section-title">najbolje iz arhive</h2>
-    <a href="/citaj-radio" class="section-link">sve →</a>
   </div>
-  <div class="grid-cover grid-cover--wide">
-    {#each archiveArticles as article (article.href)}
-      <ArticleCard {...article} image="" />
-    {/each}
+  <ArticleGrid items={archiveArticles}>
+    {#snippet card(item)}
+      <ArticleCard {...item} />
+    {/snippet}
+  </ArticleGrid>
+  <div class="section-link">
+    <SeeAll href="/citaj-radio" label="Vidi sve iz arhive" />
   </div>
 </section>
 
@@ -153,7 +438,6 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 1rem;
-    border-bottom: 2px solid var(--color-black);
     padding-bottom: 0.5rem;
     margin-bottom: 0;
   }
@@ -166,29 +450,7 @@
   }
 
   .section-link {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: rgb(0 0 0 / 0.45);
-    text-decoration: none;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-
-  .section-link:hover {
-    color: var(--color-black);
-  }
-
-  /* ── Cover card grids ── */
-  .grid-cover {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2px;
-  }
-
-  .grid-cover--wide {
-    grid-template-columns: repeat(2, 1fr);
+    margin: 0.75rem 0;
   }
 
   /* ── Mid section (program danas + čitaj radio) ── */
@@ -196,14 +458,15 @@
     display: grid;
     grid-template-columns: 1fr;
     margin-bottom: 3rem;
-  }
-
-  .mid-col {
     padding: 0 1rem;
   }
 
   .mid-col--program {
     margin-bottom: 3rem;
+  }
+
+  .mid-col--citaj {
+    container-type: inline-size;
   }
 
   /* Program list */
@@ -214,18 +477,17 @@
   .program-row {
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid rgb(0 0 0 / 0.1);
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 2px solid black;
   }
 
   .program-time {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    color: rgb(0 0 0 / 0.45);
+    font-family: var(--font-body);
+    font-size: var(--text-title);
     flex-shrink: 0;
-    width: 2.75rem;
-    padding-top: 0.15em;
+    line-height: 1.2;
+    width: 2.5em;
   }
 
   .program-info {
@@ -238,15 +500,21 @@
 
   .program-name {
     font-family: var(--font-display);
-    font-size: var(--text-body);
-    line-height: 1.3;
+    font-size: var(--text-title);
+    line-height: 1.2;
   }
 
   .program-desc {
-    font-size: var(--text-meta);
-    color: rgb(0 0 0 / 0.5);
-    line-height: 1.4;
+    font-size: var(--text-body);
+    line-height: 1.5;
     display: none;
+  }
+
+  .program-tags {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
   }
 
   .now-badge {
@@ -263,13 +531,73 @@
     color: var(--color-brand);
   }
 
-  /* Text card grid (čitaj radio preview) */
-  .grid-text {
-    display: grid;
-    grid-template-columns: 1fr;
-    column-gap: 1px;
-    row-gap: 0;
-    background: rgb(0 0 0 / 0.12);
+  .album-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 2px solid var(--color-black);
+    padding: 12px;
+    margin-bottom: 0.5rem;
+    background-color: white;
+  }
+
+  .album-image {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+    margin-bottom: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  @container (min-width: 400px) {
+    .album-card {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .album-image {
+      width: 45%;
+      margin-bottom: 0;
+    }
+  }
+
+  .album-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    height: stretch;
+  }
+
+  .album-title {
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .album-card:hover .album-title {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .album-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 700;
+  }
+
+  .album-excerpt {
+    font-size: var(--text-body);
+    line-height: 1.5;
+  }
+
+  .album-tag {
+    margin-top: auto;
   }
 
   /* ── CTAs ── */
@@ -318,24 +646,12 @@
       margin-bottom: 4rem;
     }
 
-    .mid-col {
-      padding: 0 1.5rem;
-    }
-
-    .grid-cover {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .grid-cover--wide {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    .grid-text {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
     .program-desc {
       display: block;
+    }
+
+    .program-tags {
+      display: flex;
     }
   }
 
@@ -346,29 +662,19 @@
       margin-bottom: 5rem;
     }
 
-    .grid-cover {
-      grid-template-columns: repeat(4, 1fr);
-    }
-
-    .grid-cover--wide {
-      grid-template-columns: repeat(6, 1fr);
-    }
-
     /* Program + čitaj radio side by side */
     .mid-section {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 50em) 1fr;
       margin-bottom: 5rem;
-      border-top: 2px solid var(--color-black);
-    }
-
-    .mid-col {
       padding: 0 2rem;
     }
 
     .mid-col--program {
       margin-bottom: 0;
-      border-right: 1px solid rgb(0 0 0 / 0.15);
-      padding-left: 2rem;
+      border-right: 2px solid black;
+    }
+
+    .program-row {
       padding-right: 2rem;
     }
 
@@ -379,11 +685,7 @@
     .mid-col .section-header {
       border-bottom: none;
       border-top: none;
-      padding-top: 0.75rem;
-    }
-
-    .grid-text {
-      grid-template-columns: repeat(2, 1fr);
+      padding-top: 1rem;
     }
 
     /* CTAs side by side */
