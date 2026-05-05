@@ -64,12 +64,8 @@
 
     {#if category}
       <div class="card-tags">
-        <Tag label={category} color="none" />
+        <Tag label={category} />
       </div>
-    {/if}
-
-    {#if showKomentar}
-      <a href="{href}#komentari" class="card-komentar">komentar</a>
     {/if}
   </div>
 </article>
@@ -153,7 +149,6 @@
 
   .card-excerpt {
     font-size: var(--text-body);
-    color: rgb(0 0 0 / 0.6);
     line-height: 1.5;
     /* clamp to 3 lines */
     display: -webkit-box;
@@ -167,22 +162,6 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
-    margin-top: 0.25rem;
-  }
-
-  .card-komentar {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-black);
-    text-decoration: none;
     margin-top: auto;
-    padding-top: 0.75rem;
-  }
-
-  .card-komentar:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
   }
 </style>

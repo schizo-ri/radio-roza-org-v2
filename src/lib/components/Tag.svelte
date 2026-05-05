@@ -23,7 +23,8 @@
     text-transform: uppercase;
     /*letter-spacing: 0.04em;*/
     color: var(--color-black);
-    border: 1px solid rgb(0 0 0 / 0.35);
+    background-color: var(--color-white, #fff);
+    border: 1px solid var(--color-white, #fff);
     border-radius: var(--text-body);
     padding: 0.5em 0.8em;
     white-space: nowrap;

@@ -538,7 +538,6 @@
     color: inherit;
     border-bottom: 2px solid var(--color-black);
     padding: 12px;
-    margin-bottom: 0.5rem;
     background-color: white;
   }
 

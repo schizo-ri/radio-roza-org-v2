@@ -823,6 +823,24 @@
     }
   }
 
+  /* Tablet+: larger play/pause icons */
+  @media (min-width: 640px) {
+    .play-btn {
+      width: 44px;
+      height: 44px;
+    }
+
+    .play-btn svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
   /* Desktop */
   @media (min-width: 1024px) {
     .player-bar {

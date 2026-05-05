@@ -72,9 +72,9 @@
   <title>Program — Radio Roža</title>
 </svelte:head>
 
-<main class="program-page">
-  <div class="page-top">
-    <span class="page-label">program</span>
+<main class="page">
+  <header class="page-header">
+    <h1 class="page-title">program</h1>
 
     <details class="pick-date" bind:this={detailsEl}>
       <summary class="pick-date-btn">pick a date</summary>
@@ -89,82 +89,84 @@
         {/each}
       </ul>
     </details>
+  </header>
+
+  <div class="content">
+    {#each DAYS_ORDER as day (day)}
+      <section
+        class="day-section"
+        id={day.toLowerCase()}
+        aria-current={day === today ? 'true' : undefined}
+      >
+        <div class="day-header">
+          <h2 class="day-name">
+            {DAY_NAMES_HR[day]}<span class="day-date">{formatDate(weekDates[day])}</span>
+          </h2>
+        </div>
+
+        <ul class="show-list">
+          {#each showsByDay[day] as show (show.title + show.show_start)}
+            {@const block = blocks.find((b) => b.title === show.title)}
+            <li class="show-row">
+              <span class="show-time">{show.show_start}</span>
+              <div class="show-info">
+                <h3 class="show-title">{show.title}</h3>
+                {#if block}
+                  <p class="show-desc">{block.description}</p>
+                  <div class="show-tags">
+                    {#each block.tags as tag (tag)}
+                      <Tag label={tag} color="black" />
+                    {/each}
+                  </div>
+                {/if}
+              </div>
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/each}
   </div>
-
-  {#each DAYS_ORDER as day (day)}
-    <section
-      class="day-section"
-      id={day.toLowerCase()}
-      aria-current={day === today ? 'true' : undefined}
-    >
-      <div class="day-header">
-        <h2 class="day-name">
-          {DAY_NAMES_HR[day]}<span class="day-date">{formatDate(weekDates[day])}</span>
-        </h2>
-      </div>
-
-      <ul class="show-list">
-        {#each showsByDay[day] as show (show.title + show.show_start)}
-          {@const block = blocks.find((b) => b.title === show.title)}
-          <li class="show-row">
-            <span class="show-time">{show.show_start}</span>
-            <div class="show-info">
-              <h3 class="show-title">{show.title}</h3>
-              {#if block}
-                <p class="show-desc">{block.description}</p>
-                <div class="show-tags">
-                  {#each block.tags as tag (tag)}
-                    <Tag label={tag} color="none" />
-                  {/each}
-                </div>
-              {/if}
-            </div>
-          </li>
-        {/each}
-      </ul>
-    </section>
-  {/each}
 </main>
 
 <style>
-  .program-page {
+  .page {
     padding: 1.5rem 1rem 4rem;
+  }
+
+  .content {
     max-width: 640px;
     margin-inline: auto;
     overflow-x: hidden;
   }
 
-  /* Top bar: label + pick-a-date */
-  .page-top {
+  /* Header row */
+  .page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    padding-bottom: 1rem;
   }
 
-  .page-label {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: rgb(0 0 0 / 0.4);
+  .page-title {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    font-weight: 400;
+    line-height: 1;
   }
-
   /* pick a date — <details> */
   .pick-date {
     position: relative;
   }
 
   .pick-date-btn {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-black);
     background: none;
-    border: 1px solid var(--color-black);
-    padding: 0.3em 0.75em;
+    border: 2px solid var(--color-black);
+    font-weight: 600;
+    border-radius: 2em;
+    padding: 0.5em 1em;
     cursor: pointer;
     list-style: none;
     white-space: nowrap;
@@ -182,7 +184,7 @@
     z-index: 10;
     list-style: none;
     background: var(--color-bg);
-    border: 1px solid var(--color-black);
+    border: 2px solid var(--color-black);
     min-width: 11rem;
   }
 
@@ -193,8 +195,7 @@
     padding: 0.5em 0.75em;
     text-decoration: none;
     color: var(--color-black);
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
+    font-size: var(--text-body);
   }
 
   .day-dropdown a:hover {
@@ -281,7 +282,6 @@
 
   .show-desc {
     font-size: var(--text-body);
-    color: rgb(0 0 0 / 0.55);
     line-height: 1.5;
   }
 
@@ -294,7 +294,7 @@
 
   /* Tablet+ */
   @media (min-width: 640px) {
-    .program-page {
+    .page {
       padding: 2rem 1.5rem 5rem;
     }
 
@@ -309,12 +309,18 @@
 
   /* Desktop */
   @media (min-width: 1024px) {
-    .program-page {
+    .page {
       padding: 2.5rem 2rem 6rem;
     }
 
     .show-row {
       padding: 1rem 0;
+    }
+  }
+
+  @media (min-width: 1600px) {
+    .content {
+      margin-top: -9rem;
     }
   }
 </style>

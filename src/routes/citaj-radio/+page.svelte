@@ -1,28 +1,117 @@
 <script lang="ts">
   import ArticleCard from '$lib/components/ArticleCard.svelte';
+  import ArticleGrid from '$lib/components/ArticleGrid.svelte';
+  import { page } from '$app/state';
+  import { goto } from '$app/navigation';
 
-  const categories = ['sve', 'glazba', 'kultura', 'intervjui', 'reportaže'];
-  let activeCategory = $state('sve');
+  const categories = ['sve', 'aktualno', 'ćakula', 'komentar', 'album tjedna'];
+
+  const activeCategory = $derived(page.url.searchParams.get('kategorija') ?? 'sve');
 
   const excerpt =
     'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.';
 
   // Mock data — replace with CMS
   const articles = [
-    { href: '/citaj-radio/rijecka-underground-scena', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/zvukovi-iz-podruma', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/rijecka-underground-2', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/zvukovi-2', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/rijecka-underground-3', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/zvukovi-3', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/rijecka-underground-4', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
-    { href: '/citaj-radio/zvukovi-4', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt, showKomentar: true },
+    {
+      href: '/citaj-radio/rijecka-underground-scena',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'aktualno',
+    },
+    {
+      href: '/citaj-radio/zvukovi-iz-podruma',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'ćakula',
+    },
+    {
+      href: '/citaj-radio/rijecka-underground-2',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'komentar',
+    },
+    {
+      href: '/citaj-radio/zvukovi-2',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'album tjedna',
+    },
+    {
+      href: '/citaj-radio/rijecka-underground-3',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'komentar',
+    },
+    {
+      href: '/citaj-radio/zvukovi-3',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'komentar',
+    },
+    {
+      href: '/citaj-radio/rijecka-underground-4',
+      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'ćakula',
+    },
+    {
+      href: '/citaj-radio/zvukovi-4',
+      title: 'Zvukovi iz podruma koji oblikuju budućnost',
+      date: '02.03.2026.',
+      author: 'Martina Blečić',
+      readTime: '4 min read',
+      excerpt,
+      category: 'aktualno',
+    },
   ];
 
+  const filteredArticles = $derived(
+    activeCategory === 'sve' ? articles : articles.filter((a) => a.category === activeCategory)
+  );
+
+  function setCategory(cat: string) {
+    const url = new URL(page.url);
+    if (cat === 'sve') {
+      url.searchParams.delete('kategorija');
+    } else {
+      url.searchParams.set('kategorija', cat);
+    }
+    url.searchParams.delete('stranica');
+    goto(url.toString(), { replaceState: true });
+  }
+
+  function pageHref(n: number): string {
+    const url = new URL(page.url);
+    url.searchParams.set('stranica', String(n));
+    return url.pathname + url.search;
+  }
+
   // Mock pagination
-  const currentPage = 1;
+  const currentPageNum = $derived(Number(page.url.searchParams.get('stranica') ?? 1));
   const totalPages = 5;
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const pageNums = Array.from({ length: totalPages }, (_, i) => i + 1);
 </script>
 
 <svelte:head>
@@ -33,13 +122,13 @@
   <div class="page-header">
     <h1 class="page-title">čitaj radio</h1>
     <div class="filter-bar">
-      <span class="filter-label">kategorije</span>
+      <span class="filter-label">kategorije: </span>
       <div class="filter-tabs">
         {#each categories as cat (cat)}
           <button
             class="filter-tab"
             class:active={activeCategory === cat}
-            onclick={() => (activeCategory = cat)}
+            onclick={() => setCategory(cat)}
           >
             {cat}
           </button>
@@ -48,21 +137,21 @@
     </div>
   </div>
 
-  <div class="card-grid">
-    {#each articles as article (article.href)}
-      <ArticleCard {...article} />
-    {/each}
-  </div>
+  <ArticleGrid items={filteredArticles} rows={3}>
+    {#snippet card(item)}
+      <ArticleCard {...item} />
+    {/snippet}
+  </ArticleGrid>
 
   <nav class="pagination" aria-label="Stranice">
-    {#each pages as page (page)}
+    {#each pageNums as n (n)}
       <a
-        href="/citaj-radio?stranica={page}"
+        href={pageHref(n)}
         class="page-num"
-        class:current={page === currentPage}
-        aria-current={page === currentPage ? 'page' : undefined}
+        class:current={n === currentPageNum}
+        aria-current={n === currentPageNum ? 'page' : undefined}
       >
-        {page}
+        {n}
       </a>
     {/each}
   </nav>
@@ -76,13 +165,12 @@
   /* Header row */
   .page-header {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
     gap: 1rem;
     flex-wrap: wrap;
     margin-bottom: 0;
-    border-bottom: 2px solid var(--color-black);
-    padding-bottom: 0.75rem;
+    padding-bottom: 1rem;
   }
 
   .page-title {
@@ -101,11 +189,10 @@
   }
 
   .filter-label {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgb(0 0 0 / 0.4);
+    letter-spacing: -1px;
+    font-weight: 600;
+    margin-right: 1ch;
   }
 
   .filter-tabs {
@@ -117,32 +204,26 @@
   .filter-tab {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-    background: none;
-    border: 1px solid transparent;
-    padding: 0.2em 0.5em;
+    background: var(--color-white, #fff);
+    border: 1px solid var(--color-white, #fff);
+    border-radius: var(--text-body);
+    padding: 0.5em 0.8em;
     cursor: pointer;
-    color: rgb(0 0 0 / 0.5);
+    color: var(--color-black);
+    line-height: 1;
+    white-space: nowrap;
   }
 
   .filter-tab:hover {
-    color: var(--color-black);
-    border-color: rgb(0 0 0 / 0.3);
-  }
-
-  .filter-tab.active {
-    color: var(--color-black);
     border-color: var(--color-black);
   }
 
-  /* Grid — ArticleCard provides its own border-top */
-  .card-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    column-gap: 1px;
-    row-gap: 0;
-    background: rgb(0 0 0 / 0.12);
+  .filter-tab.active {
+    background: var(--color-black);
+    border-color: var(--color-black);
+    color: var(--color-white, #fff);
   }
 
   /* Pagination */
@@ -153,12 +234,19 @@
   }
 
   .page-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-family: var(--font-mono);
     font-size: var(--text-meta);
+    font-weight: 700;
     color: var(--color-black);
     text-decoration: none;
-    padding: 0.3em 0.6em;
     border: 1px solid transparent;
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+    width: 24px;
+    line-height: 1;
   }
 
   .page-num:hover {
@@ -174,20 +262,12 @@
     .citaj-radio-page {
       padding: 2rem 1.5rem 5rem;
     }
-
-    .card-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
   }
 
   /* Desktop */
   @media (min-width: 1024px) {
     .citaj-radio-page {
       padding: 2.5rem 2rem 6rem;
-    }
-
-    .card-grid {
-      grid-template-columns: repeat(4, 1fr);
     }
   }
 </style>
