@@ -35,16 +35,17 @@
   onclose={() => (lightboxOpen = false)}
 />
 
-<main class="o-nama-page">
-
+<main class="page">
   <!-- ── Title + intro ── -->
-  <section class="intro-section">
+  <header class="page-header">
     <h1 class="page-title">o nama</h1>
-    <p class="intro-text">
-      <!-- content TBD -->
-      Radio Roža je community radio stanica iz Rijeke, vođena volonterima i entuzijastima koji vjeruju u slobodnu, nezavisnu glazbenu kulturu. Emitiramo 24/7, pokrivamo sve žanrove i scene, i trudimo se biti glas zajednice.
-    </p>
-  </section>
+  </header>
+
+  <p class="intro-text">
+    Radio Roža je community internet radio nastao iz želje i potrebe za praćenjem nezavisne kulturne
+    scene i raznih kulturnih aktera u Rijeci, promocijom najrazličitijih (underground) žanrova, te
+    ljubavi prema gramofonskim pločama.
+  </p>
 
   <!-- ── Photo grid 1 ── -->
   <div class="photo-grid photo-grid--portrait" aria-label="Galerija fotografija studija">
@@ -68,16 +69,36 @@
     <div class="two-col-block">
       <h2 class="block-title">kakav smo mi radio</h2>
       <div class="block-text">
-        <p><!-- content TBD --> Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima. Svaka emisija je priča, svaki DJ je glasnik nečeg važnog.</p>
-        <p>Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima. Radio, podcast, intervju, reportaža — sve je dobrodošlo.</p>
+        <p>
+          Osnovan od strane nekolicine prijatelja i entuzijasta ponaprije iz zabave, ali i revolta
+          prema komercijalnim sadržajima, istodobno se počelo djelovati kao internet radio, ali i
+          kao grupa selektora koja s vinila vrti mahom ex yu funk, disco, rock, uz poneki izlet u
+          reggae, dub, gipsy i mnoge druge vode. Ubrzo su uslijedili nastupi po riječkim klubovima,
+          ulicama, sajmovima i kinima, nekoliko festivala u regiji – Komšilook (Rijeka), Velvet
+          festival (Krk), Trk u šumu (Platak), pa čak i u Domu za starije i nemoćne osobe Mali
+          Kartec – Krk.
+        </p>
+        <p>
+          Uz nastupe, počeli su se organizirati i prijenosi uživo s raznih koncerata i nastupa, te
+          se polako razvijala potreba za prostorom za rad i stvaranjem radija zajednice. Nakon
+          prijave i dobivanja projekta „Žiroskop - Civilno-javno partnerstvo u upravljanju
+          prostorima kulture u Rijeci“ Radio Roža službeno postaje radio zajednice u sklopu Udruge
+          Ri Rock, a zajedno s partnerima na projektu – Drugo More, Filmaktiv, Prostor +, Savez
+          udruga Molekula i Grad Rijeka, započelo je novo poglavlje djelovanja gdje će glavna zadaća
+          biti pratiti i stvarati sadržaj u prostorima Palacha, Filodrammatice i HKD-a na Sušaku.
+        </p>
       </div>
     </div>
 
     <div class="two-col-block">
       <h2 class="block-title">gdje se nalazi naš studio</h2>
       <div class="block-text">
-        <p><!-- content TBD --> Naš studio se nalazi u srcu Rijeke. Vrata su uvijek otvorena za posjet, suradnju i razgovor. Pronađi nas i uvjeri se osobno.</p>
-        <p>Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu.</p>
+        <p>
+          Radio svoj dom dobiva u Omladinskom kulturnom centru Palach, te od siječnja 2019. godine
+          započinje s uređenjem i opremanjem prostora koji će služiti kao radio zajednice,
+          promovirajući razne bendove, izvođače, selektore i druge umjetnike koji djeluju ili
+          gostuju u Rijeci.
+        </p>
       </div>
       <a href="#studio" class="studio-link">* * * posjeti studio</a>
     </div>
@@ -103,18 +124,27 @@
   <!-- ── Crew / Naša priča / Šalji mjuzu ── -->
   <section class="three-col-section">
     <div class="three-col-block">
-      <h2 class="block-title">crew</h2>
-      <p class="block-body"><!-- content TBD --> Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.</p>
+      <h2 class="block-title"><a href="/o-nama/crew">--> crew</a></h2>
+      <p class="block-body">
+        Upoznaj ekipu radija. Selektori, novinari, tehničari, informatičari... Svatko ima svoju
+        ulogu, često i više njih. Jesmo li već negdje spomenuli da nam se možeš pridružiti i ti?
+      </p>
     </div>
 
     <div class="three-col-block">
       <h2 class="block-title">naša priča</h2>
-      <p class="block-body"><!-- content TBD --> Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.</p>
+      <p class="block-body">
+        <!-- content TBD --> Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu
+        glazbenu kulturu koja odolijeva mainstream pritiscima.
+      </p>
     </div>
 
     <div class="three-col-block">
       <h2 class="block-title">šalji mjuzu</h2>
-      <p class="block-body"><!-- content TBD --> Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.</p>
+      <p class="block-body">
+        <!-- content TBD --> Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu
+        glazbenu kulturu koja odolijeva mainstream pritiscima.
+      </p>
     </div>
   </section>
 
@@ -131,17 +161,22 @@
       <p class="cta-body"><!-- content TBD --></p>
     </div>
   </div>
-
 </main>
 
 <style>
-  /* ── Intro ── */
-  .intro-section {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    padding: 1.5rem 1rem 2rem;
-    border-bottom: 2px solid var(--color-black);
+  .page {
+    padding: 1.5rem 1rem 4rem;
+  }
+
+  /* Header row */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0;
+    padding-bottom: 1rem;
   }
 
   .page-title {
@@ -153,8 +188,10 @@
 
   .intro-text {
     font-size: var(--text-body);
+    font-weight: 500;
     line-height: 1.7;
-    color: rgb(0 0 0 / 0.75);
+    max-width: 600px;
+    margin-bottom: 1rem;
   }
 
   /* ── Photo grids ── */
@@ -194,10 +231,6 @@
     transition: transform 0.3s ease;
   }
 
-  .photo-item:hover .photo-img {
-    transform: scale(1.04);
-  }
-
   .photo-placeholder {
     background: rgb(0 0 0 / 0.08);
     aspect-ratio: 3 / 4;
@@ -223,7 +256,6 @@
 
   .two-col-block {
     padding: 1.5rem 0;
-    border-top: 2px solid var(--color-black);
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -233,7 +265,7 @@
     font-family: var(--font-display);
     font-size: var(--text-title);
     font-weight: 400;
-    line-height: 1.1;
+    line-height: 1;
   }
 
   .block-text {
@@ -245,8 +277,7 @@
   .block-text p,
   .block-body {
     font-size: var(--text-body);
-    line-height: 1.7;
-    color: rgb(0 0 0 / 0.75);
+    line-height: 2;
   }
 
   .studio-link {
@@ -274,7 +305,6 @@
 
   .three-col-block {
     padding: 1.5rem 0;
-    border-top: 2px solid var(--color-black);
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -321,11 +351,6 @@
 
   /* ── Tablet (640px+) ── */
   @media (min-width: 640px) {
-    .intro-section {
-      grid-template-columns: 1fr 1fr;
-      padding: 2rem 1.5rem 2.5rem;
-    }
-
     .photo-grid {
       grid-template-columns: repeat(4, 1fr);
     }
@@ -351,11 +376,6 @@
 
   /* ── Desktop (1024px+) ── */
   @media (min-width: 1024px) {
-    .intro-section {
-      padding: 2.5rem 2rem 3rem;
-      gap: 3rem;
-    }
-
     .two-col-section {
       padding: 0 2rem;
       gap: 3rem;
