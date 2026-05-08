@@ -5,6 +5,8 @@
   import logo from '$lib/assets/logo.svg';
 
   let menuOpen = $state(false);
+  let hidden = $state(false);
+  let lastScrollY = 0;
 
   afterNavigate(() => {
     menuOpen = false;
@@ -15,6 +17,29 @@
     return () => {
       document.body.style.overflow = '';
     };
+  });
+
+  function getNavHeight() {
+    return window.innerWidth >= 1024 ? 70 : 60;
+  }
+
+  function onScroll() {
+    const y = window.scrollY;
+    if (y < 80) {
+      hidden = false;
+      document.documentElement.style.setProperty('--nav-offset', `${getNavHeight()}px`);
+    } else if (y > lastScrollY) {
+      hidden = true;
+      document.documentElement.style.setProperty('--nav-offset', '0px');
+    } else {
+      hidden = false;
+      document.documentElement.style.setProperty('--nav-offset', `${getNavHeight()}px`);
+    }
+    lastScrollY = y;
+  }
+
+  $effect(() => {
+    document.documentElement.style.setProperty('--nav-offset', `${getNavHeight()}px`);
   });
 
   function onKeydown(e: KeyboardEvent) {
@@ -36,9 +61,9 @@
   }
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window onkeydown={onKeydown} onscroll={onScroll} />
 
-<nav>
+<nav class={{ hidden }}>
   <div class="nav-bar">
     <a href="/" class="logo" aria-label="Radio Roža — početna stranica">
       <img src={logo} alt="Radio Roža" width="40" height="40" />
@@ -52,26 +77,18 @@
       {/each}
     </ul>
 
-    <button
-      class="menu-button"
-      onclick={() => (menuOpen = !menuOpen)}
-      aria-expanded={menuOpen}
-      aria-label={menuOpen ? 'Zatvori izbornik' : 'Otvori izbornik'}
-    >
-      <!-- IZBORNIK -->
-      MENU
-    </button>
+    <a href="/" class="site-name" aria-label="Radio Roža — početna stranica">Radio Roža</a>
 
-    <!-- <button
+    <button
       class="hamburger"
       onclick={() => (menuOpen = !menuOpen)}
       aria-expanded={menuOpen}
       aria-label={menuOpen ? 'Zatvori izbornik' : 'Otvori izbornik'}
     >
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button> -->
+      <span class="bar" class:open={menuOpen}></span>
+      <span class="bar" class:open={menuOpen}></span>
+      <span class="bar" class:open={menuOpen}></span>
+    </button>
   </div>
 </nav>
 
@@ -83,7 +100,7 @@
     transition:fade={{ duration: 200 }}
   ></div>
   <ul class="mobile-menu" aria-label="Navigacija" transition:fly={{ y: -8, duration: 200 }}>
-    {#each links as { href, label } (href)}
+    {#each links.filter((l) => l.href !== '/') as { href, label } (href)}
       <li>
         <a {href} class={{ active: isActive(href) }}>{label}</a>
       </li>
@@ -93,7 +110,18 @@
 
 <style>
   nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 300;
     background: var(--color-brand);
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+  }
+
+  nav.hidden {
+    transform: translateY(-100%);
   }
 
   .nav-bar {
@@ -116,16 +144,48 @@
     list-style: none;
   }
 
-  .menu-button {
-    font-family: var(--font-mono);
+  .site-name {
+    font-family: var(--font-display);
     font-size: var(--text-title);
     font-weight: 400;
     color: var(--color-white);
+    text-decoration: none;
     white-space: nowrap;
+  }
+
+  .hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
     margin-left: auto;
     background: none;
     border: none;
     cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+  }
+
+  .bar {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--color-white);
+    border-radius: 1px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    transform-origin: center;
+  }
+
+  .bar:nth-child(1).open {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .bar:nth-child(2).open {
+    opacity: 0;
+  }
+
+  .bar:nth-child(3).open {
+    transform: translateY(-7px) rotate(-45deg);
   }
 
   /* Backdrop */
@@ -176,7 +236,11 @@
       padding: 0 1.25rem;
     }
 
-    .menu-button {
+    .site-name {
+      display: none;
+    }
+
+    .hamburger {
       display: none;
     }
 

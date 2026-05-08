@@ -28,6 +28,13 @@
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    padding-top: 60px;
+  }
+
+  @media (min-width: 1024px) {
+    .layout {
+      padding-top: 70px;
+    }
   }
 
   .layout-content {

@@ -527,7 +527,8 @@
 <style>
   .player {
     position: sticky;
-    top: 0;
+    top: var(--nav-offset, 60px);
+    transition: top 0.3s ease;
     z-index: 200;
     background: var(--color-white);
     border-bottom: 1px solid rgb(0 0 0 / 0.08);
