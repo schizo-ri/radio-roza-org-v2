@@ -5,27 +5,12 @@
   import { playerState } from '$lib/stores/player.svelte';
   import { getAlbumArt, getArtistFanart } from '$lib/utils/artwork';
   import type { ArtworkSizes, ArtistFanart } from '$lib/utils/artwork';
-  import { slide } from 'svelte/transition';
-  import { getCurrentShow, getNextShow, blocks } from '$lib/utils/program';
 
   let audioEl = $state<HTMLAudioElement | undefined>(undefined);
-  let now = $state(new Date());
-
-  $effect(() => {
-    const id = setInterval(() => { now = new Date(); }, 60_000);
-    return () => clearInterval(id);
-  });
   let hlsInstance: Hls | null = null;
   let isPlaying = $state(false);
   let loading = $state(false);
   let error = $state<string | null>(null);
-  let expanded = $state(false);
-
-  const currentShow = $derived(now && playerState.isLive ? getCurrentShow() : null);
-  const nextShow = $derived(now && playerState.isLive ? getNextShow() : null);
-  const currentDescription = $derived(
-    currentShow ? (blocks.find((b) => b.title === currentShow.title)?.description ?? null) : null,
-  );
 
   // Artwork state — updated on each song change
   let artwork = $state<ArtworkSizes | null>(null);
@@ -86,14 +71,15 @@
   // Manual reconnect — reinitialises HLS and attempts playback
   let reconnectKey = $state(0);
   let reconnectShouldPlay = false;
+  let wasPlayingBeforeDisconnect = false;
 
-  function reconnect() {
+  function reconnect(shouldPlay = true) {
     if (!audioEl) return;
     error = null;
     loading = true;
     hideReloadBtn();
     clearRetry();
-    reconnectShouldPlay = true;
+    reconnectShouldPlay = shouldPlay;
     reconnectKey++;
   }
 
@@ -150,18 +136,52 @@
     }
   }
 
+  function skipToLive() {
+    if (!audioEl) return;
+    const d = audioEl.duration;
+    if (d && isFinite(d)) {
+      audioEl.currentTime = Math.max(0, d - 5);
+    } else if (hlsInstance && hlsInstance.liveSyncPosition != null) {
+      audioEl.currentTime = hlsInstance.liveSyncPosition;
+    }
+  }
+
+  // Checked once at setup — capability doesn't change at runtime
+  let canSetPositionState = false;
+
+  function updatePositionState() {
+    if (!canSetPositionState || !audioEl) return;
+    const d = audioEl.duration;
+    const t = audioEl.currentTime;
+    if (!d || !isFinite(d) || !isFinite(t)) return;
+    try {
+      navigator.mediaSession.setPositionState({ duration: d, position: Math.min(t, d), playbackRate: 1 });
+    } catch {
+      canSetPositionState = false;
+    }
+  }
+
   function setupMediaSessionHandlers() {
     if (!browser || !('mediaSession' in navigator)) return;
+    canSetPositionState = !!navigator.mediaSession.setPositionState;
     try {
       navigator.mediaSession.setActionHandler('play', () => {
+        userPaused = false;
         audioEl?.play().catch(() => {});
       });
       navigator.mediaSession.setActionHandler('pause', () => {
+        userPaused = true;
         audioEl?.pause();
       });
       navigator.mediaSession.setActionHandler('stop', () => {
+        userPaused = true;
         audioEl?.pause();
       });
+      navigator.mediaSession.setActionHandler('seekbackward', () => {
+        if (audioEl) audioEl.currentTime = Math.max(0, audioEl.currentTime - 30);
+      });
+      navigator.mediaSession.setActionHandler('seekforward', skipToLive);
+      navigator.mediaSession.setActionHandler('nexttrack', skipToLive);
     } catch (e) {
       console.warn('MediaSession handlers failed:', e);
     }
@@ -251,24 +271,55 @@
       resetToLiveEdge();
     }
 
-    const onVisibilityChange = () => onRegainFocus();
-    const onWindowFocus = () => onRegainFocus();
-
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    window.addEventListener('focus', onWindowFocus);
+    document.addEventListener('visibilitychange', onRegainFocus);
+    window.addEventListener('focus', onRegainFocus);
 
     return () => {
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-      window.removeEventListener('focus', onWindowFocus);
+      document.removeEventListener('visibilitychange', onRegainFocus);
+      window.removeEventListener('focus', onRegainFocus);
     };
   });
 
-  // Poll only when playing the live stream
+  // Auto-reconnect when browser comes back online after suspension.
+  // HLS destroys itself on fatal network errors, so when we get the `online`
+  // event we reinitialise only if the player is in an error/broken state.
+  // Delay 1.5s: `online` fires when the network interface comes up, but DNS
+  // resolution can still fail for a second or two after that.
   $effect(() => {
-    if (!browser || !playerState.isLive) return;
+    if (!browser) return;
+
+    let onlineTimer: ReturnType<typeof setTimeout> | null = null;
+
+    function onOnline() {
+      if (error || !hlsInstance) {
+        if (onlineTimer) clearTimeout(onlineTimer);
+        onlineTimer = setTimeout(() => {
+          onlineTimer = null;
+          reconnect(wasPlayingBeforeDisconnect);
+          wasPlayingBeforeDisconnect = false;
+        }, 1500);
+      }
+    }
+
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      if (onlineTimer) clearTimeout(onlineTimer);
+    };
+  });
+
+  $effect(() => {
+    if (!browser) return;
+
+    if (!playerState.isLive) {
+      artwork = null;
+      artistFanart = null;
+      updateMediaSessionMetadata();
+      return;
+    }
 
     setupMediaSessionHandlers();
-    updateMediaSessionMetadata(); // set default metadata immediately, don't wait for fetch
+    updateMediaSessionMetadata();
     fetchNowPlaying();
     const interval = setInterval(fetchNowPlayingSimple, 5000);
 
@@ -276,15 +327,6 @@
       clearInterval(interval);
       if (fetchDebounceTimeout) clearTimeout(fetchDebounceTimeout);
     };
-  });
-
-  // Update MediaSession when switching to an archive source
-  $effect(() => {
-    if (!browser || playerState.isLive) return;
-    // Clear artwork from previous live session
-    artwork = null;
-    artistFanart = null;
-    updateMediaSessionMetadata();
   });
 
   $effect(() => {
@@ -322,9 +364,9 @@
           if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
             hls.recoverMediaError();
           } else {
+            wasPlayingBeforeDisconnect = isPlaying;
             error = 'Stream nije dostupan.';
             loading = false;
-            showReload = true;
             clearRetry();
             hideReloadBtn();
             hls.destroy();
@@ -371,10 +413,21 @@
       hideReloadBtn();
     };
 
+    // Throttled timeupdate — ~4 FPS is enough for lock-screen position state
+    let lastPositionUpdate = 0;
+    const onTimeUpdate = () => {
+      const now = Date.now();
+      if (now - lastPositionUpdate > 250) {
+        lastPositionUpdate = now;
+        updatePositionState();
+      }
+    };
+
     el.addEventListener('playing', onPlaying);
     el.addEventListener('pause', onPause);
     el.addEventListener('waiting', onWaiting);
     el.addEventListener('canplay', onCanPlay);
+    el.addEventListener('timeupdate', onTimeUpdate);
 
     return () => {
       clearRetry();
@@ -385,6 +438,7 @@
       el.removeEventListener('pause', onPause);
       el.removeEventListener('waiting', onWaiting);
       el.removeEventListener('canplay', onCanPlay);
+      el.removeEventListener('timeupdate', onTimeUpdate);
     };
   });
 
@@ -416,7 +470,7 @@
   }
 </script>
 
-<div class="player" class:expanded>
+<div class="player">
   <div class="player-bar">
     <button
       class="play-btn"
@@ -455,42 +509,6 @@
       </span>
     </div>
 
-    <button
-      class="expand-btn"
-      onclick={() => (expanded = !expanded)}
-      aria-expanded={expanded}
-      aria-label={expanded ? 'Smanji player' : 'Proširi player'}
-    >
-      {#if expanded}
-        <svg
-          width="12"
-          height="7"
-          viewBox="0 0 12 7"
-          aria-hidden="true"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="1,6 6,1 11,6" />
-        </svg>
-      {:else}
-        <svg
-          width="12"
-          height="7"
-          viewBox="0 0 12 7"
-          aria-hidden="true"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="1,1 6,6 11,1" />
-        </svg>
-      {/if}
-    </button>
   </div>
 
   {#if error || showReload}
@@ -498,72 +516,10 @@
       {#if error}
         <span class="player-error">{error}</span>
       {/if}
-      <button class="reload-btn" onclick={reconnect}>osvježi</button>
+      <button class="reload-btn" onclick={() => reconnect()}>osvježi</button>
     </div>
   {/if}
 
-  {#if expanded}
-    <div class="player-expanded" transition:slide={{ duration: 200 }}>
-      {#if playerState.isLive}
-        <div class="expanded-cover">
-          {#if artwork}
-            <img src={artwork.medium} alt={playerState.artist} />
-          {:else}
-            <div class="cover-placeholder" aria-hidden="true"></div>
-          {/if}
-        </div>
-        <!-- <div class="expanded-content"> -->
-        <div class="expanded-now">
-          <span class="row-label">Sada</span>
-          <div class="show-row">
-            {#if currentShow}
-              <span class="show-time">{currentShow.show_start}</span>
-              <span class="show-title">{currentShow.title}</span>
-            {:else}
-              <span class="show-title">Radio Roža</span>
-            {/if}
-          </div>
-        </div>
-        <div class="expanded-desc">
-          {#if currentDescription}
-            <p>{currentDescription}</p>
-          {/if}
-        </div>
-        <div class="expanded-next">
-          <span class="row-label">Sljedeće</span>
-          <div class="show-row">
-            {#if nextShow}
-              <span class="show-time">{nextShow.show_start}</span>
-              <span class="show-title">{nextShow.title}</span>
-            {:else}
-              <span class="show-title">—</span>
-            {/if}
-          </div>
-        </div>
-        <div class="expanded-tags">
-          <span class="tag">Hip hop</span>
-          <span class="tag">Rap</span>
-          <span class="tag">Underground</span>
-        </div>
-        <!-- </div> -->
-      {:else}
-        <div class="expanded-cover">
-          <div class="cover-placeholder" aria-hidden="true"></div>
-        </div>
-        <div class="expanded-content">
-          <div class="expanded-now">
-            <span class="row-label">Arhiva</span>
-            <div class="show-row">
-              <span class="show-title">{playerState.artist}</span>
-            </div>
-          </div>
-          <div class="expanded-tags">
-            <span class="tag">Arhiva</span>
-          </div>
-        </div>
-      {/if}
-    </div>
-  {/if}
 </div>
 
 <audio bind:this={audioEl} preload="none"></audio>
@@ -659,20 +615,6 @@
     text-overflow: ellipsis;
   }
 
-  /* Expand button */
-  .expand-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-left: auto;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    color: var(--color-black);
-  }
-
   .player-status {
     display: flex;
     align-items: center;
@@ -700,135 +642,6 @@
 
   .reload-btn:hover {
     opacity: 0.7;
-  }
-
-  /* Expanded panel */
-  .player-expanded {
-    /*display: flex;*/
-    border-top: 1px solid rgb(0 0 0 / 0.08);
-    overflow: hidden;
-    display: grid;
-    grid-template-areas:
-      'cover now'
-      'cover next'
-      'tags tags';
-    grid-template-columns: 120px minmax(0, 1fr);
-  }
-
-  .expanded-cover {
-    grid-area: cover;
-    flex-shrink: 0;
-    width: 120px;
-    aspect-ratio: 1;
-    /*align-self: stretch;*/
-  }
-
-  .expanded-cover img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .cover-placeholder {
-    width: 100%;
-    height: 100%;
-    min-height: 80px;
-    background: rgb(0 0 0 / 0.07);
-  }
-
-  .expanded-content {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .expanded-now,
-  .expanded-desc,
-  .expanded-next,
-  .expanded-tags {
-    padding: 0.625rem 1rem;
-  }
-
-  .expanded-now {
-    grid-area: now;
-  }
-
-  .expanded-next {
-    grid-area: next;
-  }
-
-  .expanded-now,
-  .expanded-next {
-    border-bottom: 1px solid rgb(0 0 0 / 0.06);
-  }
-
-  .expanded-desc {
-    grid-area: description;
-    display: none;
-    border-bottom: 1px solid rgb(0 0 0 / 0.06);
-    font-size: var(--text-body);
-    line-height: 1.5;
-    color: rgb(0 0 0 / 0.55);
-  }
-
-  .expanded-desc p {
-    margin: 0;
-  }
-
-  .row-label {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    color: rgb(0 0 0 / 0.4);
-    margin-bottom: 0.125rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .show-row {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .show-time {
-    font-family: var(--font-mono);
-    font-size: var(--text-body);
-    color: var(--color-black);
-    flex-shrink: 0;
-  }
-
-  .show-title {
-    font-family: var(--font-display);
-    font-size: var(--text-body);
-    color: var(--color-black);
-  }
-
-  .expanded-tags {
-    grid-area: tags;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
-    margin-top: auto;
-  }
-
-  .tag {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    color: var(--color-white);
-    background: var(--color-black);
-    padding: 0.2rem 0.625rem;
-    border-radius: 100px;
-  }
-
-  /* Tablet: show description */
-  @media (min-width: 800px) {
-    .expanded-desc {
-      display: block;
-    }
   }
 
   /* Tablet+: larger play/pause icons */
@@ -864,15 +677,5 @@
       font-size: var(--text-title);
     }
 
-    .expanded-cover {
-      width: 180px;
-    }
-
-    .expanded-now,
-    .expanded-desc,
-    .expanded-next,
-    .expanded-tags {
-      padding: 0.875rem 1.25rem;
-    }
   }
 </style>
