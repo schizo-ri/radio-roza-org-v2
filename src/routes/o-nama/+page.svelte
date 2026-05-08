@@ -4,8 +4,8 @@
 
   // Mock gallery images — replace with CMS
   const gallery1: LightboxImage[] = Array.from({ length: 8 }, (_, i) => ({
-    src: '',
-    alt: `Fotografija studija ${i + 1}`,
+    src: `/images/o-nama/roza-${i + 1}.jpg`,
+    alt: `Fotografija ${i + 1}`,
   }));
 
   const gallery2: LightboxImage[] = Array.from({ length: 8 }, (_, i) => ({
@@ -268,6 +268,20 @@
     line-height: 1;
   }
 
+  .three-col-block .block-title {
+    font-size: var(--text-display);
+  }
+
+  .block-title a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .block-title a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
   .block-text {
     display: flex;
     flex-direction: column;
@@ -308,13 +322,13 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    border-bottom: 2px solid var(--color-black, #000);
   }
 
   /* ── CTAs ── */
   .cta-section {
     display: grid;
     grid-template-columns: 1fr;
-    border-top: 2px solid var(--color-black);
   }
 
   .cta-block {
@@ -351,6 +365,10 @@
 
   /* ── Tablet (640px+) ── */
   @media (min-width: 640px) {
+    .page {
+      padding: 2rem 1.5rem 5rem;
+    }
+
     .photo-grid {
       grid-template-columns: repeat(4, 1fr);
     }
@@ -364,9 +382,17 @@
 
     .three-col-section {
       grid-template-columns: repeat(3, 1fr);
-      padding: 0 1.5rem;
-      gap: 2rem;
+      padding: 1.5rem;
       margin-bottom: 4rem;
+    }
+
+    .three-col-block {
+      border-bottom: none;
+      padding: 1.5rem;
+    }
+
+    .three-col-block:not(:last-child) {
+      border-right: 2px solid var(--color-black, #000);
     }
 
     .cta-block {
@@ -376,6 +402,10 @@
 
   /* ── Desktop (1024px+) ── */
   @media (min-width: 1024px) {
+    .page {
+      padding: 2.5rem 2rem 6rem;
+    }
+
     .two-col-section {
       padding: 0 2rem;
       gap: 3rem;
@@ -383,9 +413,12 @@
     }
 
     .three-col-section {
-      padding: 0 2rem;
-      gap: 3rem;
+      padding: 2rem;
       margin-bottom: 5rem;
+    }
+
+    .three-col-block {
+      padding: 2rem;
     }
 
     .cta-section {
@@ -399,6 +432,13 @@
     .cta-block + .cta-block {
       border-top: none;
       border-left: 2px solid var(--color-black);
+    }
+  }
+
+  /* ── Big Desktop (1600x+) ── */
+  @media (min-width: 1600px) {
+    .three-col-block {
+      padding: 3rem;
     }
   }
 </style>

@@ -7,13 +7,14 @@
     date?: string;
     image?: string;
     tags?: string[];
+    mixcloudKey?: string;
   }
 
   let { href, title, date, image, tags }: Props = $props();
 </script>
 
 <article class="show-card">
-  <a {href} class="card-image-link" tabindex="-1" aria-hidden="true">
+  <a {href} class="card-image-link" tabindex="-1" aria-hidden="true" target="_blank" rel="noopener noreferrer">
     {#if image}
       <img src={image} alt={title} class="card-image" />
     {:else}
@@ -27,7 +28,7 @@
     {/if}
 
     <h3 class="card-title">
-      <a {href}>{title}</a>
+      <a {href} target="_blank" rel="noopener noreferrer">{title}</a>
     </h3>
 
     {#if tags && tags.length > 0}
@@ -37,8 +38,6 @@
         {/each}
       </div>
     {/if}
-
-    <!-- <a {href} class="card-listen">poslušaj</a> -->
   </div>
 </article>
 
@@ -50,7 +49,6 @@
     padding: 8px;
   }
 
-  /* Cover image — square */
   .card-image-link {
     display: block;
     aspect-ratio: 1 / 1;
@@ -66,16 +64,11 @@
     transition: transform 0.3s ease;
   }
 
-  .show-card:hover .card-image {
-    transform: scale(1.03);
-  }
-
   .card-image-placeholder {
     width: 100%;
     height: 100%;
   }
 
-  /* Body */
   .card-body {
     display: flex;
     flex-direction: column;
@@ -94,7 +87,6 @@
     font-size: var(--text-card);
     font-weight: 400;
     line-height: 1.2;
-    /* max 3 lines */
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
@@ -116,25 +108,5 @@
     flex-wrap: wrap;
     gap: 0.25rem;
     margin-top: auto;
-  }
-
-  /* Listen button */
-  .card-listen {
-    display: inline-block;
-    align-self: flex-start;
-    margin-top: 0.25rem;
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-black);
-    border: 1px solid var(--color-black);
-    padding: 0.3em 0.75em;
-    text-decoration: none;
-  }
-
-  .card-listen:hover {
-    background: var(--color-black);
-    color: var(--color-white);
   }
 </style>

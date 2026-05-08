@@ -17,7 +17,7 @@
 <div class="layout">
   <Nav />
   <Player />
-  <div class="layout-content">
+<div class="layout-content">
     {@render children()}
   </div>
   <Footer />

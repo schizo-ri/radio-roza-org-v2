@@ -6,6 +6,9 @@
   import Tag from '$lib/components/Tag.svelte';
   import { browser } from '$app/environment';
   import { program, blocks, type Day } from '$lib/utils/program';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
 
   // --- Program danas ---
   let now = $state(new Date());
@@ -44,156 +47,8 @@
     ].slice(0, 5)
   );
 
-  // --- Mock data — replace with CMS ---
   const excerpt =
     'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.';
-
-  const newArticles = [
-    {
-      href: '/citaj-radio/rijecka-underground-1',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Hip hop', 'Rap'],
-      image: 'images/1.jpg',
-    },
-    {
-      href: '/citaj-radio/zvukovi-2',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Kultura'],
-      image: 'images/2.png',
-    },
-    {
-      href: '/citaj-radio/rijecka-3',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Intervju'],
-      image: 'images/3.png',
-    },
-    {
-      href: '/citaj-radio/zvukovi-4',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Glazba'],
-      image: 'images/4.jpeg',
-    },
-    {
-      href: '/citaj-radio/rijecka-underground-3',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Hip hop', 'Rap'],
-      image: 'images/1.jpg',
-    },
-    {
-      href: '/citaj-radio/zvukovi-5',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Kultura'],
-      image: 'images/5.jpg',
-    },
-    {
-      href: '/citaj-radio/rijecka-6',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Intervju'],
-      image: 'images/2.png',
-    },
-    {
-      href: '/citaj-radio/zvukovi-7',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Glazba'],
-      image: 'images/3.png',
-    },
-    {
-      href: '/citaj-radio/rijecka-underground-4',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Hip hop', 'Rap'],
-      image: 'images/4.jpeg',
-    },
-    {
-      href: '/citaj-radio/zvukovi-8',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Kultura'],
-      image: 'images/5.jpg',
-    },
-    {
-      href: '/citaj-radio/rijecka-9',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Intervju'],
-      image: 'images/1.jpg',
-    },
-    {
-      href: '/citaj-radio/zvukovi-10',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Glazba'],
-      image: 'images/3.png',
-    },
-    {
-      href: '/citaj-radio/rijecka-underground-11',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Hip hop', 'Rap'],
-      image: 'images/4.jpeg',
-    },
-    {
-      href: '/citaj-radio/zvukovi-12',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Kultura'],
-      image: 'images/5.jpg',
-    },
-    {
-      href: '/citaj-radio/rijecka-13',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Intervju'],
-      image: 'images/1.jpg',
-    },
-    {
-      href: '/citaj-radio/zvukovi-14',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Glazba'],
-      image: 'images/2.png',
-    },
-  ];
 
   const citajRadioPreview = [
     {
@@ -309,7 +164,7 @@
   <div class="section-header">
     <h2 class="section-title">novo novo novo</h2>
   </div>
-  <ArticleGrid items={newArticles}>
+  <ArticleGrid items={data.shows}>
     {#snippet card(item)}
       <ShowCard {...item} />
     {/snippet}

@@ -388,6 +388,14 @@
     };
   });
 
+  // Pause HLS when Mixcloud embed takes over
+  $effect(() => {
+    if (playerState.mixcloudShow && audioEl && isPlaying) {
+      userPaused = true;
+      audioEl.pause();
+    }
+  });
+
   function togglePlay() {
     if (!audioEl) return;
     error = null;
