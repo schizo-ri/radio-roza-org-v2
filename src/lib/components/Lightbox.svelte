@@ -86,8 +86,8 @@
         if (!dialogEl) break;
         const focusable = Array.from(
           dialogEl.querySelectorAll<HTMLElement>(
-            'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
-          ),
+            'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+          )
         );
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -144,7 +144,9 @@
     <!-- Toolbar -->
     <div class="lb-toolbar">
       <span class="lb-counter" aria-live="polite" aria-atomic="true">
-        <span class="sr-only">Fotografija</span>{current + 1}<span aria-hidden="true"> / </span><span class="sr-only">od</span>{total}
+        <span class="sr-only">Fotografija</span>{current + 1}<span aria-hidden="true">
+          /
+        </span><span class="sr-only">od</span>{total}
       </span>
       <button class="lb-close" onclick={onclose} aria-label="Zatvori galeriju (Esc)">
         <span aria-hidden="true">×</span>
@@ -164,14 +166,9 @@
 
       <!-- Image -->
       {#key current}
-        <div class="lb-image-wrap" transition:fade={{ duration: 80 }}>
+        <div class="lb-image-wrap">
           {#if image?.src}
-            <img
-              src={image.src}
-              alt={image.alt}
-              class="lb-image"
-              draggable="false"
-            />
+            <img src={image.src} alt={image.alt} class="lb-image" draggable="false" />
           {:else}
             <div class="lb-placeholder" role="img" aria-label={image?.alt ?? ''}></div>
           {/if}
@@ -182,7 +179,7 @@
       <button
         class="lb-nav lb-nav--next"
         onclick={next}
-        aria-label="Sljedeća fotografija ({(current + 2) > total ? 1 : current + 2} od {total})"
+        aria-label="Sljedeća fotografija ({current + 2 > total ? 1 : current + 2} od {total})"
       >
         <span aria-hidden="true">→</span>
       </button>
