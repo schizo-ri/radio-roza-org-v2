@@ -1,3 +1,7 @@
+<script lang="ts">
+  import CtaSection from '$lib/components/CtaSection.svelte';
+</script>
+
 <svelte:head>
   <title>Kontakt — Radio Roža</title>
   <meta
@@ -93,6 +97,8 @@
       </a>
     </div>
   </section>
+
+  <CtaSection />
 </main>
 
 <style>
@@ -120,6 +126,7 @@
   /* ── Sections ── */
   .contact-section {
     margin-top: 2.5rem;
+    margin-bottom: 4rem;
   }
 
   .section-title {

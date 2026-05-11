@@ -1,5 +1,6 @@
 <script lang="ts">
   import Lightbox from '$lib/components/Lightbox.svelte';
+  import CtaSection from '$lib/components/CtaSection.svelte';
   import type { LightboxImage } from '$lib/components/Lightbox.svelte';
 
   // Mock gallery images — replace with CMS
@@ -149,18 +150,7 @@
   </section>
 
   <!-- ── CTAs ── -->
-  <div class="cta-section">
-    <div class="cta-block">
-      <h2 class="cta-title">podržni nas</h2>
-      <div class="cta-image" aria-hidden="true"></div>
-      <p class="cta-body"><!-- content TBD --></p>
-    </div>
-    <div class="cta-block">
-      <h2 class="cta-title">pridruži se</h2>
-      <div class="cta-image" aria-hidden="true"></div>
-      <p class="cta-body"><!-- content TBD --></p>
-    </div>
-  </div>
+  <CtaSection />
 </main>
 
 <style>
@@ -325,44 +315,6 @@
     border-bottom: 2px solid var(--color-black, #000);
   }
 
-  /* ── CTAs ── */
-  .cta-section {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .cta-block {
-    padding: 1.5rem 1rem 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .cta-block + .cta-block {
-    border-top: 2px solid var(--color-black);
-  }
-
-  .cta-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
-    margin-bottom: 1rem;
-  }
-
-  .cta-body {
-    font-size: var(--text-body);
-    color: rgb(0 0 0 / 0.7);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
-
-  .cta-image {
-    margin-top: auto;
-    aspect-ratio: 4 / 3;
-    background: rgb(0 0 0 / 0.07);
-  }
-
   /* ── Tablet (640px+) ── */
   @media (min-width: 640px) {
     .page {
@@ -395,9 +347,6 @@
       border-right: 2px solid var(--color-black, #000);
     }
 
-    .cta-block {
-      padding: 2rem 1.5rem 0;
-    }
   }
 
   /* ── Desktop (1024px+) ── */
@@ -421,18 +370,6 @@
       padding: 2rem;
     }
 
-    .cta-section {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .cta-block {
-      padding: 2rem 2rem 0;
-    }
-
-    .cta-block + .cta-block {
-      border-top: none;
-      border-left: 2px solid var(--color-black);
-    }
   }
 
   /* ── Big Desktop (1600x+) ── */

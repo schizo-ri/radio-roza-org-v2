@@ -4,6 +4,7 @@
   import ShowCard from '$lib/components/ShowCard.svelte';
   import SeeAll from '$lib/components/SeeAll.svelte';
   import Tag from '$lib/components/Tag.svelte';
+  import CtaSection from '$lib/components/CtaSection.svelte';
   import { browser } from '$app/environment';
   import { program, blocks, type Day } from '$lib/utils/program';
   import type { PageData } from './$types';
@@ -268,18 +269,7 @@
 </section>
 
 <!-- ── CTAs ───────────────────────────────────────── -->
-<div class="cta-section">
-  <div class="cta-block">
-    <h2 class="cta-title">podržni nas</h2>
-    <div class="cta-image cta-image--placeholder" aria-hidden="true"></div>
-    <p class="cta-body"><!-- content TBD --></p>
-  </div>
-  <div class="cta-block">
-    <h2 class="cta-title">pridruži se</h2>
-    <div class="cta-image cta-image--placeholder" aria-hidden="true"></div>
-    <p class="cta-body"><!-- content TBD --></p>
-  </div>
-</div>
+<CtaSection />
 
 <style>
   /* ── Shared section styles ── */
@@ -454,45 +444,6 @@
     margin-top: auto;
   }
 
-  /* ── CTAs ── */
-  .cta-section {
-    display: grid;
-    grid-template-columns: 1fr;
-    border-top: 2px solid var(--color-black);
-  }
-
-  .cta-block {
-    padding: 1.5rem 1rem 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .cta-block + .cta-block {
-    border-top: 2px solid var(--color-black);
-  }
-
-  .cta-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
-    margin-bottom: 1rem;
-  }
-
-  .cta-body {
-    font-size: var(--text-body);
-    color: rgb(0 0 0 / 0.7);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
-
-  .cta-image--placeholder {
-    margin-top: auto;
-    aspect-ratio: 4 / 3;
-    background: rgb(0 0 0 / 0.07);
-  }
-
   /* ── Tablet (640px+) ── */
   @media (min-width: 640px) {
     .home-section {
@@ -540,20 +491,6 @@
       border-bottom: none;
       border-top: none;
       padding-top: 1rem;
-    }
-
-    /* CTAs side by side */
-    .cta-section {
-      grid-template-columns: 1fr 1fr;
-    }
-
-    .cta-block + .cta-block {
-      border-top: none;
-      border-left: 2px solid var(--color-black);
-    }
-
-    .cta-block {
-      padding: 2rem 2rem 0;
     }
   }
 </style>
