@@ -4,99 +4,16 @@
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
 
-  const categories = ['sve', 'aktualno', 'ćakula', 'komentar', 'album tjedna'];
+  let { data } = $props();
 
   const activeCategory = $derived(page.url.searchParams.get('kategorija') ?? 'sve');
 
-  const excerpt =
-    'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.';
-
-  // Mock data — replace with CMS
-  const articles = [
-    {
-      href: '/citaj-radio/rijecka-underground-scena',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'aktualno',
-    },
-    {
-      href: '/citaj-radio/zvukovi-iz-podruma',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'ćakula',
-    },
-    {
-      href: '/citaj-radio/rijecka-underground-2',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'komentar',
-    },
-    {
-      href: '/citaj-radio/zvukovi-2',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'album tjedna',
-    },
-    {
-      href: '/citaj-radio/rijecka-underground-3',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'komentar',
-    },
-    {
-      href: '/citaj-radio/zvukovi-3',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'komentar',
-    },
-    {
-      href: '/citaj-radio/rijecka-underground-4',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'ćakula',
-    },
-    {
-      href: '/citaj-radio/zvukovi-4',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'aktualno',
-    },
-  ];
-
-  const filteredArticles = $derived(
-    activeCategory === 'sve' ? articles : articles.filter((a) => a.category === activeCategory)
-  );
-
-  function setCategory(cat: string) {
+  function setCategory(slug: string | null) {
     const url = new URL(page.url);
-    if (cat === 'sve') {
+    if (!slug) {
       url.searchParams.delete('kategorija');
     } else {
-      url.searchParams.set('kategorija', cat);
+      url.searchParams.set('kategorija', slug);
     }
     url.searchParams.delete('stranica');
     goto(url.toString(), { replaceState: true });
@@ -108,10 +25,7 @@
     return url.pathname + url.search;
   }
 
-  // Mock pagination
-  const currentPageNum = $derived(Number(page.url.searchParams.get('stranica') ?? 1));
-  const totalPages = 5;
-  const pageNums = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const pageNums = $derived(Array.from({ length: data.totalPages }, (_, i) => i + 1));
 </script>
 
 <svelte:head>
@@ -124,37 +38,46 @@
     <div class="filter-bar">
       <span class="filter-label">kategorije: </span>
       <div class="filter-tabs">
-        {#each categories as cat (cat)}
+        <button
+          class="filter-tab"
+          class:active={activeCategory === 'sve'}
+          onclick={() => setCategory(null)}
+        >
+          sve
+        </button>
+        {#each data.categories as cat (cat.id)}
           <button
             class="filter-tab"
-            class:active={activeCategory === cat}
-            onclick={() => setCategory(cat)}
+            class:active={activeCategory === cat.slug}
+            onclick={() => setCategory(cat.slug)}
           >
-            {cat}
+            {cat.title}
           </button>
         {/each}
       </div>
     </div>
   </div>
 
-  <ArticleGrid items={filteredArticles} rows={3}>
+  <ArticleGrid items={data.posts} rows={3}>
     {#snippet card(item)}
       <ArticleCard {...item} />
     {/snippet}
   </ArticleGrid>
 
-  <nav class="pagination" aria-label="Stranice">
-    {#each pageNums as n (n)}
-      <a
-        href={pageHref(n)}
-        class="page-num"
-        class:current={n === currentPageNum}
-        aria-current={n === currentPageNum ? 'page' : undefined}
-      >
-        {n}
-      </a>
-    {/each}
-  </nav>
+  {#if data.totalPages > 1}
+    <nav class="pagination" aria-label="Stranice">
+      {#each pageNums as n (n)}
+        <a
+          href={pageHref(n)}
+          class="page-num"
+          class:current={n === data.currentPage}
+          aria-current={n === data.currentPage ? 'page' : undefined}
+        >
+          {n}
+        </a>
+      {/each}
+    </nav>
+  {/if}
 </main>
 
 <style>

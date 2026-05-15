@@ -48,112 +48,7 @@
     ].slice(0, 5)
   );
 
-  const excerpt =
-    'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.';
-
-  const citajRadioPreview = [
-    {
-      href: '/citaj-radio/album',
-      title: 'Bambi Molesters: Dumb Loud Hollow Twang',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt:
-        'Istražujemo kako riječki underground prostori i kolektivi stvaraju  jedinstvenu glazbenu kulturu koja odolijevia mainstream pritiscima.',
-      image: 'images/1.jpg',
-      category: 'album tjedna',
-    },
-    {
-      href: '/citaj-radio/a',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'komentar',
-    },
-    {
-      href: '/citaj-radio/b',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'ćakule',
-    },
-    {
-      href: '/citaj-radio/c',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'aktualno',
-    },
-    {
-      href: '/citaj-radio/d',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      excerpt,
-      category: 'komentar',
-    },
-  ];
-
-  const albumTjedna = citajRadioPreview.find((a) => a.category === 'album tjedna') ?? null;
-  const citajRadioList = citajRadioPreview.filter((a) => a.category !== 'album tjedna');
-
-  const archiveArticles = [
-    {
-      href: '/citaj-radio/arc-1',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Hip hop'],
-    },
-    {
-      href: '/citaj-radio/arc-2',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Rock'],
-    },
-    {
-      href: '/citaj-radio/arc-3',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Kultura'],
-    },
-    {
-      href: '/citaj-radio/arc-4',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Intervju'],
-    },
-    {
-      href: '/citaj-radio/arc-5',
-      title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Glazba'],
-    },
-    {
-      href: '/citaj-radio/arc-6',
-      title: 'Zvukovi iz podruma koji oblikuju budućnost',
-      date: '02.03.2026.',
-      author: 'Martina Blečić',
-      readTime: '4 min read',
-      tags: ['Hip hop'],
-    },
-  ];
+  const { albumTjedna, previewPosts: citajRadioList, archivePosts: archiveArticles } = $derived(data);
 </script>
 
 <svelte:head>
@@ -227,10 +122,9 @@
             {albumTjedna.date}
           </p>
           <h3 class="album-title">{albumTjedna.title}</h3>
-          <p class="album-meta">
-            {#if albumTjedna.author}{albumTjedna.author}{/if}
-            {#if albumTjedna.readTime}({albumTjedna.readTime}){/if}
-          </p>
+          {#if albumTjedna.author}
+            <p class="album-meta">{albumTjedna.author}</p>
+          {/if}
           {#if albumTjedna.excerpt}
             <p class="album-excerpt">{albumTjedna.excerpt}</p>
           {/if}

@@ -2,27 +2,8 @@
   import ArticleCard from '$lib/components/ArticleCard.svelte';
   import Tag from '$lib/components/Tag.svelte';
 
-  // Mock article — replace with CMS fetch via +page.ts
-  const article = {
-    title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost',
-    date: '02.03.2026.',
-    author: 'Martina Blečić',
-    readTime: '4 min read',
-    image: undefined as string | undefined,
-    tags: ['Hip hop', 'Rap', 'Hardcore Hip Hop'],
-    body: [
-      'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.',
-      'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima. Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima. Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.',
-      'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima. Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu koja odolijeva mainstream pritiscima.',
-    ],
-  };
-
-  const related = [
-    { href: '/citaj-radio/rijecka-1', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt: 'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu.', showKomentar: true },
-    { href: '/citaj-radio/zvukovi-2', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt: 'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu.', showKomentar: true },
-    { href: '/citaj-radio/rijecka-3', title: 'Riječka underground scena: Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt: 'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu.', showKomentar: true },
-    { href: '/citaj-radio/zvukovi-4', title: 'Zvukovi iz podruma koji oblikuju budućnost', date: '02.03.2026.', author: 'Martina Blečić', readTime: '4 min read', excerpt: 'Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu glazbenu kulturu.', showKomentar: true },
-  ];
+  let { data } = $props();
+  const { article, related } = $derived(data);
 </script>
 
 <svelte:head>
@@ -43,35 +24,35 @@
   <div class="article-layout">
     <div class="article-cover">
       {#if article.image}
-        <img src={article.image} alt={article.title} />
+        <img src={article.image} alt={article.imageAlt} />
       {:else}
         <div class="cover-placeholder" aria-hidden="true"></div>
       {/if}
     </div>
 
     <div class="article-body">
-      {#each article.body as paragraph}
-        <p>{paragraph}</p>
-      {/each}
+      {@html article.contentHtml}
 
-      {#if article.tags.length > 0}
+      {#if article.categories.length > 0}
         <div class="article-tags">
-          {#each article.tags as tag (tag)}
-            <Tag label={tag} />
+          {#each article.categories as cat (cat.slug)}
+            <Tag label={cat.title} />
           {/each}
         </div>
       {/if}
     </div>
   </div>
 
-  <section class="related">
-    <h2 class="related-title">vezani članci</h2>
-    <div class="related-grid">
-      {#each related as item (item.href)}
-        <ArticleCard {...item} />
-      {/each}
-    </div>
-  </section>
+  {#if related.length > 0}
+    <section class="related">
+      <h2 class="related-title">vezani članci</h2>
+      <div class="related-grid">
+        {#each related as item (item.href)}
+          <ArticleCard {...item} />
+        {/each}
+      </div>
+    </section>
+  {/if}
 </main>
 
 <style>
@@ -138,10 +119,66 @@
     gap: 1rem;
   }
 
-  .article-body p {
+  .article-body :global(p) {
     font-size: var(--text-body);
     line-height: 1.7;
     color: rgb(0 0 0 / 0.85);
+    margin: 0;
+  }
+
+  .article-body :global(h2),
+  .article-body :global(h3),
+  .article-body :global(h4) {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .article-body :global(a) {
+    color: inherit;
+    text-underline-offset: 3px;
+  }
+
+  .article-body :global(strong) {
+    font-weight: 700;
+  }
+
+  .article-body :global(blockquote) {
+    border-left: 3px solid var(--color-black);
+    padding-left: 1rem;
+    margin: 0;
+    font-style: italic;
+  }
+
+  .article-body :global(hr) {
+    border: none;
+    border-top: 1px solid rgb(0 0 0 / 0.15);
+    margin: 0.5rem 0;
+  }
+
+  .article-body :global(pre) {
+    background: rgb(0 0 0 / 0.05);
+    padding: 1rem;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+
+  .article-body :global(figure) {
+    margin: 0;
+  }
+
+  .article-body :global(figure img) {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .article-body :global(ul),
+  .article-body :global(ol) {
+    padding-left: 1.5rem;
+    margin: 0;
   }
 
   .article-tags {
