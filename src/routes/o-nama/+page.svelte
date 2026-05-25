@@ -133,10 +133,10 @@
     </div>
 
     <div class="three-col-block">
-      <h2 class="block-title">naša priča</h2>
+      <h2 class="block-title"><a href="/o-nama/projekti">--> projekti</a></h2>
       <p class="block-body">
-        <!-- content TBD --> Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu
-        glazbenu kulturu koja odolijeva mainstream pritiscima.
+        Vidi kakve smo sve projekte provodili u ovom našem kratkom postojanju u suradnji s našim
+        dragim partnerima!
       </p>
     </div>
 
@@ -346,7 +346,6 @@
     .three-col-block:not(:last-child) {
       border-right: 2px solid var(--color-black, #000);
     }
-
   }
 
   /* ── Desktop (1024px+) ── */
@@ -369,7 +368,6 @@
     .three-col-block {
       padding: 2rem;
     }
-
   }
 
   /* ── Big Desktop (1600x+) ── */

@@ -1,0 +1,151 @@
+Kamenolom Light
+- kratki opis: Rock koji neće razbiti prozore, ali će razbuditi susjede. Odgovorno teškaštvo.
+- tagovi: Rock, Alternative, Indie Rock, Grunge
+
+Kamenolom Dark
+- kratki opis: Kad Light nije dovoljno - full metal jacket za uši. Nosači slušalica, oprez!
+- tagovi: Metal, Heavy Metal, Hard Rock, Doom, Sludge
+
+Naše gore riff
+- kratki opis: Domaći riffovi koji lupe pravo u srce - balkanski zvukovi bez granica.
+- tagovi: Rock, Balkan, Alternative, Domaći
+
+Naše gore riff - Rock
+- kratki opis: Domaći rock koji lupa jače od rakije. Balkanski riffovi bez granica.
+- tagovi: Rock, Hard Rock, Balkan, Domaći
+
+Naše Gore Riff - Indie
+- kratki opis: Indie zvukovi s naših prostora - alternativa alternativama, hipsterski approved.
+- tagovi: Indie, Alternative, Domaći, Lo-fi
+
+Naše Gore Riff - Electro
+- kratki opis: Kad rakija sretne sintetizator - električni Balkan za moderne nomade.
+- tagovi: Electro, Electronic, Balkan, Synth
+
+Naše Gore Riff - Ri Rock
+- kratki opis: Domaći rock koji lupa jače od rakije. Balkanski riffovi bez granica.
+- tagovi: Rock, Domaći, Balkan, Alternative
+
+Fjaka
+- kratki opis: Kad ti je život previše stresan, a krevet predaleko - sjedni i slušaj.
+- tagovi: Pop, Ambient, Jazz
+
+Kuplung
+- kratki opis: Glazba koja povezuje - kao dobar kuplung, sve ide glatko u pravom rhythm-u.
+- tagovi: Electronic, House, Disco, Funk
+
+Space is the Place
+- kratki opis: Cosmic sounds za zemaljske bića - Houston, imamo funky problem!
+- tagovi: Jazz, Cosmic, Experimental, Ambient, Avant-garde
+
+Chill Pill
+- kratki opis: Audio sedativ za preživljavanje modernog života. Nuspojave: smirenost.
+- tagovi: Chillout, Ambient, Lo-fi, Downtempo
+
+Don Eladio
+- kratki opis: Elegantno opasna glazba - kao dobar mezcal, glatko ide, ali ima punch.
+- tagovi: Latin, Jazz, Bossa Nova, World Music
+
+Ras Pashoy - Reggae/Dub
+- kratki opis: One love, heavy bass - Jah blagoslovio ovaj soundsystem.
+- tagovi: Reggae, Dub, Roots, Bass
+
+Ras Pashoy - Dubstep
+- kratki opis: Kad dub sretne 2010-e - reggae roots sa sub-bass terapijom.
+- tagovi: Dubstep, Dub, Bass, Electronic
+
+Ritmologija
+- kratki opis: Znanstveno dokazano: ritam liječi. Doktor preporučuje bass i hi-hat.
+- tagovi: Electronic, Techno, House, Bass
+
+Funkushima
+- kratki opis: Radioaktivno funkaran - groove koji se ne zaustavlja, možda i zarazno.
+- tagovi: Funk, Groove, Soul, Disco
+
+Okolo Naokolo - Afro
+- kratki opis: Afrički ritmovi koji te tjeraju da plešeš, čak i kad misliš da ne znaš.
+- tagovi: Afrobeat, World Music, Funk, Rhythm
+
+Okolo Naokolo - Istok
+- kratki opis: Putovanje na Istok bez vize - od Balkana do Bliskog istoka zvukom.
+- tagovi: World Music, Balkan, Middle East, Folk, Ethno
+
+Strujni Vod - Techno
+- kratki opis: Tehno koji prolazi kroz žile kao električna struja - underground pure energy.
+- tagovi: Techno, Underground, Electronic, Industrial
+
+Strujni Vod - Minimal House
+- kratki opis: Manje je više, ali bass je dovoljno. Minimalistički hedonizam.
+- tagovi: Minimal, House, Electronic, Techno
+
+Strujni Vod - Electro Breakbeat
+- kratki opis: Visokonaponski breakbeats - pazi, udara pod 220V groovea!
+- tagovi: Electro, Breakbeat, Electronic, Dance
+
+Potrensuljka
+- kratki opis: Glazba koja te trese kao dobar trening - cardio za uši, workout za dušu.
+- tagovi: Electronic, Dance, Bass, Energetic
+
+Izvorišta
+- kratki opis: Povratak korijenima - tradicijski zvukovi koji te vezuju za zemlju i predke.
+- tagovi: Folk, Traditional, World Music, Ethno
+
+Depilacija
+- kratki opis: Glazba koja skida dlake i inhibicije - raw energy bez cenzure.
+- tagovi: Punk, Noise, Experimental, Raw, Post-punk
+
+Roža info
+- kratki opis: Sve što trebaš znati, a nisi znao da trebaš - informacije začinjene muzikom.
+- tagovi: Talk, Info, News, Culture
+
+Yugofonija
+- kratki opis: Nostalgija na vinilu - kad je Balkan bio jedan, a glazba bila zajednička.
+- tagovi: Retro, Yugo, Nostalgia, Pop, Rock
+
+Ja Biram
+- kratki opis: Demokratija na radiju - ti biraš, mi puštamo, svi uživamo.
+- tagovi: Mixed, Listener Request, Varied, Interactive
+
+Dramorama
+- kratki opis: Teatar za uši - kad riječi postaju glazba, a glazba postaje priča.
+- tagovi: Spoken Word, Theater, Culture, Storytelling
+
+Mutant Disco
+- kratki opis: Disco koji je mutirao u nešto bolje - evolucija plesa kroz zvuk.
+- tagovi: Disco, Funk, Post-Disco, Dance
+
+Bubanj i Bass
+- kratki opis: Dva najbolja prijatelja zvuka - jednostavno i nezaustavljivo.
+- tagovi: Drum & Bass, Electronic, Bass, Jungle
+
+HEX.
+- kratki opis: Šesterokutni zvukovi za digitalne duše - algoritmi koji groovaju.
+- tagovi: Electronic, Experimental, Glitch, Digital
+
+Naftalina
+- kratki opis: Vintage vibes iz babine škrinje - staro zlato koje nikad ne izlazi iz mode.
+- tagovi: Oldies, Retro, Nostalgia, Vintage
+
+Fader
+- kratki opis: Kad DJ postane dirigent, a mikseta postane orkestar - pure mixing magic.
+- tagovi: DJ, Electronic, Mix, Dance, House
+
+Štošta
+- kratki opis: Kad ne znaš što očekivati, ali znaš da će biti dobro - audio rulet.
+- tagovi: Eclectic, Mixed, Varied, Surprise
+
+Reality Check
+- kratki opis: Provjera stvarnosti kroz bass i melodiju - wake up call za uši.
+- tagovi: Electronic, Hip-Hop, Alternative, Bass
+
+Podzemna kulisa - Peperton specijal
+- kratki opis: Underground scena kroz piperov objektiv - kultura ispod radara.
+- tagovi: Underground, Alternative, Culture, Indie
+
+Kapuz
+- kratki opis: Glazba za one dane kad ni kava ne pomaže. Hoodie up, world out.
+- tagovi: Hip-Hop, R&B, Lo-fi, Downtempo
+
+Kava sa šlagerom
+- kratki opis: Šlager hits koji idu uz jutarnju kavu - slatko, pjenjavo, možda malo lipkavo.
+- tagovi: Šlager, Pop, Retro, Folk

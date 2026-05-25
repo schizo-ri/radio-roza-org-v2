@@ -2,6 +2,7 @@
   import ArticleCard from '$lib/components/ArticleCard.svelte';
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
   import ShowCard from '$lib/components/ShowCard.svelte';
+  import ShowCardSkeleton from '$lib/components/ShowCardSkeleton.svelte';
   import SeeAll from '$lib/components/SeeAll.svelte';
   import Tag from '$lib/components/Tag.svelte';
   import CtaSection from '$lib/components/CtaSection.svelte';
@@ -10,6 +11,59 @@
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
+
+  // --- Mixcloud shows (client-side fetch) ---
+  interface Show {
+    href: string;
+    title: string;
+    date: string;
+    image?: string;
+    tags: string[];
+    mixcloudKey: string;
+  }
+
+  interface MixcloudCloudcast {
+    key: string;
+    url: string;
+    name: string;
+    created_time: string;
+    pictures: { extra_large?: string; '640wx640h'?: string; large?: string };
+    tags: Array<{ name: string }>;
+  }
+
+  const SKELETON_COUNT = 16;
+  const skeletonItems = Array.from({ length: SKELETON_COUNT }, (_, i) => ({
+    href: `__skeleton__${i}`,
+  }));
+
+  let shows = $state<Show[]>([]);
+  let showsLoading = $state(true);
+
+  $effect(() => {
+    if (!browser) return;
+    fetch('https://api.mixcloud.com/RadioRoza/cloudcasts/?limit=16&metadata=1')
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((json: { data: MixcloudCloudcast[] }) => {
+        shows = json.data.map((c) => ({
+          href: c.url,
+          title: c.name,
+          date: new Date(c.created_time).toLocaleDateString('hr-HR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          }),
+          image: c.pictures['640wx640h'] ?? c.pictures.extra_large ?? c.pictures.large,
+          tags: c.tags.slice(0, 3).map((t) => t.name),
+          mixcloudKey: c.key,
+        }));
+      })
+      .catch(() => {
+        shows = [];
+      })
+      .finally(() => {
+        showsLoading = false;
+      });
+  });
 
   // --- Program danas ---
   let now = $state(new Date());
@@ -49,6 +103,7 @@
   );
 
   const { albumTjedna, previewPosts: citajRadioList, archivePosts: archiveArticles } = $derived(data);
+
 </script>
 
 <svelte:head>
@@ -60,9 +115,13 @@
   <div class="section-header">
     <h2 class="section-title">novo novo novo</h2>
   </div>
-  <ArticleGrid items={data.shows}>
+  <ArticleGrid items={showsLoading ? skeletonItems : shows}>
     {#snippet card(item)}
-      <ShowCard {...item} />
+      {#if showsLoading}
+        <ShowCardSkeleton />
+      {:else}
+        <ShowCard {...(item as Show)} />
+      {/if}
     {/snippet}
   </ArticleGrid>
   <div class="section-link">

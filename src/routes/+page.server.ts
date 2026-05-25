@@ -9,47 +9,12 @@ const categoryMap = new Map(
   categoriesJson.docs.map((c) => [c.id, { title: c.title, slug: c.slug }]),
 );
 
-interface MixcloudCloudcast {
-  key: string;
-  url: string;
-  name: string;
-  created_time: string;
-  pictures: {
-    extra_large?: string;
-    '640wx640h'?: string;
-    large?: string;
-    medium?: string;
-  };
-  tags: Array<{ name: string }>;
-}
+export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
+  // Cache SSR HTML on Netlify CDN — reduces cold-start penalty for subsequent visitors.
+  // Mixcloud shows are fetched client-side so staleness there is irrelevant here.
+  setHeaders({ 'Cache-Control': 'public, max-age=60, s-maxage=300' });
 
-interface MixcloudResponse {
-  data: MixcloudCloudcast[];
-}
-
-export const load: PageServerLoad = async ({ fetch }) => {
-  const [mixcloudRes, cmsRes] = await Promise.allSettled([
-    fetch('https://api.mixcloud.com/RadioRoza/cloudcasts/?limit=16&metadata=1'),
-    fetchPosts(fetch, { limit: 10, page: 1 }),
-  ]);
-
-  const shows =
-    mixcloudRes.status === 'fulfilled' && mixcloudRes.value.ok
-      ? await mixcloudRes.value.json().then((json: MixcloudResponse) =>
-          json.data.map((c) => ({
-            href: c.url,
-            title: c.name,
-            date: new Date(c.created_time).toLocaleDateString('hr-HR', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-            }),
-            image: c.pictures['640wx640h'] ?? c.pictures.extra_large ?? c.pictures.large,
-            tags: c.tags.slice(0, 3).map((t) => t.name),
-            mixcloudKey: c.key,
-          })),
-        )
-      : [];
+  const [cmsRes] = await Promise.allSettled([fetchPosts(fetch, { limit: 10, page: 1 })]);
 
   const allPosts =
     cmsRes.status === 'fulfilled'
@@ -89,7 +54,6 @@ export const load: PageServerLoad = async ({ fetch }) => {
   const archivePosts = allPosts.filter((p) => !p.isAlbumTjedna).slice(4);
 
   return {
-    shows,
     albumTjedna,
     previewPosts,
     archivePosts,

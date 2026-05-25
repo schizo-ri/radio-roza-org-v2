@@ -1,8 +1,11 @@
 <script lang="ts">
   import { page } from '$app/state';
+  import ListenNotesEpisodes from '$lib/components/ListenNotesEpisodes.svelte';
   import MixcloudPlaylist from '$lib/components/MixcloudPlaylist.svelte';
   import Tag from '$lib/components/Tag.svelte';
   import { shows } from '$lib/data/shows';
+
+  let { data } = $props();
 
   const show = $derived(shows.find((s) => s.href === `/emisije/${page.params.slug}`));
 </script>
@@ -45,12 +48,26 @@
         </div>
       </div>
 
-      <!-- Right: mixcloud playlist -->
+      <!-- Right: episodes -->
       <div class="show-right">
-        {#if show.playlist_url}
+        {#if data.lnEpisodes}
+          <ListenNotesEpisodes
+            episodes={data.lnEpisodes}
+            nextCursor={data.lnNextCursor}
+            podcastId={data.lnPodcastId}
+          />
+        {:else if show.playlist_url?.includes('mixcloud.com')}
           <MixcloudPlaylist playlistUrl={show.playlist_url} />
+        {:else if show.playlist_url}
+          <p class="no-playlist">
+            Epizode dostupne na <a
+              href={show.playlist_url}
+              target="_blank"
+              rel="noopener noreferrer">vanjskoj platformi →</a
+            >
+          </p>
         {:else}
-          <p class="no-playlist">Nema Mixcloud playliste za ovu emisiju.</p>
+          <p class="no-playlist">Nema epizoda za ovu emisiju.</p>
         {/if}
       </div>
     </div>
@@ -146,6 +163,11 @@
     font-family: var(--font-mono);
     font-size: var(--text-meta);
     color: rgb(0 0 0 / 0.45);
+  }
+
+  .no-playlist a {
+    color: inherit;
+    text-underline-offset: 3px;
   }
 
   /* Tablet */
