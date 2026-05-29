@@ -87,12 +87,9 @@
     line-height: 1;
   }
 
-  /* Border-grid: container provides left+top edge; cards add right+bottom */
   .projects-grid {
     display: grid;
     grid-template-columns: 1fr;
-    border-left: 2px solid var(--color-black);
-    border-top: 2px solid var(--color-black);
   }
 
   .project-card {
@@ -104,6 +101,14 @@
     border-bottom: 2px solid var(--color-black);
     text-decoration: none;
     color: inherit;
+  }
+
+  /* 1 col: no right border; last card no bottom */
+  .projects-grid .project-card {
+    border-right: none;
+  }
+  .projects-grid .project-card:last-child {
+    border-bottom: none;
   }
 
   .card-image {
@@ -163,6 +168,12 @@
     .projects-grid {
       grid-template-columns: repeat(2, 1fr);
     }
+
+    /* 2 cols: restore right; remove from 2n; last 2 no bottom */
+    .projects-grid .project-card { border-right: 2px solid var(--color-black); }
+    .projects-grid .project-card:last-child { border-bottom: 2px solid var(--color-black); }
+    .projects-grid .project-card:nth-child(2n) { border-right: none; }
+    .projects-grid .project-card:nth-last-child(-n + 2) { border-bottom: none; }
   }
 
   @media (min-width: 1024px) {
@@ -173,5 +184,23 @@
     .projects-grid {
       grid-template-columns: repeat(3, 1fr);
     }
+
+    /* 3 cols: reset 2-col overrides; apply 3-col pattern */
+    .projects-grid .project-card:nth-child(2n) { border-right: 2px solid var(--color-black); }
+    .projects-grid .project-card:nth-last-child(-n + 2) { border-bottom: 2px solid var(--color-black); }
+    .projects-grid .project-card:nth-child(3n) { border-right: none; }
+    .projects-grid .project-card:nth-last-child(-n + 3) { border-bottom: none; }
+  }
+
+  @media (min-width: 1920px) {
+    .projects-grid {
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    /* 6 cols: reset 3-col overrides; apply 6-col pattern */
+    .projects-grid .project-card:nth-child(3n) { border-right: 2px solid var(--color-black); }
+    .projects-grid .project-card:nth-last-child(-n + 3) { border-bottom: 2px solid var(--color-black); }
+    .projects-grid .project-card:nth-child(6n) { border-right: none; }
+    .projects-grid .project-card:nth-last-child(-n + 6) { border-bottom: none; }
   }
 </style>

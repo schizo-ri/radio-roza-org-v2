@@ -1,7 +1,9 @@
 <script lang="ts">
   import MixcloudPlaylist from '$lib/components/MixcloudPlaylist.svelte';
+  import Lightbox from '$lib/components/Lightbox.svelte';
+  import type { LightboxImage } from '$lib/components/Lightbox.svelte';
 
-  const galleryImages = [
+  const galleryImages: LightboxImage[] = [
     { src: '/images/projekti/17-bitnih/17-1.jpg', alt: '17 Bitnih - slika 1' },
     { src: '/images/projekti/17-bitnih/17-2.jpg', alt: '17 Bitnih - slika 2' },
     { src: '/images/projekti/17-bitnih/17-3.jpg', alt: '17 Bitnih - slika 3' },
@@ -13,6 +15,14 @@
     { src: '/images/projekti/17-bitnih/17-9.jpg', alt: '17 Bitnih - slika 9' },
     { src: '/images/projekti/17-bitnih/17-10.jpg', alt: '17 Bitnih - slika 10' },
   ];
+
+  let lightboxIndex = $state(0);
+  let lightboxOpen = $state(false);
+
+  function openLightbox(index: number) {
+    lightboxIndex = index;
+    lightboxOpen = true;
+  }
 
   const goals = [
     'Iskorjenjivanje siromaštva',
@@ -42,6 +52,13 @@
     content="Radijska emisija 17 bitnih okuplja 17 voditelja koji kroz 17 epizoda razgovaraju s gostima o ciljevima održivog razvoja."
   />
 </svelte:head>
+
+<Lightbox
+  images={galleryImages}
+  open={lightboxOpen}
+  startIndex={lightboxIndex}
+  onclose={() => (lightboxOpen = false)}
+/>
 
 <main class="page">
   <header class="page-header">
@@ -115,8 +132,14 @@
       </div>
 
       <div class="gallery" aria-label="Galerija fotografija projekta 17 Bitnih">
-        {#each galleryImages as img (img.src)}
-          <img src={img.src} alt={img.alt} />
+        {#each galleryImages as img, i (img.src)}
+          <button
+            class="gallery-item"
+            onclick={() => openLightbox(i)}
+            aria-label="Otvori fotografiju: {img.alt}"
+          >
+            <img src={img.src} alt={img.alt} />
+          </button>
         {/each}
       </div>
 
@@ -270,14 +293,37 @@
     border-top: 2px solid var(--color-black);
   }
 
+  .gallery-item {
+    display: block;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: none;
+    cursor: zoom-in;
+    width: 100%;
+    overflow: hidden;
+    border-right: 2px solid var(--color-black);
+    border-bottom: 2px solid var(--color-black);
+  }
+
+  .gallery-item:focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: -3px;
+    z-index: 1;
+    position: relative;
+  }
+
   .gallery img {
     aspect-ratio: 4 / 3;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    border-right: 2px solid var(--color-black);
-    border-bottom: 2px solid var(--color-black);
+    transition: transform 0.3s ease;
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.03);
   }
 
   @media (min-width: 640px) {
