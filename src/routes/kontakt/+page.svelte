@@ -42,7 +42,6 @@
       <div class="person-card">
         <h3 class="person-name">Sebastijan Tomažin</h3>
         <p class="person-role">Audio tehničar i tonac</p>
-        <a href="mailto:tomazin.sebastijan@gmail.com">tomazin.sebastijan@gmail.com</a>
       </div>
 
       <div class="person-card">

@@ -17,7 +17,7 @@
 {#if show}
   <main class="page">
     <header class="page-header">
-      <h1 class="page-title">emisije</h1>
+      <h1 class="page-title">{show.title}</h1>
     </header>
 
     <div class="show-layout">

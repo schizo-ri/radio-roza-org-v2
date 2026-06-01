@@ -14,7 +14,7 @@
 </script>
 
 <article class="show-card">
-  <a {href} class="card-image-link" tabindex="-1" aria-hidden="true" target="_blank" rel="noopener noreferrer">
+  <a {href} class="card-image-link" tabindex="-1" aria-hidden="true">
     {#if image}
       <img src={image} alt={title} class="card-image" />
     {:else}
@@ -28,7 +28,7 @@
     {/if}
 
     <h3 class="card-title">
-      <a {href} target="_blank" rel="noopener noreferrer">{title}</a>
+      <a {href}>{title}</a>
     </h3>
 
     {#if tags && tags.length > 0}
