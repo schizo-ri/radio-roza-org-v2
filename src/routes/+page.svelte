@@ -102,8 +102,11 @@
     ].slice(0, 5)
   );
 
-  const { albumTjedna, previewPosts: citajRadioList, archivePosts: archiveArticles } = $derived(data);
-
+  const {
+    albumTjedna,
+    previewPosts: citajRadioList,
+    archivePosts: archiveArticles,
+  } = $derived(data);
 </script>
 
 <svelte:head>
@@ -120,7 +123,7 @@
       {#if showsLoading}
         <ShowCardSkeleton />
       {:else}
-        <ShowCard {...(item as Show)} />
+        <ShowCard {...item as Show} />
       {/if}
     {/snippet}
   </ArticleGrid>
@@ -207,7 +210,7 @@
 </div>
 
 <!-- ── najbolje iz arhive ─────────────────────────── -->
-<section class="home-section">
+<!-- <section class="home-section">
   <div class="section-header">
     <h2 class="section-title">najbolje iz arhive</h2>
   </div>
@@ -219,7 +222,7 @@
   <div class="section-link">
     <SeeAll href="/citaj-radio" label="Vidi sve iz arhive" />
   </div>
-</section>
+</section> -->
 
 <!-- ── CTAs ───────────────────────────────────────── -->
 <CtaSection />

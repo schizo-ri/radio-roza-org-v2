@@ -1,485 +1,403 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
   import { untrack } from 'svelte';
   import Hls from 'hls.js';
   import { playerState } from '$lib/stores/player.svelte';
-  import { getAlbumArt, getArtistFanart } from '$lib/utils/artwork';
-  import type { ArtworkSizes, ArtistFanart } from '$lib/utils/artwork';
-
-  let audioEl = $state<HTMLAudioElement | undefined>(undefined);
-  let hlsInstance: Hls | null = null;
-  let isPlaying = $state(false);
-  let loading = $state(false);
-  let error = $state<string | null>(null);
-
-  // Artwork state — updated on each song change
-  let artwork = $state<ArtworkSizes | null>(null);
-  let artistFanart = $state<ArtistFanart | null>(null);
-
-  // Now-playing polling internals (non-reactive, internal bookkeeping)
-  let nowPlayingText = ''; // tracks last seen "artist - title" string to detect changes
-  let isFetching = false;
-  let fetchDebounceTimeout: ReturnType<typeof setTimeout> | null = null;
-
-  // Stream retry internals
-  let retryTimeout: ReturnType<typeof setTimeout> | null = null;
-  let userPaused = false; // true when user explicitly paused; prevents retry loop
-
-  function clearRetry() {
-    if (retryTimeout) {
-      clearTimeout(retryTimeout);
-      retryTimeout = null;
-    }
-  }
-
-  function scheduleRetry() {
-    clearRetry();
-    retryTimeout = setTimeout(() => {
-      retryTimeout = null;
-      if (!audioEl || isPlaying || userPaused) return;
-      if (hlsInstance) {
-        hlsInstance.stopLoad();
-        hlsInstance.startLoad(-1); // reload from live edge
-      } else if (audioEl.src) {
-        audioEl.load();
-      }
-      audioEl.play().catch(() => {});
-      scheduleRetry(); // keep retrying until playing or paused
-    }, 10_000);
-  }
-
-  // Reload button — shown after 5s of stuck loading, or on fatal error
-  let showReload = $state(false);
-  let showReloadTimer: ReturnType<typeof setTimeout> | null = null;
-
-  function armReloadBtn() {
-    if (showReloadTimer || showReload) return;
-    showReloadTimer = setTimeout(() => {
-      showReload = true;
-      showReloadTimer = null;
-    }, 5000);
-  }
-
-  function hideReloadBtn() {
-    if (showReloadTimer) {
-      clearTimeout(showReloadTimer);
-      showReloadTimer = null;
-    }
-    showReload = false;
-  }
-
-  // Manual reconnect — reinitialises HLS and attempts playback
-  let reconnectKey = $state(0);
-  let reconnectShouldPlay = false;
-  let wasPlayingBeforeDisconnect = false;
-
-  function reconnect(shouldPlay = true) {
-    if (!audioEl) return;
-    error = null;
-    loading = true;
-    hideReloadBtn();
-    clearRetry();
-    reconnectShouldPlay = shouldPlay;
-    reconnectKey++;
-  }
+  import { getAlbumArt } from '$lib/utils/artwork';
+  import type { ArtworkSizes } from '$lib/utils/artwork';
 
   const NOW_PLAYING_URL = 'https://radio.radio-roza.org/api/nowplaying_static/radioroza.json';
   const NOW_PLAYING_SIMPLE_URL = 'https://radio.radio-roza.org/api/nowplaying_static/radioroza.txt';
+  const LIVE_MP3_FALLBACK = 'https://radio.radio-roza.org/listen/radioroza/live.mp3';
   const IGNORE_ARTISTS = ['radio roža', 'radio roza', 'jingl'];
 
-  // --- Artwork helpers ---
+  const STALL_TIMEOUT_MS = 8000; // no audio within this window counts as a failed attempt
+  const MAX_ATTEMPTS = 12; // ~2 min of automatic retrying before giving up
+  const LONG_OUTAGE_ATTEMPT = 3; // after this many attempts the message switches to "unavailable"
 
-  function preloadImage(src: string): Promise<void> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => resolve();
-      img.onerror = () => resolve();
-      img.src = src;
-    });
+  type Status = 'idle' | 'loading' | 'retrying' | 'playing' | 'failed' | 'unsupported';
+
+  let audioEl = $state<HTMLAudioElement | undefined>(undefined);
+  let status = $state<Status>('idle');
+  let attempt = $state(0);
+  let artwork = $state<ArtworkSizes | null>(null);
+
+  const isActive = $derived(status === 'playing' || status === 'loading' || status === 'retrying');
+
+  const statusMessage = $derived.by(() => {
+    if (status === 'retrying') {
+      return attempt <= LONG_OUTAGE_ATTEMPT
+        ? 'Povezivanje sa streamom…'
+        : 'Stream je trenutno nedostupan — pokušavamo se ponovno spojiti…';
+    }
+    if (status === 'failed') {
+      return 'Stream trenutno nije dostupan. Pritisnite play za novi pokušaj.';
+    }
+    if (status === 'unsupported') {
+      return 'Vaš preglednik ne podržava reprodukciju streama.';
+    }
+    return null;
+  });
+
+  // --- Playback (non-reactive bookkeeping) ---
+
+  let hls: Hls | null = null;
+  let wantsPlaying = false; // the user's intent — all recovery logic works to satisfy it
+  let usingNativeSrc = false; // native HLS / MP3 fallback path (no MSE)
+  let stallTimer: ReturnType<typeof setTimeout> | null = null;
+  let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function clearTimers() {
+    if (stallTimer) {
+      clearTimeout(stallTimer);
+      stallTimer = null;
+    }
+    if (retryTimer) {
+      clearTimeout(retryTimer);
+      retryTimer = null;
+    }
   }
 
-  async function preloadArtworkImages(art: ArtworkSizes | null, fanart: ArtistFanart | null) {
-    const urls: string[] = [];
-    if (art) {
-      if (art.thumbnail) urls.push(art.thumbnail);
-      if (art.medium) urls.push(art.medium);
-      if (art.large) urls.push(art.large);
+  // While a stall/retry timer is armed, any `pause` event is our own teardown,
+  // not the user or OS pausing playback.
+  function internalPausePending() {
+    return stallTimer !== null || retryTimer !== null;
+  }
+
+  function destroyHls() {
+    hls?.destroy();
+    hls = null;
+  }
+
+  function armStallWatchdog() {
+    if (stallTimer) clearTimeout(stallTimer);
+    stallTimer = setTimeout(() => {
+      stallTimer = null;
+      if (wantsPlaying && status !== 'playing') handleFailure();
+    }, STALL_TIMEOUT_MS);
+  }
+
+  function handleFailure() {
+    if (!wantsPlaying) return;
+    attempt += 1;
+    if (attempt >= MAX_ATTEMPTS) {
+      wantsPlaying = false;
+      stopStream();
+      status = 'failed';
+      return;
     }
-    if (fanart?.banner) urls.push(fanart.banner);
-    else if (fanart?.fanart) urls.push(fanart.fanart);
-    await Promise.all(urls.map(preloadImage));
+    status = 'retrying';
+    clearTimers();
+    retryTimer = setTimeout(tryPlay, Math.min(attempt * 1000, 5000));
+  }
+
+  function onPlayRejected(e: unknown) {
+    const name = (e as DOMException)?.name;
+    if (name === 'AbortError') return; // our own teardown interrupted play(); the retry cycle handles it
+    if (name === 'NotAllowedError') {
+      // Autoplay blocked — a fresh user gesture is required, so stop trying quietly
+      pauseIntent();
+      return;
+    }
+    // Anything else: the stall watchdog will schedule the next attempt
+  }
+
+  // Starts playback fresh from the live edge. Live radio has no resume position,
+  // so every attempt tears down the old connection — this also clears any stale
+  // buffer left behind by an idle tab.
+  function tryPlay() {
+    const el = audioEl;
+    if (!el) return;
+
+    clearTimers();
+    status = attempt === 0 ? 'loading' : 'retrying';
+    armStallWatchdog(); // armed before teardown, so pause events fired by teardown are ignored
+
+    destroyHls();
+    usingNativeSrc = false;
+    const src = playerState.src;
+
+    if (Hls.isSupported()) {
+      const instance = new Hls({
+        enableWorker: true,
+        maxBufferLength: 20,
+        maxMaxBufferLength: 30,
+        backBufferLength: 30,
+        liveDurationInfinity: true,
+      });
+      let mediaErrorRecovered = false;
+
+      hls = instance;
+      instance.loadSource(src);
+      instance.attachMedia(el);
+      instance.on(Hls.Events.ERROR, (_, data) => {
+        if (instance !== hls || !data.fatal) return;
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !mediaErrorRecovered) {
+          mediaErrorRecovered = true;
+          instance.recoverMediaError();
+        } else {
+          handleFailure();
+        }
+      });
+    } else if (el.canPlayType('application/vnd.apple.mpegurl')) {
+      usingNativeSrc = true;
+      el.src = src;
+      el.load();
+    } else if (playerState.isLive) {
+      usingNativeSrc = true;
+      el.src = LIVE_MP3_FALLBACK;
+      el.load();
+    } else {
+      clearTimers();
+      wantsPlaying = false;
+      status = 'unsupported';
+      return;
+    }
+
+    el.play().catch(onPlayRejected);
+  }
+
+  function stopStream() {
+    clearTimers();
+    destroyHls();
+    const el = audioEl;
+    if (!el) return;
+    el.pause();
+    if (usingNativeSrc) {
+      // Actually stop the network connection, not just playback
+      el.removeAttribute('src');
+      el.load();
+      usingNativeSrc = false;
+    }
+  }
+
+  function playIntent() {
+    wantsPlaying = true;
+    attempt = 0;
+    tryPlay();
+  }
+
+  function pauseIntent() {
+    wantsPlaying = false;
+    stopStream();
+    status = 'idle';
+  }
+
+  function togglePlay() {
+    if (wantsPlaying) pauseIntent();
+    else playIntent();
+  }
+
+  function onOnline() {
+    if (wantsPlaying && status !== 'playing') {
+      clearTimers();
+      // `online` fires when the interface comes up; give DNS a moment
+      retryTimer = setTimeout(tryPlay, 1000);
+    }
+  }
+
+  function onVisibilityChange() {
+    if (document.hidden) return;
+    if (playerState.isLive) refreshNowPlaying();
+    if (wantsPlaying && status !== 'playing') {
+      // Timers were throttled while the tab was hidden — reconnect right away
+      tryPlay();
+    }
   }
 
   // --- MediaSession ---
 
+  let mediaSessionReady = false;
+
+  function setupMediaSessionHandlers() {
+    if (mediaSessionReady || !('mediaSession' in navigator)) return;
+    mediaSessionReady = true;
+    const trySet = (action: MediaSessionAction, handler: MediaSessionActionHandler) => {
+      try {
+        navigator.mediaSession.setActionHandler(action, handler);
+      } catch {
+        // action not supported by this browser
+      }
+    };
+    trySet('play', playIntent);
+    trySet('pause', pauseIntent);
+    trySet('stop', pauseIntent);
+  }
+
   function updateMediaSessionMetadata() {
-    if (!browser || !('mediaSession' in navigator)) return;
-
-    const getMime = (src: string): string => (src.endsWith('.png') ? 'image/png' : 'image/jpeg');
-
-    const artworkEntries: MediaImage[] = artwork
-      ? [
-          { src: artwork.thumbnail, sizes: '128x128', type: getMime(artwork.thumbnail) },
-          { src: artwork.medium, sizes: '300x300', type: getMime(artwork.medium) },
-          { src: artwork.large, sizes: '600x600', type: getMime(artwork.large) },
-        ]
-      : [];
-
+    if (!('mediaSession' in navigator)) return;
+    const mime = (src: string) => (src.endsWith('.png') ? 'image/png' : 'image/jpeg');
     try {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: playerState.title || 'Live Stream',
-        artist: playerState.artist,
-        artwork: artworkEntries,
+        title: playerState.title || playerState.artist,
+        artist: playerState.title ? playerState.artist : '',
+        artwork: artwork
+          ? [
+              { src: artwork.thumbnail, sizes: '128x128', type: mime(artwork.thumbnail) },
+              { src: artwork.medium, sizes: '300x300', type: mime(artwork.medium) },
+              { src: artwork.large, sizes: '600x600', type: mime(artwork.large) },
+            ]
+          : [],
       });
     } catch (e) {
       console.warn('MediaSession metadata failed:', e);
     }
   }
 
-  function skipToLive() {
-    if (!audioEl) return;
-    const d = audioEl.duration;
-    if (d && isFinite(d)) {
-      audioEl.currentTime = Math.max(0, d - 5);
-    } else if (hlsInstance && hlsInstance.liveSyncPosition != null) {
-      audioEl.currentTime = hlsInstance.liveSyncPosition;
-    }
-  }
-
-  // Checked once at setup — capability doesn't change at runtime
-  let canSetPositionState = false;
-
-  function updatePositionState() {
-    if (!canSetPositionState || !audioEl) return;
-    const d = audioEl.duration;
-    const t = audioEl.currentTime;
-    if (!d || !isFinite(d) || !isFinite(t)) return;
-    try {
-      navigator.mediaSession.setPositionState({ duration: d, position: Math.min(t, d), playbackRate: 1 });
-    } catch {
-      canSetPositionState = false;
-    }
-  }
-
-  function setupMediaSessionHandlers() {
-    if (!browser || !('mediaSession' in navigator)) return;
-    canSetPositionState = !!navigator.mediaSession.setPositionState;
-    try {
-      navigator.mediaSession.setActionHandler('play', () => {
-        userPaused = false;
-        audioEl?.play().catch(() => {});
-      });
-      navigator.mediaSession.setActionHandler('pause', () => {
-        userPaused = true;
-        audioEl?.pause();
-      });
-      navigator.mediaSession.setActionHandler('stop', () => {
-        userPaused = true;
-        audioEl?.pause();
-      });
-      navigator.mediaSession.setActionHandler('seekbackward', () => {
-        if (audioEl) audioEl.currentTime = Math.max(0, audioEl.currentTime - 30);
-      });
-      navigator.mediaSession.setActionHandler('seekforward', skipToLive);
-      navigator.mediaSession.setActionHandler('nexttrack', skipToLive);
-    } catch (e) {
-      console.warn('MediaSession handlers failed:', e);
-    }
-  }
-
   // --- Now-playing polling ---
 
-  const fetchNowPlaying = async () => {
+  let nowPlayingText = ''; // last seen "artist - title" string, used to detect changes
+  let isFetching = false;
+  let artworkRequestId = 0;
+
+  async function refreshNowPlaying() {
     if (isFetching) return;
     isFetching = true;
-
     try {
-      const res = await fetch(NOW_PLAYING_URL);
+      const res = await fetch(NOW_PLAYING_URL, { cache: 'no-store' });
+      if (!res.ok) return;
       const data: { now_playing?: { song?: { artist: string; title: string; text: string } } } =
         await res.json();
+      const song = data?.now_playing?.song;
+      if (!song || song.text === nowPlayingText) return;
 
-      if (!data?.now_playing?.song) return;
-
-      const { artist, title, text } = data.now_playing.song;
-
-      // Skip if nothing changed
-      if (text === nowPlayingText) return;
-
-      let newArtwork: ArtworkSizes | null = null;
-      let newFanart: ArtistFanart | null = null;
-
-      if (artist && !IGNORE_ARTISTS.includes(artist.toLowerCase())) {
-        [newArtwork, newFanart] = await Promise.all([
-          getAlbumArt(artist, title),
-          getArtistFanart(artist),
-        ]);
-        // Preload before updating state to avoid flash
-        await preloadArtworkImages(newArtwork, newFanart);
-      }
-
-      // Atomic state update
-      nowPlayingText = text;
-      playerState.artist = artist;
-      playerState.title = title;
-      artwork = newArtwork;
-      artistFanart = newFanart;
-
+      // Show the text immediately — artwork loads in the background
+      nowPlayingText = song.text;
+      playerState.artist = song.artist;
+      playerState.title = song.title;
+      artwork = null;
       updateMediaSessionMetadata();
+      loadArtwork(song.artist, song.title);
     } catch (e) {
       console.error('Error fetching now playing:', e);
     } finally {
       isFetching = false;
     }
-  };
+  }
 
-  const fetchNowPlayingSimple = async () => {
+  async function loadArtwork(artist: string, title: string) {
+    const requestId = ++artworkRequestId;
+    if (!artist || IGNORE_ARTISTS.includes(artist.toLowerCase())) return;
+    const art = await getAlbumArt(artist, title).catch(() => null);
+    if (requestId !== artworkRequestId) return; // a newer song superseded this lookup
+    artwork = art;
+    if (art) updateMediaSessionMetadata();
+  }
+
+  async function pollNowPlayingSimple() {
+    if (document.hidden) return; // onVisibilityChange refreshes when the tab returns
     try {
-      const res = await fetch(NOW_PLAYING_SIMPLE_URL);
-      const text = await res.text();
-      if (text && text.trim() !== nowPlayingText) {
-        // Debounce: wait 3s for metadata to stabilize before full fetch
-        if (fetchDebounceTimeout) clearTimeout(fetchDebounceTimeout);
-        fetchDebounceTimeout = setTimeout(fetchNowPlaying, 3000);
-      }
-    } catch (e) {
-      console.error('Error polling now playing:', e);
+      const res = await fetch(NOW_PLAYING_SIMPLE_URL, { cache: 'no-store' });
+      const text = (await res.text()).trim();
+      if (text && text !== nowPlayingText) refreshNowPlaying();
+    } catch {
+      // transient polling errors are fine — the next tick will retry
     }
-  };
+  }
 
-  // Reset HLS to live edge when tab regains focus while paused.
-  // detachMedia() removes the MediaSource from the element (clears stale buffer),
-  // then loadSource + attachMedia restart from live edge without destroying the HLS instance.
+  // --- Effects ---
+
+  // Audio element event wiring
   $effect(() => {
-    if (!browser) return;
-
-    let resetPending = false;
-
-    function resetToLiveEdge() {
-      if (resetPending) return;
-      resetPending = true;
-      setTimeout(() => { resetPending = false; }, 500);
-
-      hlsInstance!.stopLoad();
-      hlsInstance!.detachMedia();
-      hlsInstance!.loadSource(playerState.src);
-      hlsInstance!.attachMedia(audioEl!);
-    }
-
-    function onRegainFocus() {
-      if (document.visibilityState !== 'visible') return;
-      if (isPlaying || !playerState.isLive || !hlsInstance || !audioEl) return;
-      resetToLiveEdge();
-    }
-
-    document.addEventListener('visibilitychange', onRegainFocus);
-    window.addEventListener('focus', onRegainFocus);
-
-    return () => {
-      document.removeEventListener('visibilitychange', onRegainFocus);
-      window.removeEventListener('focus', onRegainFocus);
-    };
-  });
-
-  // Auto-reconnect when browser comes back online after suspension.
-  // HLS destroys itself on fatal network errors, so when we get the `online`
-  // event we reinitialise only if the player is in an error/broken state.
-  // Delay 1.5s: `online` fires when the network interface comes up, but DNS
-  // resolution can still fail for a second or two after that.
-  $effect(() => {
-    if (!browser) return;
-
-    let onlineTimer: ReturnType<typeof setTimeout> | null = null;
-
-    function onOnline() {
-      if (error || !hlsInstance) {
-        if (onlineTimer) clearTimeout(onlineTimer);
-        onlineTimer = setTimeout(() => {
-          onlineTimer = null;
-          reconnect(wasPlayingBeforeDisconnect);
-          wasPlayingBeforeDisconnect = false;
-        }, 1500);
-      }
-    }
-
-    window.addEventListener('online', onOnline);
-    return () => {
-      window.removeEventListener('online', onOnline);
-      if (onlineTimer) clearTimeout(onlineTimer);
-    };
-  });
-
-  $effect(() => {
-    if (!browser) return;
-
-    if (!playerState.isLive) {
-      artwork = null;
-      artistFanart = null;
-      updateMediaSessionMetadata();
-      return;
-    }
-
-    setupMediaSessionHandlers();
-    updateMediaSessionMetadata();
-    fetchNowPlaying();
-    const interval = setInterval(fetchNowPlayingSimple, 5000);
-
-    return () => {
-      clearInterval(interval);
-      if (fetchDebounceTimeout) clearTimeout(fetchDebounceTimeout);
-    };
-  });
-
-  $effect(() => {
-    if (!browser || !audioEl) return;
-
-    const src = playerState.src;
-    const _key = reconnectKey; // re-run on manual reconnect
-    const wasPlaying = untrack(() => isPlaying) || reconnectShouldPlay;
-    reconnectShouldPlay = false;
-
-    hlsInstance?.destroy();
-    hlsInstance = null;
-    loading = false;
-    error = null;
-
     const el = audioEl;
-
-    if (Hls.isSupported()) {
-      const hls = new Hls({
-        enableWorker: true,
-        lowLatencyMode: true,
-        maxBufferLength: 20,
-        maxMaxBufferLength: 30,
-      });
-
-      hls.loadSource(src);
-      hls.attachMedia(el);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        if (wasPlaying) el.play().catch(() => {});
-      });
-
-      hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
-          if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-            hls.recoverMediaError();
-          } else {
-            wasPlayingBeforeDisconnect = isPlaying;
-            error = 'Stream nije dostupan.';
-            loading = false;
-            clearRetry();
-            hideReloadBtn();
-            hls.destroy();
-            if (hlsInstance === hls) hlsInstance = null;
-          }
-        }
-      });
-
-      hlsInstance = hls;
-    } else if (el.canPlayType('application/vnd.apple.mpegurl')) {
-      el.src = src;
-      if (wasPlaying) el.play().catch(() => {});
-    } else {
-      error = 'Vaš preglednik ne podržava HLS stream.';
-    }
+    if (!el) return;
 
     const onPlaying = () => {
-      isPlaying = true;
-      loading = false;
-      error = null;
-      userPaused = false;
-      clearRetry();
-      hideReloadBtn();
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.playbackState = 'playing';
-        updateMediaSessionMetadata();
-      }
-    };
-    const onPause = () => {
-      isPlaying = false;
-      clearRetry();
-      hideReloadBtn();
-      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-    };
-    const onWaiting = () => {
-      loading = true;
-      scheduleRetry();
-      armReloadBtn();
-    };
-    const onCanPlay = () => {
-      loading = false;
-      error = null;
-      clearRetry();
-      hideReloadBtn();
+      clearTimers();
+      attempt = 0;
+      status = 'playing';
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
     };
 
-    // Throttled timeupdate — ~4 FPS is enough for lock-screen position state
-    let lastPositionUpdate = 0;
-    const onTimeUpdate = () => {
-      const now = Date.now();
-      if (now - lastPositionUpdate > 250) {
-        lastPositionUpdate = now;
-        updatePositionState();
+    const onPause = () => {
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+      if (!wantsPlaying) {
+        if (status !== 'failed' && status !== 'unsupported') status = 'idle';
+      } else if (!internalPausePending()) {
+        // External pause (unplugged headphones, another app taking over) — respect it
+        wantsPlaying = false;
+        stopStream();
+        status = 'idle';
       }
+    };
+
+    const onWaiting = () => {
+      if (!wantsPlaying) return;
+      if (status === 'playing') status = 'loading';
+      armStallWatchdog();
+    };
+
+    const onError = () => {
+      if (hls) return; // MSE errors are handled through hls.js events
+      handleFailure();
     };
 
     el.addEventListener('playing', onPlaying);
     el.addEventListener('pause', onPause);
     el.addEventListener('waiting', onWaiting);
-    el.addEventListener('canplay', onCanPlay);
-    el.addEventListener('timeupdate', onTimeUpdate);
+    el.addEventListener('error', onError);
 
     return () => {
-      clearRetry();
-      hideReloadBtn();
-      hlsInstance?.destroy();
-      hlsInstance = null;
       el.removeEventListener('playing', onPlaying);
       el.removeEventListener('pause', onPause);
       el.removeEventListener('waiting', onWaiting);
-      el.removeEventListener('canplay', onCanPlay);
-      el.removeEventListener('timeupdate', onTimeUpdate);
+      el.removeEventListener('error', onError);
+      clearTimers();
+      destroyHls();
     };
   });
 
-  // Pause HLS when Mixcloud embed takes over
+  // Restart playback when the source changes
   $effect(() => {
-    if (playerState.mixcloudShow && audioEl && isPlaying) {
-      userPaused = true;
-      audioEl.pause();
+    void playerState.src;
+    untrack(() => {
+      if (wantsPlaying) {
+        attempt = 0;
+        tryPlay();
+      }
+    });
+  });
+
+  // Pause the live stream when a Mixcloud embed takes over
+  $effect(() => {
+    if (playerState.mixcloudShow) {
+      untrack(() => {
+        if (wantsPlaying) pauseIntent();
+      });
     }
   });
 
-  function togglePlay() {
-    if (!audioEl) return;
-    error = null;
-    if (isPlaying) {
-      userPaused = true;
-      audioEl.pause();
-    } else {
-      userPaused = false;
-      loading = true;
-      scheduleRetry();
-      audioEl.play().catch((e: unknown) => {
-        loading = false;
-        clearRetry();
-        error = 'Reprodukcija nije moguća.';
-        console.error('play() failed:', e);
-      });
+  // Now-playing metadata — only relevant for the live stream
+  $effect(() => {
+    if (!playerState.isLive) {
+      // Reset so the next return to live re-fetches even if the song is unchanged
+      nowPlayingText = '';
+      artworkRequestId += 1;
+      artwork = null;
+      return;
     }
-  }
+
+    untrack(() => {
+      setupMediaSessionHandlers();
+      refreshNowPlaying();
+    });
+    const interval = setInterval(pollNowPlayingSimple, 5000);
+    return () => clearInterval(interval);
+  });
 </script>
+
+<svelte:window ononline={onOnline} />
+<svelte:document onvisibilitychange={onVisibilityChange} />
 
 <div class="player">
   <div class="player-bar">
     <button
       class="play-btn"
       onclick={togglePlay}
-      aria-label={isPlaying ? 'Pauziraj' : 'Reproduciraj'}
+      aria-label={isActive ? 'Pauziraj' : 'Reproduciraj'}
     >
-      {#if loading}
+      {#if status === 'loading' || status === 'retrying'}
         <span class="spinner" aria-hidden="true"></span>
-      {:else if isPlaying}
+      {:else if status === 'playing'}
         <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
           <rect x="2" y="2" width="4" height="12" />
           <rect x="10" y="2" width="4" height="12" />
@@ -508,18 +426,13 @@
         {/if}
       </span>
     </div>
-
   </div>
 
-  {#if error || showReload}
-    <div class="player-status">
-      {#if error}
-        <span class="player-error">{error}</span>
-      {/if}
-      <button class="reload-btn" onclick={() => reconnect()}>osvježi</button>
+  {#if statusMessage}
+    <div class="player-status" aria-live="polite">
+      <span class="status-text">{statusMessage}</span>
     </div>
   {/if}
-
 </div>
 
 <audio bind:this={audioEl} preload="none"></audio>
@@ -623,26 +536,10 @@
     padding: 0.25rem 1rem 0.5rem;
   }
 
-  .player-error {
+  .status-text {
     font-family: var(--font-mono);
     font-size: var(--text-meta);
     color: var(--color-brand);
-  }
-
-  .reload-btn {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    color: var(--color-brand);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  .reload-btn:hover {
-    opacity: 0.7;
   }
 
   /* Tablet+: larger play/pause icons */
@@ -677,6 +574,5 @@
     .track-info {
       font-size: var(--text-title);
     }
-
   }
 </style>

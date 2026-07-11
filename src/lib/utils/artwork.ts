@@ -4,20 +4,8 @@ export interface ArtworkSizes {
   large: string;
 }
 
-export interface ArtistFanart {
-  fanart: string | null;
-  fanart2: string | null;
-  fanart3: string | null;
-  banner: string | null;
-  logo: string | null;
-  thumb: string | null;
-  bio: string | null;
-  genre: string | null;
-}
-
-// Simple in-memory caches to avoid repeated API calls
+// Simple in-memory cache to avoid repeated API calls (null results are cached too)
 const artworkCache = new Map<string, ArtworkSizes | null>();
-const fanartCache = new Map<string, ArtistFanart | null>();
 
 async function getAlbumArtItunes(artist: string, track: string): Promise<ArtworkSizes | null> {
   const query = `${artist} ${track}`;
@@ -41,149 +29,58 @@ async function searchMusicBrainz(artist: string, track: string): Promise<string 
   const query = `artist:"${artist}" AND recording:"${track}"`;
   const url = `https://musicbrainz.org/ws/2/recording/?query=${encodeURIComponent(query)}&fmt=json&limit=1`;
 
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'RadioRoza/1.0 (radio-rozari@gmail.com)',
-      },
-    });
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'RadioRoza/1.0 (radio-rozari@gmail.com)',
+    },
+  });
 
-    if (response.status === 404) {
-      console.log('MusicBrainz not found');
-      return null;
-    }
+  if (!response.ok) return null;
 
-    const data: { recordings?: { releases?: { id: string }[] }[] } = await response.json();
-
-    if (data.recordings && data.recordings.length > 0) {
-      const recording = data.recordings[0];
-      if (recording.releases && recording.releases.length > 0) {
-        return recording.releases[0].id; // MBID
-      }
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error searching MusicBrainz:', error);
-    return null;
-  }
+  const data: { recordings?: { releases?: { id: string }[] }[] } = await response.json();
+  return data.recordings?.[0]?.releases?.[0]?.id ?? null;
 }
 
 async function getCoverArt(mbid: string): Promise<ArtworkSizes | null> {
-  const url = `https://coverartarchive.org/release/${mbid}`;
+  const response = await fetch(`https://coverartarchive.org/release/${mbid}`);
 
-  try {
-    const response = await fetch(url);
+  if (!response.ok) return null;
 
-    if (response.status === 404) {
-      console.log('CoverArt not found');
-      return null;
-    }
+  const data: {
+    images: { front: boolean; thumbnails: { small: string; large: string }; image: string }[];
+  } = await response.json();
 
-    const data: {
-      images: { front: boolean; thumbnails: { small: string; large: string }; image: string }[];
-    } = await response.json();
+  const frontCover = data.images.find((img) => img.front === true);
+  if (!frontCover) return null;
 
-    const frontCover = data.images.find((img) => img.front === true);
-    if (!frontCover) return null;
-
-    return {
-      thumbnail: frontCover.thumbnails.small, // 250px
-      medium: frontCover.thumbnails.large, // 500px
-      large: frontCover.image, // Full size
-    };
-  } catch (error) {
-    console.error('Nema cover art za ovaj release', (error as Error).message);
-    return null;
-  }
+  return {
+    thumbnail: frontCover.thumbnails.small, // 250px
+    medium: frontCover.thumbnails.large, // 500px
+    large: frontCover.image, // Full size
+  };
 }
 
 async function getAlbumArtMusicBrainz(artist: string, track: string): Promise<ArtworkSizes | null> {
   const mbid = await searchMusicBrainz(artist, track);
-  if (!mbid) {
-    console.log('Nije pronađen u MusicBrainz');
-    return null;
-  }
+  if (!mbid) return null;
   return getCoverArt(mbid);
 }
 
 export async function getAlbumArt(artist: string, track: string): Promise<ArtworkSizes | null> {
   const cacheKey = `${artist}|${track}`.toLowerCase();
 
-  if (artworkCache.has(cacheKey)) {
-    return artworkCache.get(cacheKey)!;
+  const cached = artworkCache.get(cacheKey);
+  if (cached !== undefined) return cached;
+
+  // 1. iTunes — single fast request, covers most popular releases
+  const itunesArt = await getAlbumArtItunes(artist, track).catch(() => null);
+  if (itunesArt) {
+    artworkCache.set(cacheKey, itunesArt);
+    return itunesArt;
   }
 
-  // 1. Try MusicBrainz + Cover Art Archive
-  const coverArt = await getAlbumArtMusicBrainz(artist, track);
-  if (coverArt) {
-    artworkCache.set(cacheKey, coverArt);
-    return coverArt;
-  }
-
-  console.log('Trying iTunes');
-  // 2. Fall back to iTunes
-  const coverArtItunes = await getAlbumArtItunes(artist, track);
-  if (coverArtItunes) {
-    artworkCache.set(cacheKey, coverArtItunes);
-    return coverArtItunes;
-  }
-
-  // Cache null results too to avoid repeated failed lookups
-  artworkCache.set(cacheKey, null);
-  return null;
-}
-
-export async function getArtistFanart(artist: string): Promise<ArtistFanart | null> {
-  const cacheKey = artist.toLowerCase();
-
-  if (fanartCache.has(cacheKey)) {
-    return fanartCache.get(cacheKey)!;
-  }
-
-  try {
-    const url = `https://www.theaudiodb.com/api/v1/json/2/search.php?s=${encodeURIComponent(artist)}`;
-    const response = await fetch(url);
-
-    if (response.status === 404) {
-      fanartCache.set(cacheKey, null);
-      return null;
-    }
-
-    const data: {
-      artists?: {
-        strArtistFanart: string | null;
-        strArtistFanart2: string | null;
-        strArtistFanart3: string | null;
-        strArtistBanner: string | null;
-        strArtistLogo: string | null;
-        strArtistThumb: string | null;
-        strArtistBiographyEN: string | null;
-        strArtistGenre: string | null;
-      }[];
-    } = await response.json();
-
-    if (data.artists && data.artists.length > 0) {
-      const a = data.artists[0];
-      const result: ArtistFanart = {
-        fanart: a.strArtistFanart,
-        fanart2: a.strArtistFanart2,
-        fanart3: a.strArtistFanart3,
-        banner: a.strArtistBanner,
-        logo: a.strArtistLogo,
-        thumb: a.strArtistThumb,
-        bio: a.strArtistBiographyEN,
-        genre: a.strArtistGenre,
-      };
-      fanartCache.set(cacheKey, result);
-      return result;
-    }
-
-    fanartCache.set(cacheKey, null);
-    return null;
-  } catch (error) {
-    console.error('Nema fanart za ovog artista', (error as Error).message);
-    fanartCache.set(cacheKey, null);
-    return null;
-  }
+  // 2. Fall back to MusicBrainz + Cover Art Archive (two requests, rate-limited)
+  const coverArt = await getAlbumArtMusicBrainz(artist, track).catch(() => null);
+  artworkCache.set(cacheKey, coverArt);
+  return coverArt;
 }
