@@ -125,7 +125,7 @@
   <!-- ── Crew / Naša priča / Šalji mjuzu ── -->
   <section class="three-col-section">
     <div class="three-col-block">
-      <h2 class="block-title"><a href="/o-nama/crew">--> crew</a></h2>
+      <h2 class="block-title"><a href="/o-nama/crew">→→→ crew</a></h2>
       <p class="block-body">
         Upoznaj ekipu radija. Selektori, novinari, tehničari, informatičari... Svatko ima svoju
         ulogu, često i više njih. Jesmo li već negdje spomenuli da nam se možeš pridružiti i ti?
@@ -133,7 +133,7 @@
     </div>
 
     <div class="three-col-block">
-      <h2 class="block-title"><a href="/o-nama/projekti">--> projekti</a></h2>
+      <h2 class="block-title"><a href="/o-nama/projekti">→→→ projekti</a></h2>
       <p class="block-body">
         Vidi kakve smo sve projekte provodili u ovom našem kratkom postojanju u suradnji s našim
         dragim partnerima!
