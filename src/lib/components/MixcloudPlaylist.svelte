@@ -24,11 +24,38 @@
 
   const PAGE_SIZE = 20;
 
+  let order = $state<'asc' | 'desc'>('asc');
+
+  // Ascending (playlist order) — Mixcloud's native pagination
   let episodes = $state<MixcloudEpisode[]>([]);
   let loading = $state(true);
-  let loadingMore = $state(false);
   let error = $state<string | null>(null);
   let nextUrl = $state<string | null>(null);
+
+  // Descending — reverse pagination via offset from the end of the playlist.
+  // descOffset is the playlist offset of the oldest fetched episode; 0 means
+  // the whole playlist is loaded, null means descending was never fetched.
+  let descEpisodes = $state<MixcloudEpisode[]>([]);
+  let descLoading = $state(false);
+  let descError = $state<string | null>(null);
+  let descOffset = $state<number | null>(null);
+
+  let loadingMore = $state(false);
+
+  const apiPath = $derived.by(() => {
+    if (!playlistUrl) return null;
+    try {
+      return new URL(playlistUrl).pathname;
+    } catch {
+      return playlistUrl.startsWith('/') ? playlistUrl : `/${playlistUrl}`;
+    }
+  });
+
+  const shownEpisodes = $derived(order === 'asc' ? episodes : descEpisodes);
+  const shownError = $derived(order === 'asc' ? error : descError);
+  const hasMore = $derived(
+    order === 'asc' ? nextUrl !== null : descOffset !== null && descOffset > 0,
+  );
 
   function formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('hr-HR', {
@@ -64,66 +91,147 @@
     }
   }
 
+  async function fetchRange(offset: number, limit: number): Promise<MixcloudEpisode[]> {
+    const r = await fetch(
+      `https://api.mixcloud.com${apiPath}cloudcasts/?offset=${offset}&limit=${limit}`,
+    );
+    if (!r.ok) throw new Error(`${r.status}`);
+    const data = await r.json();
+    return data.data ?? [];
+  }
+
+  // The playlist detail endpoint exposes cloudcast_count, so descending order
+  // only needs the last page — no need to walk the whole playlist.
+  async function loadDescInitial() {
+    descLoading = true;
+    descError = null;
+
+    try {
+      const r = await fetch(`https://api.mixcloud.com${apiPath}`);
+      if (!r.ok) throw new Error(`${r.status}`);
+      const total: number = (await r.json()).cloudcast_count ?? 0;
+      const offset = Math.max(0, total - PAGE_SIZE);
+      const batch = await fetchRange(offset, PAGE_SIZE);
+      descEpisodes = batch.reverse();
+      descOffset = offset;
+    } catch (e) {
+      descError = (e as Error).message;
+    } finally {
+      descLoading = false;
+    }
+  }
+
+  async function loadDescMore() {
+    if (!descOffset) return;
+    loadingMore = true;
+    descError = null;
+
+    try {
+      const newOffset = Math.max(0, descOffset - PAGE_SIZE);
+      const batch = await fetchRange(newOffset, descOffset - newOffset);
+      descEpisodes = [...descEpisodes, ...batch.reverse()];
+      descOffset = newOffset;
+    } catch (e) {
+      descError = (e as Error).message;
+    } finally {
+      loadingMore = false;
+    }
+  }
+
+  function toggleOrder() {
+    order = order === 'asc' ? 'desc' : 'asc';
+
+    if (order === 'desc' && descOffset === null && !descLoading) {
+      if (!nextUrl && episodes.length > 0) {
+        // Ascending list is complete — flip in the UI, no network needed
+        descEpisodes = [...episodes].reverse();
+        descOffset = 0;
+      } else {
+        loadDescInitial();
+      }
+    } else if (order === 'asc' && descOffset === 0 && nextUrl) {
+      // Descending list is complete but ascending isn't — reuse it
+      episodes = [...descEpisodes].reverse();
+      nextUrl = null;
+    }
+  }
+
+  function loadMore() {
+    if (order === 'asc') {
+      if (nextUrl) fetchPage(nextUrl, true);
+    } else {
+      loadDescMore();
+    }
+  }
+
   $effect(() => {
-    if (!browser || !playlistUrl) {
+    if (!browser || !apiPath) {
       loading = false;
       return;
     }
 
-    const path = (() => {
-      try {
-        return new URL(playlistUrl).pathname;
-      } catch {
-        return playlistUrl.startsWith('/') ? playlistUrl : `/${playlistUrl}`;
-      }
-    })();
-
+    order = 'asc';
     episodes = [];
     nextUrl = null;
-    fetchPage(`https://api.mixcloud.com${path}cloudcasts/?limit=${PAGE_SIZE}`);
+    descEpisodes = [];
+    descOffset = null;
+    descError = null;
+    fetchPage(`https://api.mixcloud.com${apiPath}cloudcasts/?limit=${PAGE_SIZE}`);
   });
 </script>
 
 {#if loading}
   <p class="status">Učitavanje epizoda...</p>
-{:else if error}
+{:else if order === 'asc' && error}
   <p class="status">
     Nije moguće učitati epizode. <a href={playlistUrl} target="_blank" rel="noopener noreferrer"
       >Pogledaj na Mixcloudu →</a
     >
   </p>
-{:else if episodes.length === 0}
+{:else if episodes.length === 0 && order === 'asc'}
   <p class="status">Nema dostupnih epizoda.</p>
 {:else}
-  <ul class="episode-list">
-    {#each episodes as ep (ep.key)}
-      <li class="episode-row">
-        <div class="episode-meta">
-          <span class="episode-date">{formatDate(ep.created_time)}</span>
-          <span class="episode-duration">{formatDuration(ep.audio_length)}</span>
-        </div>
-        <a class="episode-title" href={ep.url} target="_blank" rel="noopener noreferrer">
-          {ep.name}
-        </a>
-        {#if ep.tags && ep.tags.length > 0}
-          <div class="episode-tags">
-            {#each ep.tags as tag (tag.url)}
-              <Tag label={tag.name} />
-            {/each}
-          </div>
-        {/if}
-      </li>
-    {/each}
-  </ul>
-
-  {#if nextUrl}
-    <button
-      class="load-more"
-      onclick={() => fetchPage(nextUrl!,  true)}
-      disabled={loadingMore}
-    >
-      {loadingMore ? 'Učitavanje...' : 'Učitaj još'}
+  <div class="list-toolbar">
+    <button class="sort-toggle" onclick={toggleOrder} disabled={descLoading}>
+      {order === 'asc' ? '↓ Najnovije prve' : '↑ Najstarije prve'}
     </button>
+  </div>
+
+  {#if order === 'desc' && descLoading}
+    <p class="status">Učitavanje najnovijih epizoda...</p>
+  {:else if order === 'desc' && shownError}
+    <p class="status">
+      Nije moguće učitati epizode. <a href={playlistUrl} target="_blank" rel="noopener noreferrer"
+        >Pogledaj na Mixcloudu →</a
+      >
+    </p>
+  {:else}
+    <ul class="episode-list">
+      {#each shownEpisodes as ep (ep.key)}
+        <li class="episode-row">
+          <div class="episode-meta">
+            <span class="episode-date">{formatDate(ep.created_time)}</span>
+            <span class="episode-duration">{formatDuration(ep.audio_length)}</span>
+          </div>
+          <a class="episode-title" href={ep.url} target="_blank" rel="noopener noreferrer">
+            {ep.name}
+          </a>
+          {#if ep.tags && ep.tags.length > 0}
+            <div class="episode-tags">
+              {#each ep.tags as tag (tag.url)}
+                <Tag label={tag.name} />
+              {/each}
+            </div>
+          {/if}
+        </li>
+      {/each}
+    </ul>
+
+    {#if hasMore}
+      <button class="load-more" onclick={loadMore} disabled={loadingMore}>
+        {loadingMore ? 'Učitavanje...' : 'Učitaj još'}
+      </button>
+    {/if}
   {/if}
 {/if}
 
@@ -137,6 +245,30 @@
   .status a {
     color: inherit;
     text-underline-offset: 3px;
+  }
+
+  .list-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    padding-bottom: 0.5rem;
+  }
+
+  .sort-toggle {
+    all: unset;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    padding: 0.25rem 0;
+  }
+
+  .sort-toggle:hover:not(:disabled) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .sort-toggle:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
 
   .episode-list {
