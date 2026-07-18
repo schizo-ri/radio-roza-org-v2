@@ -145,7 +145,7 @@
     {/snippet}
   </ShowsGrid>
   <div class="section-link">
-    <SeeAll href="/citaj-radio" label="Vidi sve " />
+    <SeeAll href="/arhiva" label="Vidi cijelu arhivu" />
   </div>
 </section>
 

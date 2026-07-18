@@ -8,6 +8,7 @@
     { href: '/citaj-radio', label: 'Čitaj radio' },
     { href: '/program', label: 'Program' },
     { href: '/emisije', label: 'Emisije' },
+    { href: '/arhiva', label: 'Arhiva' },
     { href: '/o-nama', label: 'O nama' },
     { href: '/kontakt', label: 'Kontakt' },
   ];

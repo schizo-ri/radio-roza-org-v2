@@ -5,6 +5,7 @@ export const prerender = false;
 
 const STATIC_PATHS = [
   '/',
+  '/arhiva',
   '/citaj-radio',
   '/program',
   '/emisije',
