@@ -60,5 +60,6 @@ odrađen u kodu (vidi git log).
 
 14. ~~**ArticleGrid layout shift.**~~ **Riješeno** — ugrađena varijanta C iz prototipa: stupce
     određuje CSS (`auto-fill`), linije crta 2px outline na karticama, bez JS-a i bez skoka nakon
-    hidratacije. Broj kartica je sad fiksan (naslovnica dohvaća 8 emisija), a zadnji red smije
-    biti nepotpun.
+    hidratacije. Paginirane stranice (citaj-radio, emisije) prihvaćaju nepotpun zadnji red, a
+    "novo novo novo" na naslovnici ima poseban `ShowsGrid` s container queryjima koji uvijek
+    puni redove (1 stupac → 4 kartice, 2 → 8, 3 → 9, 4 → 8, šire → stupci × 2).
