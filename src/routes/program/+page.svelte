@@ -227,7 +227,8 @@
     font: inherit;
     font-weight: 600;
     color: var(--color-brand);
-    background: none;
+    /* neprozirno: iznad 640px pilule plutaju nad sadržajem koji scrolla ispod */
+    background: var(--color-bg);
     border: 2px solid var(--color-brand);
     border-radius: 2em;
     padding: 0.5em 1em;
@@ -246,7 +247,7 @@
   }
 
   .pick-date-btn {
-    background: none;
+    background: var(--color-bg);
     border: 2px solid var(--color-black);
     font-weight: 600;
     border-radius: 2em;
@@ -403,6 +404,27 @@
       padding: 2rem 1.5rem 5rem;
     }
 
+    /* Botuni u isti red s naslovom: bar se stisne u desni kut i negativnom
+       marginom povuče preko headera, okomito centriran na naslov. Puna traka
+       s pozadinom bi prerezala naslov, zato pilule nose vlastitu pozadinu, a
+       dani se lijepe direktno ispod playera — u istom pojasu s botunima. */
+    .header-actions {
+      width: fit-content;
+      margin-left: auto;
+      background: none;
+      margin-top: calc(-1 * (var(--text-display) / 2 + var(--actions-h) / 2 + 1rem));
+      /* vrati tok na mjesto gdje bi bio bez bara */
+      margin-bottom: calc(var(--text-display) / 2 - var(--actions-h) / 2 + 1rem);
+    }
+
+    .day-header {
+      top: var(--stack-top);
+    }
+
+    .day-section {
+      scroll-margin-top: calc(var(--stack-top) + 0.5rem);
+    }
+
     .show-row {
       gap: 2rem;
     }
@@ -423,21 +445,11 @@
     }
   }
 
-  @media (min-width: 1600px) {
+  @media (min-width: 1400px) {
     .content {
-      margin-top: -9rem;
-    }
-
-    /* Sadržaj je uska centrirana kolona povučena uz naslov — bar preko cijele
-       širine bi je prekrio, pa se stisne u desni kut, a dani se lijepe
-       direktno ispod playera, u istoj visini s botunima. */
-    .header-actions {
-      width: fit-content;
-      margin-left: auto;
-    }
-
-    .day-header {
-      top: var(--stack-top);
+      /* bar više ne zauzima 3rem toka (margine ga kompenziraju),
+         pa je prijašnjih -12.5rem sada -9.5rem za istu poziciju */
+      margin-top: -9.5rem;
     }
   }
 
