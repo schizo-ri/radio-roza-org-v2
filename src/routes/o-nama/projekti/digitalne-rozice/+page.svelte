@@ -18,7 +18,7 @@
   <div class="project-layout">
     <div class="project-left">
       <div class="project-cover">
-        <img src="/images/projekti/digitalne-rozice/art-dr.png" alt="Digitalne Rožice" />
+        <img src="/images/projekti/digitalne-rozice/art-dr.webp" alt="Digitalne Rožice" />
       </div>
 
       <div class="project-about">
@@ -59,17 +59,19 @@
       <div class="project-content">
         <p>
           Digitalne rožice europski je projekt koji u fokus postavlja opću populaciju djece i mladih
-          te djecu i mlade s teškoćama u razvoju. U suradnji s partnerskim udrugama (RUKE, Muzikopter)
-          nastoji se utjecati na kulturnu i umjetničku edukaciju, razvoj samostalnosti, poboljšanje
-          slike o sebi te poboljšanje socio-emocionalnog kontakta i osobni rast djece i mladih.
+          te djecu i mlade s teškoćama u razvoju. U suradnji s partnerskim udrugama (RUKE,
+          Muzikopter) nastoji se utjecati na kulturnu i umjetničku edukaciju, razvoj samostalnosti,
+          poboljšanje slike o sebi te poboljšanje socio-emocionalnog kontakta i osobni rast djece i
+          mladih.
         </p>
 
         <p>
-          Uslijed novonastale situacije povezane s pandemijom COVID-19 dogodile su se promjene koje su
-          izazvale negativne utjecaje na djecu i mlade — segregacija iz kulturnog i društvenog života
-          zajednice, nedostupnost interaktivnih online programa, gušenje kreativnih i socijalnih
-          potencijala. Sve to potaknulo je intervenciju udruge Ri Rock i projektnih partnera da ponude
-          načine za izražavanje osjećaja, želja i potreba kroz online kreativne aktivnosti.
+          Uslijed novonastale situacije povezane s pandemijom COVID-19 dogodile su se promjene koje
+          su izazvale negativne utjecaje na djecu i mlade — segregacija iz kulturnog i društvenog
+          života zajednice, nedostupnost interaktivnih online programa, gušenje kreativnih i
+          socijalnih potencijala. Sve to potaknulo je intervenciju udruge Ri Rock i projektnih
+          partnera da ponude načine za izražavanje osjećaja, želja i potreba kroz online kreativne
+          aktivnosti.
         </p>
 
         <hr />
@@ -92,9 +94,7 @@
           kognitivnog i emocionalnog funkcioniranja djece i mladih s teškoćama u razvoju.
         </p>
 
-        <p class="disclaimer">
-          Sadržaj web stranice isključiva je odgovornost Udruge Ri Rock.
-        </p>
+        <p class="disclaimer">Sadržaj web stranice isključiva je odgovornost Udruge Ri Rock.</p>
       </div>
 
       <section class="episodes">

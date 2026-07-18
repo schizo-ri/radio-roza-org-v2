@@ -301,7 +301,7 @@ export const shows: Show[] = [
     title: 'Korona Kid',
     tags: ['Educational', 'Youth'],
     description: `Interaktivni, tehnološki napredni, ali istovremeno zabavni načini učenja, pokazali su svoju važnost u novoj stvarnosti koju nam je stvorila pandemija korone. Kako bismo učinili sve da naša djeca i mladi što lakše shvate, a onda se i prilagode novonastaloj situaciji, pokrenuli smo projekt Korona kid.`,
-    image: '/images/shows/korona-kid.png',
+    image: '/images/shows/korona-kid.webp',
     authors: ['Luka Rodela', 'Kasja Borić'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/korona-kid/',
     active: false,
@@ -543,7 +543,7 @@ export const shows: Show[] = [
     tags: ['Human rights', 'Educational'],
     description:
       'Obrađivat će teme iz domene rodne ravnopravnosti i reproduktivne pravde. Kroz razgovore sa ženama pokrit će se aktualne teme iz politike, kulture i ekonomije iz pozicije rodne ravnopravnosti te omogućiti sudjelovanje ženama različitih profila, profesija i stupnja obrazovanja, a sve kako bi se aktivno radilo na uključivanju socijalno osjetljivijih skupina u javni i društveni život i kako bi se neispričanim pričama dala platforma za zahtijevanje promjena. Cilj emisije je informirati širu javnost o ženskim pravima te diskriminirajućim situacijama s kojima se ženske osobe susreću u javnom i privatnom životu te osnažiti ih za reagiranje na nepravdu i pokretanje promjena.',
-    image: '/images/shows/nevidljive.png',
+    image: '/images/shows/nevidljive.webp',
     authors: ['Pariter'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/nevidljive/',
     active: false,
@@ -555,7 +555,7 @@ export const shows: Show[] = [
     tags: ['Human rights', 'Educational'],
     description:
       'Obradit će se teme pružanja primarne pravne i psihološke pomoći žrtvama obiteljskog, partnerskog i seksualnog nasilja, pojedini aspekti radnog prava vezani uz nasilje i uznemiravanje na radnom mjestu te važnosti rada s mladima u svrhu prevencije i edukacije o nasilju. Omogućit će se da se žrtve nasilja zauzmu za sebe kroz progovaranje o svojim doživljajima te da „dobiju svoj glas“. Izlazak u javnost s vlastitom pričom na neke od njih djeluje terapeutski, ali je i iznimno korisno za druge osobe u sličnim situacijama i za društvo općenito. Predstavljanje neće biti intruzivno te pruža mogućnost zadržavanja anonimnosti. Gosti emisije bit će korisnici/e Udruge, stručnjaci/kinje i volonteri/ke koji s njima rade te istraživači/ce koje se bave temom socijalno marginaliziranih i ranjivih skupina.',
-    image: '/images/shows/sos.png',
+    image: '/images/shows/sos.webp',
     authors: ['SOS Rijeka'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/sos/',
     active: false,
@@ -567,7 +567,7 @@ export const shows: Show[] = [
     tags: ['Youth', 'Human rights'],
     description:
       'Adresirat će probleme djece i mladih u različitoj dobi - prve godine života, vrtić, predškolska dob, niži i viši razredi osnovne škole, srednja škola te fakultetsko doba. Osim tema povezanih sa samim školovanjem (bullying, poteškoće s učenjem), obradit će se i teme vezane uz obiteljski život (problemi u ponašanju, zanemarivanost od strane roditelja, popravne institucije) te svakodnevne aktivnosti (pronalazak zaposlenja, hobiji). U emisiji će gostovati djeca i mladi (s dozvolom roditelja/staratelja), predstavnici institucija, voditelji izvannastavnih aktivnosti i dr. dionici čiji rad uključuje rad s djecom i mladima. Ugostit će se gosti iz drugih županija kako bi se mogla usporediti situacija PGŽ-a i ostatka Hrvatske. Cilj emisije je osvijestiti javnost o problemima djece i mladih, njihovom pogledu na svijet i percepciji stvarnosti. Bitno je javno progovarati o mladima i njihovim pravima jer su oni budućnost, a problem s kojima se susreću mogu izazvati trajne posljedice na njih i njihovo okruženje.',
-    image: '/images/shows/skolica.png',
+    image: '/images/shows/skolica.webp',
     authors: [],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/skolica/',
     active: false,

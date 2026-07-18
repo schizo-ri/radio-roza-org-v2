@@ -10,7 +10,11 @@
 </script>
 
 <svelte:head>
-  <title>Radio Roža crew</title>
+  <title>Crew — Radio Roža</title>
+  <meta
+    name="description"
+    content="Ekipa Radio Rože — selektori, novinari, tehničari i svi koji stvaraju program."
+  />
 </svelte:head>
 
 <main class="page">

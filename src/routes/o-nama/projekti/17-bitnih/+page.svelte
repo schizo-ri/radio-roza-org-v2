@@ -68,7 +68,7 @@
   <div class="project-layout">
     <div class="project-left">
       <div class="project-cover">
-        <img src="/images/projekti/17-bitnih/main17.png" alt="17 Bitnih" />
+        <img src="/images/projekti/17-bitnih/main17.webp" alt="17 Bitnih" />
       </div>
 
       <div class="project-about">
@@ -80,7 +80,11 @@
           <dd>17 epizoda, utorkom i petkom u podne</dd>
           <dt>Više info</dt>
           <dd>
-            <a href="https://sustainabledevelopment.un.org/" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://sustainabledevelopment.un.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               sustainabledevelopment.un.org
             </a>
           </dd>
@@ -96,9 +100,9 @@
     <div class="project-right">
       <div class="project-content">
         <p>
-          Radijska emisija "17 bitnih" okuplja 17 voditelja koji kroz 17 epizoda razgovaraju s gostima
-          o ciljevima održivog razvoja. Emisija se emitira svakog utorka i petka točno u podne na
-          Radio Roži.
+          Radijska emisija "17 bitnih" okuplja 17 voditelja koji kroz 17 epizoda razgovaraju s
+          gostima o ciljevima održivog razvoja. Emisija se emitira svakog utorka i petka točno u
+          podne na Radio Roži.
         </p>
 
         <p>
@@ -122,11 +126,12 @@
         <hr />
 
         <blockquote>
-          „Iako je prošlo već 5 godina od predstavljanja ciljeva, postoji veliki broj građana koji još
-          uvijek nije čuo za ciljeve održivog razvoja. Šteta, jer kad bi svaka osoba s jednom malom
-          gestom pridonijela ostvarenju ovih ciljeva, svijet bi do 2030. godine bio puno, puno ljepše
-          mjesto za život. S radijskom emisijom '17 bitnih!' želimo povećati svijest o postojanju
-          održivih ciljeva i potaknuti svakog slušatelja da se uključi u globalni pokret."
+          „Iako je prošlo već 5 godina od predstavljanja ciljeva, postoji veliki broj građana koji
+          još uvijek nije čuo za ciljeve održivog razvoja. Šteta, jer kad bi svaka osoba s jednom
+          malom gestom pridonijela ostvarenju ovih ciljeva, svijet bi do 2030. godine bio puno, puno
+          ljepše mjesto za život. S radijskom emisijom '17 bitnih!' želimo povećati svijest o
+          postojanju održivih ciljeva i potaknuti svakog slušatelja da se uključi u globalni
+          pokret."
           <cite>— Davor Popdankovski, glavni urednik Radio Rože</cite>
         </blockquote>
       </div>
@@ -138,7 +143,7 @@
             onclick={() => openLightbox(i)}
             aria-label="Otvori fotografiju: {img.alt}"
           >
-            <img src={img.src} alt={img.alt} />
+            <img src={img.src} alt={img.alt} loading="lazy" decoding="async" />
           </button>
         {/each}
       </div>

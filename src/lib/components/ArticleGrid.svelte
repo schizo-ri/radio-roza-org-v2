@@ -42,13 +42,27 @@
     grid-template-columns: 1fr;
   }
 
-  .article-grid[data-cols='2'] { grid-template-columns: repeat(2, 1fr); }
-  .article-grid[data-cols='3'] { grid-template-columns: repeat(3, 1fr); }
-  .article-grid[data-cols='4'] { grid-template-columns: repeat(4, 1fr); }
-  .article-grid[data-cols='5'] { grid-template-columns: repeat(5, 1fr); }
-  .article-grid[data-cols='6'] { grid-template-columns: repeat(6, 1fr); }
-  .article-grid[data-cols='7'] { grid-template-columns: repeat(7, 1fr); }
-  .article-grid[data-cols='8'] { grid-template-columns: repeat(8, 1fr); }
+  .article-grid[data-cols='2'] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .article-grid[data-cols='3'] {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .article-grid[data-cols='4'] {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .article-grid[data-cols='5'] {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .article-grid[data-cols='6'] {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .article-grid[data-cols='7'] {
+    grid-template-columns: repeat(7, 1fr);
+  }
+  .article-grid[data-cols='8'] {
+    grid-template-columns: repeat(8, 1fr);
+  }
 
   /* Sve kartice: desni + donji border */
   .article-grid > :global(*) {
@@ -57,34 +71,66 @@
   }
 
   /* 1 stupac: nema desnog; zadnja kartica nema donjeg */
-  .article-grid[data-cols='1'] > :global(*) { border-right: none; }
-  .article-grid[data-cols='1'] > :global(*:last-child) { border-bottom: none; }
+  .article-grid[data-cols='1'] > :global(*) {
+    border-right: none;
+  }
+  .article-grid[data-cols='1'] > :global(*:last-child) {
+    border-bottom: none;
+  }
 
   /* 2 stupca */
-  .article-grid[data-cols='2'] > :global(*:nth-child(2n)) { border-right: none; }
-  .article-grid[data-cols='2'] > :global(*:nth-last-child(-n + 2)) { border-bottom: none; }
+  .article-grid[data-cols='2'] > :global(*:nth-child(2n)) {
+    border-right: none;
+  }
+  .article-grid[data-cols='2'] > :global(*:nth-last-child(-n + 2)) {
+    border-bottom: none;
+  }
 
   /* 3 stupca */
-  .article-grid[data-cols='3'] > :global(*:nth-child(3n)) { border-right: none; }
-  .article-grid[data-cols='3'] > :global(*:nth-last-child(-n + 3)) { border-bottom: none; }
+  .article-grid[data-cols='3'] > :global(*:nth-child(3n)) {
+    border-right: none;
+  }
+  .article-grid[data-cols='3'] > :global(*:nth-last-child(-n + 3)) {
+    border-bottom: none;
+  }
 
   /* 4 stupca */
-  .article-grid[data-cols='4'] > :global(*:nth-child(4n)) { border-right: none; }
-  .article-grid[data-cols='4'] > :global(*:nth-last-child(-n + 4)) { border-bottom: none; }
+  .article-grid[data-cols='4'] > :global(*:nth-child(4n)) {
+    border-right: none;
+  }
+  .article-grid[data-cols='4'] > :global(*:nth-last-child(-n + 4)) {
+    border-bottom: none;
+  }
 
   /* 5 stupaca */
-  .article-grid[data-cols='5'] > :global(*:nth-child(5n)) { border-right: none; }
-  .article-grid[data-cols='5'] > :global(*:nth-last-child(-n + 5)) { border-bottom: none; }
+  .article-grid[data-cols='5'] > :global(*:nth-child(5n)) {
+    border-right: none;
+  }
+  .article-grid[data-cols='5'] > :global(*:nth-last-child(-n + 5)) {
+    border-bottom: none;
+  }
 
   /* 6 stupaca */
-  .article-grid[data-cols='6'] > :global(*:nth-child(6n)) { border-right: none; }
-  .article-grid[data-cols='6'] > :global(*:nth-last-child(-n + 6)) { border-bottom: none; }
+  .article-grid[data-cols='6'] > :global(*:nth-child(6n)) {
+    border-right: none;
+  }
+  .article-grid[data-cols='6'] > :global(*:nth-last-child(-n + 6)) {
+    border-bottom: none;
+  }
 
   /* 7 stupaca */
-  .article-grid[data-cols='7'] > :global(*:nth-child(7n)) { border-right: none; }
-  .article-grid[data-cols='7'] > :global(*:nth-last-child(-n + 7)) { border-bottom: none; }
+  .article-grid[data-cols='7'] > :global(*:nth-child(7n)) {
+    border-right: none;
+  }
+  .article-grid[data-cols='7'] > :global(*:nth-last-child(-n + 7)) {
+    border-bottom: none;
+  }
 
   /* 8 stupaca */
-  .article-grid[data-cols='8'] > :global(*:nth-child(8n)) { border-right: none; }
-  .article-grid[data-cols='8'] > :global(*:nth-last-child(-n + 8)) { border-bottom: none; }
+  .article-grid[data-cols='8'] > :global(*:nth-child(8n)) {
+    border-right: none;
+  }
+  .article-grid[data-cols='8'] > :global(*:nth-last-child(-n + 8)) {
+    border-bottom: none;
+  }
 </style>

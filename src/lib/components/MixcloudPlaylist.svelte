@@ -54,7 +54,7 @@
   const shownEpisodes = $derived(order === 'asc' ? episodes : descEpisodes);
   const shownError = $derived(order === 'asc' ? error : descError);
   const hasMore = $derived(
-    order === 'asc' ? nextUrl !== null : descOffset !== null && descOffset > 0,
+    order === 'asc' ? nextUrl !== null : descOffset !== null && descOffset > 0
   );
 
   function formatDate(iso: string): string {
@@ -93,7 +93,7 @@
 
   async function fetchRange(offset: number, limit: number): Promise<MixcloudEpisode[]> {
     const r = await fetch(
-      `https://api.mixcloud.com${apiPath}cloudcasts/?offset=${offset}&limit=${limit}`,
+      `https://api.mixcloud.com${apiPath}cloudcasts/?offset=${offset}&limit=${limit}`
     );
     if (!r.ok) throw new Error(`${r.status}`);
     const data = await r.json();

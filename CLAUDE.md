@@ -33,6 +33,7 @@ There are no test commands configured yet.
 Standard SvelteKit file-based routing under `src/routes/`. Shared code lives in `src/lib/` and is importable via the `$lib` alias.
 
 **Key conventions:**
+
 - Svelte 5 runes are enabled globally (`$state`, `$derived`, `$effect`, `$props`, etc.) — use rune syntax, not the legacy Options API
 - 2-space indentation, single quotes, trailing commas (ES5), semicolons, 100-char line width (enforced by Prettier)
 
@@ -43,6 +44,7 @@ Standard SvelteKit file-based routing under `src/routes/`. Shared code lives in 
 You have access to the Svelte MCP server with comprehensive Svelte 5 and SvelteKit documentation.
 
 ### Usage workflow (required):
+
 1. **`list-sections`** — Call this FIRST when working on any Svelte/SvelteKit topic to discover relevant documentation sections
 2. **`get-documentation`** — After listing sections, fetch ALL sections relevant to the task (analyze the `use_cases` field to decide)
 3. **`svelte-autofixer`** — Run on ALL Svelte code before sending to the user; keep calling until no issues remain

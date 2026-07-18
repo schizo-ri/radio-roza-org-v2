@@ -1,14 +1,18 @@
 <script lang="ts">
   import ArticleCard from '$lib/components/ArticleCard.svelte';
+  import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
 
   let { data } = $props();
   const { article, related } = $derived(data);
 </script>
 
-<svelte:head>
-  <title>{article.title} — Radio Roža</title>
-</svelte:head>
+<Seo
+  title="{article.title} — Radio Roža"
+  description={article.excerpt || undefined}
+  image={article.ogImage}
+  type="article"
+/>
 
 <main class="article-page">
   <div class="article-meta">

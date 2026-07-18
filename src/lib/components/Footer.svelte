@@ -19,10 +19,26 @@
   ];
 
   const socials = [
-    { href: 'https://facebook.com/radiorozha', label: 'Facebook' },
-    { href: 'https://www.instagram.com/radio.rozari/', label: 'Instagram' },
-    { href: 'https://mixcloud.com/RadioRoza', label: 'Mixcloud' },
-    { href: 'https://youtube.com/@radioroza9811', label: 'YouTube' },
+    { href: 'https://facebook.com/radiorozha', label: 'FB', title: 'Facebook' },
+    { href: 'https://www.instagram.com/radio.rozari/', label: 'IG', title: 'Instagram' },
+    { href: 'https://mixcloud.com/RadioRoza', label: 'MX', title: 'Mixcloud' },
+    { href: 'https://youtube.com/@radioroza9811', label: 'YT', title: 'YouTube' },
+  ];
+
+  /* src prazan = placeholder; izvornici logotipa su u assets-src/logos */
+  const supporters = [
+    { name: 'HDS ZAMP', src: '/images/logos/hds-zamp.webp', href: 'https://www.zamp.hr' },
+    {
+      name: 'Primorsko-goranska županija',
+      src: '/images/logos/pgz.webp',
+      href: 'https://www.pgz.hr',
+    },
+    {
+      name: 'Ministarstvo kulture i medija',
+      src: '/images/logos/ministarstvo-kulture.webp',
+      href: 'https://min-kulture.gov.hr',
+    },
+    { name: 'Grad Rijeka', src: '/images/logos/grad-rijeka.webp', href: 'https://www.rijeka.hr' },
   ];
 
   function isActive(href: string): boolean {
@@ -63,9 +79,9 @@
     <div class="col">
       <h2 class="col-label">pratite nas</h2>
       <ul class="social-list">
-        {#each socials as { href, label } (href)}
+        {#each socials as { href, label, title } (href)}
           <li>
-            <a {href} target="_blank" rel="noopener noreferrer">{label}</a>
+            <a {href} target="_blank" rel="noopener noreferrer" {title}>{label}</a>
           </li>
         {/each}
       </ul>
@@ -85,6 +101,30 @@
       <span>ne koristimo kolačiće — čuvamo ih za goste u studiju</span>
       <span>radio roža · rijeka · {year}</span>
     </p>
+  </div>
+
+  <div class="supported-by">
+    <p class="funding-note">
+      Projekt je sufinancirala Europska unija iz Europskog socijalnog fonda. Izrada internet
+      stranice sufinancirana je u okviru Operativnog programa Učinkoviti ljudski potencijali iz
+      Europskog socijalnog fonda. Sadržaj komunikacije isključiva je odgovornost Udruge Ri Rock.
+      <a href="https://strukturnifondovi.hr" target="_blank" rel="noopener noreferrer"
+        >www.strukturnifondovi.hr</a
+      >
+    </p>
+    <ul class="supporters-logos">
+      {#each supporters as { name, src, href } (name)}
+        <li>
+          <a {href} target="_blank" rel="noopener noreferrer" title={name}>
+            {#if src}
+              <img {src} alt={name} loading="lazy" />
+            {:else}
+              <span class="logo-placeholder">{name}</span>
+            {/if}
+          </a>
+        </li>
+      {/each}
+    </ul>
   </div>
 </footer>
 
@@ -159,6 +199,11 @@
     list-style: none;
   }
 
+  .social-list {
+    display: inline-flex;
+    gap: 16px;
+  }
+
   .col a {
     display: inline-block;
     color: var(--color-white);
@@ -185,6 +230,11 @@
   .social-list a {
     font-size: var(--text-body);
     overflow-wrap: anywhere;
+  }
+
+  .social-list a {
+    font-weight: 600;
+    font-family: var(--font-mono);
   }
 
   /* ── Sign-off strip ── */
@@ -214,6 +264,76 @@
     color: var(--color-black);
   }
 
+  /* ── Supported-by strip ── */
+  .supported-by {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    background: var(--color-white);
+    color: var(--color-black);
+    padding: 1.75rem 1rem 2rem;
+  }
+
+  .funding-note {
+    max-width: 62ch;
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+
+  .funding-note a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .funding-note a:hover {
+    color: var(--color-brand);
+  }
+
+  .supporters-logos {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.5rem;
+  }
+
+  .supporters-logos a {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .supporters-logos img {
+    display: block;
+    height: 3.5rem;
+    width: auto;
+    max-width: 10rem;
+    object-fit: contain;
+  }
+
+  .logo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 3.5rem;
+    width: 8.5rem;
+    padding: 0 0.5rem;
+    border: 1px dashed rgba(0, 0, 0, 0.4);
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+    text-align: center;
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  .supporters-logos a:hover .logo-placeholder {
+    border-color: var(--color-black);
+    color: var(--color-black);
+  }
+
   /* ── Tablet (640px+) ── */
   @media (min-width: 640px) {
     .footer-inner {
@@ -227,6 +347,10 @@
 
     .signoff {
       padding: 1rem 1.5rem 1.25rem;
+    }
+
+    .supported-by {
+      padding: 1.75rem 1.5rem 2rem;
     }
   }
 
@@ -244,6 +368,20 @@
 
     .signoff {
       padding: 1rem 2rem 1.25rem;
+    }
+
+    .supported-by {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: 3rem;
+      padding: 2rem;
+    }
+
+    .supporters-logos {
+      justify-content: flex-end;
+      gap: 1rem 2rem;
+      flex-shrink: 0;
     }
 
     .signoff-line {

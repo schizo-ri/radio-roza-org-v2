@@ -1,14 +1,21 @@
 import { LISTENNOTES_API_KEY } from '$env/static/private';
 import { shows } from '$lib/data/shows';
 
-export async function load({ params }) {
+export async function load({ params, fetch, setHeaders }) {
   const show = shows.find((s) => s.href === `/emisije/${params.slug}`);
 
   if (!show?.listennotes_id) return {};
 
+  // Episodes change weekly at most — long CDN cache also protects the
+  // ListenNotes monthly request quota.
+  setHeaders({
+    'Cache-Control': 'public, max-age=300',
+    'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=1800, stale-while-revalidate=86400',
+  });
+
   const res = await fetch(
     `https://listen-api.listennotes.com/api/v2/podcasts/${show.listennotes_id}?sort=recent_first`,
-    { headers: { 'X-ListenAPI-Key': LISTENNOTES_API_KEY } },
+    { headers: { 'X-ListenAPI-Key': LISTENNOTES_API_KEY } }
   );
 
   if (!res.ok) return {};

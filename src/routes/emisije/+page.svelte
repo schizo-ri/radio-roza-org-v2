@@ -1,5 +1,6 @@
 <script lang="ts">
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
+  import Seo from '$lib/components/Seo.svelte';
   import ShowCard from '$lib/components/ShowCard.svelte';
   import { shows } from '$lib/data/shows';
 
@@ -12,13 +13,14 @@
       ? shows
       : activeFilter === 'aktivne'
         ? shows.filter((s) => s.active)
-        : shows.filter((s) => !s.active),
+        : shows.filter((s) => !s.active)
   );
 </script>
 
-<svelte:head>
-  <title>Emisije — Radio Roža</title>
-</svelte:head>
+<Seo
+  title="Emisije — Radio Roža"
+  description="Sve emisije Radio Rože — od reggaea i elektronike do emisija zajednice, uživo iz riječkog studija."
+/>
 
 <main class="page">
   <header class="page-header">
@@ -26,7 +28,7 @@
     <div class="filter-bar">
       <span class="filter-label">prikaži: </span>
       <div class="filter-tabs">
-        {#each (['aktivne', 'arhiva', 'sve'] as Filter[]) as f (f)}
+        {#each ['aktivne', 'arhiva', 'sve'] as Filter[] as f (f)}
           <button
             class="filter-tab"
             class:active={activeFilter === f}

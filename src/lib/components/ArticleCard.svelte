@@ -31,7 +31,7 @@
 <article class="article-card" class:has-image={!!image}>
   {#if image}
     <a {href} class="card-image-link" tabindex="-1" aria-hidden="true">
-      <img src={image} alt={title} class="card-image" />
+      <img src={image} alt={title} class="card-image" loading="lazy" decoding="async" />
     </a>
   {/if}
 

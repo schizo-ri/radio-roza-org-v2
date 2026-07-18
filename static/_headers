@@ -1,0 +1,12 @@
+# Long-lived caching for assets that never change in place.
+# Hashed SvelteKit build output — safe to cache forever.
+/_app/immutable/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Fonts never change; replacing one means a new filename anyway.
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Images can be swapped in place, so cache a week and revalidate via ETag.
+/images/*
+  Cache-Control: public, max-age=604800

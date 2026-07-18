@@ -16,7 +16,7 @@
 <article class="show-card">
   <a {href} class="card-image-link" tabindex="-1" aria-hidden="true">
     {#if image}
-      <img src={image} alt={title} class="card-image" />
+      <img src={image} alt={title} class="card-image" decoding="async" />
     {:else}
       <div class="card-image-placeholder" aria-hidden="true"></div>
     {/if}

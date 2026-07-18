@@ -35,9 +35,7 @@
     loadingMore = true;
     error = null;
     try {
-      const res = await fetch(
-        `/api/listennotes/${podcastId}?next_episode_pub_date=${nextCursor}`,
-      );
+      const res = await fetch(`/api/listennotes/${podcastId}?next_episode_pub_date=${nextCursor}`);
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       episodes = [...episodes, ...(data.episodes ?? [])];
@@ -60,7 +58,12 @@
           <span class="episode-date">{formatDate(ep.pub_date_ms)}</span>
           <span class="episode-duration">{formatDuration(ep.audio_length_sec)}</span>
         </div>
-        <a class="episode-title" href={ep.listennotes_url} target="_blank" rel="noopener noreferrer">
+        <a
+          class="episode-title"
+          href={ep.listennotes_url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           {ep.title}
         </a>
       </li>

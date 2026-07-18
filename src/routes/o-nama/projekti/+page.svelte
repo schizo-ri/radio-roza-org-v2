@@ -15,23 +15,27 @@
       </div>
       <div class="card-body">
         <h2 class="card-title">Žiroskop</h2>
-        <p class="card-desc">Razvoj civilno-javnog partnerstva u upravljanju prostorima kulture u Rijeci.</p>
+        <p class="card-desc">
+          Razvoj civilno-javnog partnerstva u upravljanju prostorima kulture u Rijeci.
+        </p>
       </div>
     </a>
 
     <a class="project-card" href="/o-nama/projekti/korona-kid">
       <div class="card-image">
-        <img src="/images/projekti/korona-kid/kk_cover.png" alt="Korona Kid" />
+        <img src="/images/projekti/korona-kid/kk_cover.webp" alt="Korona Kid" />
       </div>
       <div class="card-body">
         <h2 class="card-title">Korona Kid</h2>
-        <p class="card-desc">Poticanje djece i mladih na građanski angažman kroz usvajanje novih znanja.</p>
+        <p class="card-desc">
+          Poticanje djece i mladih na građanski angažman kroz usvajanje novih znanja.
+        </p>
       </div>
     </a>
 
     <a class="project-card" href="/o-nama/projekti/17-bitnih">
       <div class="card-image">
-        <img src="/images/projekti/17-bitnih/main17.png" alt="17 Bitnih" />
+        <img src="/images/projekti/17-bitnih/main17.webp" alt="17 Bitnih" />
       </div>
       <div class="card-body">
         <h2 class="card-title">17 Bitnih</h2>
@@ -51,7 +55,7 @@
 
     <a class="project-card" href="/o-nama/projekti/digitalne-rozice">
       <div class="card-image">
-        <img src="/images/projekti/digitalne-rozice/art-dr.png" alt="Digitalne Rožice" />
+        <img src="/images/projekti/digitalne-rozice/art-dr.webp" alt="Digitalne Rožice" />
       </div>
       <div class="card-body">
         <h2 class="card-title">Digitalne Rožice</h2>
@@ -170,10 +174,18 @@
     }
 
     /* 2 cols: restore right; remove from 2n; last 2 no bottom */
-    .projects-grid .project-card { border-right: 2px solid var(--color-black); }
-    .projects-grid .project-card:last-child { border-bottom: 2px solid var(--color-black); }
-    .projects-grid .project-card:nth-child(2n) { border-right: none; }
-    .projects-grid .project-card:nth-last-child(-n + 2) { border-bottom: none; }
+    .projects-grid .project-card {
+      border-right: 2px solid var(--color-black);
+    }
+    .projects-grid .project-card:last-child {
+      border-bottom: 2px solid var(--color-black);
+    }
+    .projects-grid .project-card:nth-child(2n) {
+      border-right: none;
+    }
+    .projects-grid .project-card:nth-last-child(-n + 2) {
+      border-bottom: none;
+    }
   }
 
   @media (min-width: 1024px) {
@@ -186,10 +198,18 @@
     }
 
     /* 3 cols: reset 2-col overrides; apply 3-col pattern */
-    .projects-grid .project-card:nth-child(2n) { border-right: 2px solid var(--color-black); }
-    .projects-grid .project-card:nth-last-child(-n + 2) { border-bottom: 2px solid var(--color-black); }
-    .projects-grid .project-card:nth-child(3n) { border-right: none; }
-    .projects-grid .project-card:nth-last-child(-n + 3) { border-bottom: none; }
+    .projects-grid .project-card:nth-child(2n) {
+      border-right: 2px solid var(--color-black);
+    }
+    .projects-grid .project-card:nth-last-child(-n + 2) {
+      border-bottom: 2px solid var(--color-black);
+    }
+    .projects-grid .project-card:nth-child(3n) {
+      border-right: none;
+    }
+    .projects-grid .project-card:nth-last-child(-n + 3) {
+      border-bottom: none;
+    }
   }
 
   @media (min-width: 1920px) {
@@ -198,9 +218,17 @@
     }
 
     /* 6 cols: reset 3-col overrides; apply 6-col pattern */
-    .projects-grid .project-card:nth-child(3n) { border-right: 2px solid var(--color-black); }
-    .projects-grid .project-card:nth-last-child(-n + 3) { border-bottom: 2px solid var(--color-black); }
-    .projects-grid .project-card:nth-child(6n) { border-right: none; }
-    .projects-grid .project-card:nth-last-child(-n + 6) { border-bottom: none; }
+    .projects-grid .project-card:nth-child(3n) {
+      border-right: 2px solid var(--color-black);
+    }
+    .projects-grid .project-card:nth-last-child(-n + 3) {
+      border-bottom: 2px solid var(--color-black);
+    }
+    .projects-grid .project-card:nth-child(6n) {
+      border-right: none;
+    }
+    .projects-grid .project-card:nth-last-child(-n + 6) {
+      border-bottom: none;
+    }
   }
 </style>

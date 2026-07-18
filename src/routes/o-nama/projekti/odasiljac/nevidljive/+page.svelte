@@ -18,7 +18,7 @@
   <div class="show-layout">
     <div class="show-left">
       <div class="show-cover">
-        <img src="/images/projekti/odasiljac/nevidljive.png" alt="Emisija Nevidljive" />
+        <img src="/images/projekti/odasiljac/nevidljive.webp" alt="Emisija Nevidljive" />
       </div>
 
       <div class="show-about">
@@ -26,13 +26,13 @@
         <p class="show-desc">Gdje priče žena postaju vidljive.</p>
         <p class="show-desc">
           Obrađivat će teme iz domene rodne ravnopravnosti i reproduktivne pravde. Kroz razgovore sa
-          ženama pokrit će se aktualne teme iz politike, kulture i ekonomije te omogućiti sudjelovanje
-          ženama različitih profila, profesija i stupnja obrazovanja.
+          ženama pokrit će se aktualne teme iz politike, kulture i ekonomije te omogućiti
+          sudjelovanje ženama različitih profila, profesija i stupnja obrazovanja.
         </p>
         <p class="show-desc">
-          Cilj emisije je informirati širu javnost o ženskim pravima te diskriminirajućim situacijama
-          s kojima se ženske osobe susreću u javnom i privatnom životu te osnažiti ih za reagiranje na
-          nepravdu i pokretanje promjena.
+          Cilj emisije je informirati širu javnost o ženskim pravima te diskriminirajućim
+          situacijama s kojima se ženske osobe susreću u javnom i privatnom životu te osnažiti ih za
+          reagiranje na nepravdu i pokretanje promjena.
         </p>
       </div>
     </div>

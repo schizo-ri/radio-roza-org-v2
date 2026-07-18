@@ -2,17 +2,26 @@
   import { page } from '$app/state';
   import ListenNotesEpisodes from '$lib/components/ListenNotesEpisodes.svelte';
   import MixcloudPlaylist from '$lib/components/MixcloudPlaylist.svelte';
+  import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
   import { shows } from '$lib/data/shows';
 
   let { data } = $props();
 
   const show = $derived(shows.find((s) => s.href === `/emisije/${page.params.slug}`));
+
+  const seoDescription = $derived.by(() => {
+    const desc = show?.description;
+    if (!desc) return undefined;
+    return desc.length > 160 ? desc.slice(0, 160).trimEnd() + '…' : desc;
+  });
 </script>
 
-<svelte:head>
-  <title>{show?.title ?? 'Emisija'} — Radio Roža</title>
-</svelte:head>
+<Seo
+  title="{show?.title ?? 'Emisija'} — Radio Roža"
+  description={seoDescription}
+  image={show?.image}
+/>
 
 {#if show}
   <main class="page">

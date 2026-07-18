@@ -1,7 +1,12 @@
 import { LISTENNOTES_API_KEY } from '$env/static/private';
 import { json } from '@sveltejs/kit';
 
-export async function GET({ params, url }) {
+export async function GET({ params, url, setHeaders }) {
+  setHeaders({
+    'Cache-Control': 'public, max-age=300',
+    'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=1800, stale-while-revalidate=86400',
+  });
+
   const cursor = url.searchParams.get('next_episode_pub_date');
   let apiUrl = `https://listen-api.listennotes.com/api/v2/podcasts/${params.id}?sort=recent_first`;
   if (cursor) apiUrl += `&next_episode_pub_date=${cursor}`;

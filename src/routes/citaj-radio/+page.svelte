@@ -1,14 +1,14 @@
 <script lang="ts">
   import ArticleCard from '$lib/components/ArticleCard.svelte';
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
+  import Seo from '$lib/components/Seo.svelte';
   import { page } from '$app/state';
-  import { goto } from '$app/navigation';
 
   let { data } = $props();
 
   const activeCategory = $derived(page.url.searchParams.get('kategorija') ?? 'sve');
 
-  function setCategory(slug: string | null) {
+  function categoryHref(slug: string | null): string {
     const url = new URL(page.url);
     if (!slug) {
       url.searchParams.delete('kategorija');
@@ -16,7 +16,7 @@
       url.searchParams.set('kategorija', slug);
     }
     url.searchParams.delete('stranica');
-    goto(url.toString(), { replaceState: true });
+    return url.pathname + url.search;
   }
 
   function pageHref(n: number): string {
@@ -28,9 +28,10 @@
   const pageNums = $derived(Array.from({ length: data.totalPages }, (_, i) => i + 1));
 </script>
 
-<svelte:head>
-  <title>Čitaj radio — Radio Roža</title>
-</svelte:head>
+<Seo
+  title="Čitaj radio — Radio Roža"
+  description="Članci, recenzije, komentari i album tjedna — pisana strana Radio Rože."
+/>
 
 <main class="citaj-radio-page">
   <div class="page-header">
@@ -38,21 +39,17 @@
     <div class="filter-bar">
       <span class="filter-label">kategorije: </span>
       <div class="filter-tabs">
-        <button
-          class="filter-tab"
-          class:active={activeCategory === 'sve'}
-          onclick={() => setCategory(null)}
-        >
+        <a href={categoryHref(null)} class="filter-tab" class:active={activeCategory === 'sve'}>
           sve
-        </button>
+        </a>
         {#each data.categories as cat (cat.id)}
-          <button
+          <a
+            href={categoryHref(cat.slug)}
             class="filter-tab"
             class:active={activeCategory === cat.slug}
-            onclick={() => setCategory(cat.slug)}
           >
             {cat.title}
-          </button>
+          </a>
         {/each}
       </div>
     </div>
@@ -125,10 +122,12 @@
   }
 
   .filter-tab {
+    display: inline-block;
     font-family: var(--font-mono);
     font-size: var(--text-meta);
     font-weight: 700;
     text-transform: uppercase;
+    text-decoration: none;
     background: var(--color-white, #fff);
     border: 1px solid var(--color-white, #fff);
     border-radius: var(--text-body);

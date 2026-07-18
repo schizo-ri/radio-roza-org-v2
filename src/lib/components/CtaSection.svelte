@@ -1,8 +1,6 @@
 <script lang="ts">
-  // TODO: pravi IBAN udruge — dok je prazan string, prikazuje se mailto fallback
-  const DONATION_IBAN: string = '';
-  // TODO: potvrditi točan naziv primatelja za uplatnicu
-  const DONATION_RECIPIENT = 'Udruga Radio Roža';
+  const DONATION_IBAN: string = 'HR6924020061100468054';
+  const DONATION_RECIPIENT = 'Udruga Ri Rock';
 
   const JOIN_MAILTO = `mailto:radio.rozari@gmail.com?subject=${encodeURIComponent('Pridružujem se')}`;
   const MIX_MAILTO = `mailto:glazba.radioroza@gmail.com?subject=${encodeURIComponent(

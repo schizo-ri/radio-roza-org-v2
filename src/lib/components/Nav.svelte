@@ -172,7 +172,9 @@
     height: 2px;
     background: var(--color-white);
     border-radius: 1px;
-    transition: transform 0.2s ease, opacity 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
     transform-origin: center;
   }
 

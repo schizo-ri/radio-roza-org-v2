@@ -1,6 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
-  import Hls from 'hls.js';
+  import type Hls from 'hls.js';
   import { playerState } from '$lib/stores/player.svelte';
   import { getAlbumArt } from '$lib/utils/artwork';
   import type { ArtworkSizes } from '$lib/utils/artwork';
@@ -40,7 +40,10 @@
 
   // --- Playback (non-reactive bookkeeping) ---
 
+  type HlsClass = (typeof import('hls.js'))['default'];
+
   let hls: Hls | null = null;
+  let hlsLoadPromise: Promise<HlsClass | null> | null = null;
   let wantsPlaying = false; // the user's intent — all recovery logic works to satisfy it
   let usingNativeSrc = false; // native HLS / MP3 fallback path (no MSE)
   let stallTimer: ReturnType<typeof setTimeout> | null = null;
@@ -101,6 +104,22 @@
     // Anything else: the stall watchdog will schedule the next attempt
   }
 
+  // hls.js is ~160 KB gzipped, so it stays out of the initial bundle and loads
+  // on the first play attempt. A failed download resets the promise so the
+  // regular retry cycle can try fetching it again.
+  function loadHls(): Promise<HlsClass | null> {
+    if (!hlsLoadPromise) {
+      hlsLoadPromise = import('hls.js').then(
+        (m) => m.default,
+        () => {
+          hlsLoadPromise = null;
+          return null;
+        }
+      );
+    }
+    return hlsLoadPromise;
+  }
+
   // Starts playback fresh from the live edge. Live radio has no resume position,
   // so every attempt tears down the old connection — this also clears any stale
   // buffer left behind by an idle tab.
@@ -116,8 +135,25 @@
     usingNativeSrc = false;
     const src = playerState.src;
 
-    if (Hls.isSupported()) {
-      const instance = new Hls({
+    // Native HLS (Safari, iOS) plays the stream without hls.js — no download needed
+    if (el.canPlayType('application/vnd.apple.mpegurl')) {
+      usingNativeSrc = true;
+      el.src = src;
+      el.load();
+      el.play().catch(onPlayRejected);
+      return;
+    }
+
+    attachMse(el, src);
+  }
+
+  async function attachMse(el: HTMLAudioElement, src: string) {
+    const HlsMod = await loadHls();
+    // The attempt may have been paused or superseded while the module downloaded
+    if (!wantsPlaying || el !== audioEl || src !== playerState.src) return;
+
+    if (HlsMod?.isSupported()) {
+      const instance = new HlsMod({
         enableWorker: true,
         maxBufferLength: 20,
         maxMaxBufferLength: 30,
@@ -129,19 +165,15 @@
       hls = instance;
       instance.loadSource(src);
       instance.attachMedia(el);
-      instance.on(Hls.Events.ERROR, (_, data) => {
+      instance.on(HlsMod.Events.ERROR, (_, data) => {
         if (instance !== hls || !data.fatal) return;
-        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !mediaErrorRecovered) {
+        if (data.type === HlsMod.ErrorTypes.MEDIA_ERROR && !mediaErrorRecovered) {
           mediaErrorRecovered = true;
           instance.recoverMediaError();
         } else {
           handleFailure();
         }
       });
-    } else if (el.canPlayType('application/vnd.apple.mpegurl')) {
-      usingNativeSrc = true;
-      el.src = src;
-      el.load();
     } else if (playerState.isLive) {
       usingNativeSrc = true;
       el.src = LIVE_MP3_FALLBACK;

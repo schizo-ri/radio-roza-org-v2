@@ -1,16 +1,8 @@
 <script lang="ts">
   import { program, blocks, type Day } from '$lib/utils/program';
+  import { DAYS_ORDER, stationWeekday, stationWeekDateLabels } from '$lib/utils/time';
+  import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
-
-  const DAYS_ORDER: Day[] = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
-  ];
 
   const DAY_NAMES_HR: Record<Day, string> = {
     Monday: 'ponedjeljak',
@@ -22,29 +14,8 @@
     Sunday: 'nedjelja',
   };
 
-  // Monday of the current week → one Date per day
-  function getWeekDates(): Record<Day, Date> {
-    const now = new Date();
-    const dow = now.getDay(); // 0 = Sun
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
-    monday.setHours(0, 0, 0, 0);
-
-    return Object.fromEntries(
-      DAYS_ORDER.map((day, i) => {
-        const d = new Date(monday);
-        d.setDate(monday.getDate() + i);
-        return [day, d];
-      })
-    ) as Record<Day, Date>;
-  }
-
-  const weekDates = getWeekDates();
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }) as Day;
-
-  function formatDate(d: Date): string {
-    return `${d.getDate()}.${d.getMonth() + 1}.`;
-  }
+  const weekDates = stationWeekDateLabels();
+  const today = stationWeekday();
 
   // Group shows by day, sorted by start time
   const showsByDay = Object.fromEntries(
@@ -83,9 +54,10 @@
   }
 </script>
 
-<svelte:head>
-  <title>Program — Radio Roža</title>
-</svelte:head>
+<Seo
+  title="Program — Radio Roža"
+  description="Tjedni raspored emisija Radio Rože — što je danas u eteru i što slijedi."
+/>
 
 <main class="page">
   <header class="page-header">
@@ -98,7 +70,7 @@
           <li>
             <a href="#{day.toLowerCase()}" onclick={onDayClick}>
               <span class="dropdown-day">{DAY_NAMES_HR[day]}</span>
-              <span class="dropdown-date">{formatDate(weekDates[day])}</span>
+              <span class="dropdown-date">{weekDates[day]}</span>
             </a>
           </li>
         {/each}
@@ -115,7 +87,7 @@
       >
         <div class="day-header">
           <h2 class="day-name">
-            {DAY_NAMES_HR[day]}<span class="day-date">{formatDate(weekDates[day])}</span>
+            {DAY_NAMES_HR[day]}<span class="day-date">{weekDates[day]}</span>
           </h2>
         </div>
 

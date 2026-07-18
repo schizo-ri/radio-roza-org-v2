@@ -3,7 +3,7 @@
     "name": "Davor Popdankovski",
     "title": "OSNIVAČ & GLAVNI UREDNIK",
     "description": "El hefe. Voli ljuto.",
-    "image": "dp.png",
+    "image": "dp.webp",
     "tags": ["sve"],
     "photoCredit": "Vedran Karuza (Novi List)"
   },
@@ -11,7 +11,7 @@
     "name": "Sebastijan Tomažin",
     "title": "TEHNIČAR",
     "description": "Major zvuka Seba.",
-    "image": "st.png",
+    "image": "st.webp",
     "tags": ["skoroSve"],
     "photoCredit": "Tanja Kanazir"
   },
@@ -19,7 +19,7 @@
     "name": "Davor Margan",
     "title": "OSNIVAČ & IT PODRŠKA",
     "description": "Biokill bugova na Roži.",
-    "image": "dm.png",
+    "image": "dm.webp",
     "tags": ["informatika", "dizajn"],
     "photoCredit": "Tanja Kanazir"
   },
@@ -27,7 +27,7 @@
     "name": "David Dubrović",
     "title": "IT PODRŠKA & VIDEO",
     "description": "IT Wizard.",
-    "image": "dd.png",
+    "image": "dd.webp",
     "tags": ["informatika", "zivouzivo"],
     "photoCredit": null
   },
@@ -35,7 +35,7 @@
     "name": "Edin Vesković",
     "title": "IT PODRŠKA & TEHNIČAR",
     "description": "Drag mu je mikrofon, ali draži su mu botuni na mikseru.",
-    "image": "edinveskovic.png",
+    "image": "edinveskovic.webp",
     "tags": ["rozaik", "hex"],
     "photoCredit": null
   },
@@ -43,7 +43,7 @@
     "name": "Martina Blečić",
     "title": "Urednica, voditeljica",
     "description": "Kažu da emisiju teških nota vodi kao Pola ure kulture.",
-    "image": "martinablecic.png",
+    "image": "martinablecic.webp",
     "tags": ["bestijada", "rozaik", "hex"],
     "photoCredit": null
   },
@@ -51,7 +51,7 @@
     "name": "Ana Galant",
     "title": "Urednica, voditeljica",
     "description": "Dežurna Istrijanka.",
-    "image": "anagalant.png",
+    "image": "anagalant.webp",
     "tags": ["rijeckidir", "rozaik"],
     "photoCredit": null
   },
@@ -59,7 +59,7 @@
     "name": "Marija Radja",
     "title": "Urednica, voditeljica",
     "description": "Stručnjakinja za digresije i improvizaciju.",
-    "image": "marijaradja.png",
+    "image": "marijaradja.webp",
     "tags": ["rijeckidir", "rozaik", "aircheck"],
     "photoCredit": null
   },
@@ -67,7 +67,7 @@
     "name": "Tomislav Milićević",
     "title": "Urednik, voditelj, selektor",
     "description": "Ako problema NEMA, to brzo mijenja Ras Padsystema.",
-    "image": "tomislavmilicevic.png",
+    "image": "tomislavmilicevic.webp",
     "tags": ["worriesinthedance", "bestijada", "rozaik"],
     "photoCredit": "Teo Kamov"
   },
@@ -75,7 +75,7 @@
     "name": "Lorena",
     "title": "Urednica, selektorica",
     "description": "Žurka je kad basevi lupaju, a masa grize tapete.",
-    "image": "lorenamiocic.png",
+    "image": "lorenamiocic.webp",
     "tags": ["worriesinthedance"],
     "photoCredit": null
   },
@@ -83,7 +83,7 @@
     "name": "Bruno Butorac",
     "title": "Urednik, voditelj, selektor",
     "description": "Euripid - Dub partizan",
-    "image": "bb.png",
+    "image": "bb.webp",
     "tags": ["worriesinthedance"],
     "photoCredit": "Vedran Karuza (Novi List)"
   },
@@ -91,7 +91,7 @@
     "name": "Filip Žiljak",
     "title": "Urednik, voditelj, selektor",
     "description": "GOAT",
-    "image": "filipziljak.png",
+    "image": "filipziljak.webp",
     "tags": ["rapertoar"],
     "photoCredit": null
   },
@@ -99,7 +99,7 @@
     "name": "Marina Jakšić",
     "title": "Urednica, voditeljica, selektorica",
     "description": "Ova zaljubljenica u slušanje i proučavanje glazbe voli čuti dobru traku više nego na žlicu pojest.",
-    "image": "marinajaksic.png",
+    "image": "marinajaksic.webp",
     "tags": ["fader", "rozaik", "jabiram", "zivouzivo"],
     "photoCredit": null
   },
@@ -107,7 +107,7 @@
     "name": "Ivan Dragnić - Gjuro",
     "title": "Urednik, voditelj, video",
     "description": "Giovanni Tesoro - Dobar dečko s Hreljina.",
-    "image": "ivandragnicgjuro.png",
+    "image": "ivandragnicgjuro.webp",
     "tags": ["fader", "zivouzivo"],
     "photoCredit": null
   },
@@ -115,7 +115,7 @@
     "name": "Mia Hadžikadunić",
     "title": "Urednica i voditeljica",
     "description": "Pušta, stvara, studira, svira, priča o njoj...muzici naravno! Sound girl u svakom smislu.",
-    "image": "miahadzikadunic.png",
+    "image": "miahadzikadunic.webp",
     "tags": ["fader", "jabiram"],
     "photoCredit": null
   },
@@ -123,7 +123,7 @@
     "name": "Neven Babin",
     "title": "Urednik i voditelj",
     "description": "Stara škola.",
-    "image": "nevenbabin.png",
+    "image": "nevenbabin.webp",
     "tags": ["pankeraj"],
     "photoCredit": null
   },
@@ -131,7 +131,7 @@
     "name": "Andrej Vučinić",
     "title": "Urednik i voditelj",
     "description": "Škot.",
-    "image": "andrejvucinicskot.png",
+    "image": "andrejvucinicskot.webp",
     "tags": ["pankeraj"],
     "photoCredit": null
   },
@@ -139,7 +139,7 @@
     "name": "Hrvoje Šimić",
     "title": "Urednik i voditelj",
     "description": "Pank brčine.",
-    "image": "hrvojesimic.png",
+    "image": "hrvojesimic.webp",
     "tags": ["pankeraj"],
     "photoCredit": null
   },
@@ -147,7 +147,7 @@
     "name": "Vanja Kauzlarić",
     "title": "Urednik i voditelj",
     "description": "Ličo.",
-    "image": "vanjakauzlariclico.png",
+    "image": "vanjakauzlariclico.webp",
     "tags": ["pankeraj"],
     "photoCredit": null
   }

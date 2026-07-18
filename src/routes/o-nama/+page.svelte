@@ -27,6 +27,10 @@
 
 <svelte:head>
   <title>O nama — Radio Roža</title>
+  <meta
+    name="description"
+    content="Tko je Radio Roža — community radio zajednice nastao iz ljubavi prema nezavisnoj sceni i gramofonskim pločama, sa studijem u riječkom OKC Palachu."
+  />
 </svelte:head>
 
 <Lightbox
@@ -57,7 +61,7 @@
         aria-label="Otvori fotografiju: {image.alt}"
       >
         {#if image.src}
-          <img src={image.src} alt={image.alt} class="photo-img" />
+          <img src={image.src} alt={image.alt} class="photo-img" loading="lazy" decoding="async" />
         {:else}
           <div class="photo-placeholder" aria-hidden="true"></div>
         {/if}
@@ -101,7 +105,9 @@
           gostuju u Rijeci.
         </p>
       </div>
-      <a href="#studio" class="studio-link">* * * posjeti studio</a>
+      <!-- Cilja galeriju studija (photo grid 2) koja je zakomentirana dok ne stignu
+           fotografije — vrati zajedno s njom i dodaj id="studio" na sekciju -->
+      <!-- <a href="#studio" class="studio-link">* * * posjeti studio</a> -->
     </div>
   </section>
 
@@ -114,7 +120,7 @@
         aria-label="Otvori fotografiju: {image.alt}"
       >
         {#if image.src}
-          <img src={image.src} alt={image.alt} class="photo-img" />
+          <img src={image.src} alt={image.alt} class="photo-img" loading="lazy" decoding="async" />
         {:else}
           <div class="photo-placeholder" aria-hidden="true"></div>
         {/if}

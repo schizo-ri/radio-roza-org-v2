@@ -1,26 +1,16 @@
 {
-	"mcpServers": {
-		"svelte": {
-			"type": "stdio",
-			"command": "npx",
-			"env": {
-
-			},
-			"args": [
-				"-y",
-				"@sveltejs/mcp"
-			]
-		},
-		"context7": {
-			"type": "stdio",
-			"command": "npx",
-			"env": {
-
-			},
-			"args": [
-				"-y",
-				"@upstash/context7-mcp"
-			]
-		}
-	}
+  "mcpServers": {
+    "svelte": {
+      "type": "stdio",
+      "command": "npx",
+      "env": {},
+      "args": ["-y", "@sveltejs/mcp"]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "env": {},
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
 }

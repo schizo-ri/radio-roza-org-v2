@@ -18,7 +18,7 @@
   <div class="show-layout">
     <div class="show-left">
       <div class="show-cover">
-        <img src="/images/projekti/odasiljac/skolica.png" alt="Emisija Školica" />
+        <img src="/images/projekti/odasiljac/skolica.webp" alt="Emisija Školica" />
       </div>
 
       <div class="show-about">
@@ -26,14 +26,14 @@
         <p class="show-desc">Mladi i mlađi, zanimljive priče o onima na kojima svijet ostaje.</p>
         <p class="show-desc">
           Adresirat će probleme djece i mladih u različitoj dobi — prve godine života, vrtić,
-          predškolska dob, niži i viši razredi osnovne škole, srednja škola te fakultetsko doba. Osim
-          tema povezanih sa samim školovanjem (bullying, poteškoće s učenjem), obradit će se i teme
-          vezane uz obiteljski život i svakodnevne aktivnosti.
+          predškolska dob, niži i viši razredi osnovne škole, srednja škola te fakultetsko doba.
+          Osim tema povezanih sa samim školovanjem (bullying, poteškoće s učenjem), obradit će se i
+          teme vezane uz obiteljski život i svakodnevne aktivnosti.
         </p>
         <p class="show-desc">
-          Cilj emisije je osvijestiti javnost o problemima djece i mladih, njihovom pogledu na svijet
-          i percepciji stvarnosti. Bitno je javno progovarati o mladima i njihovim pravima jer su oni
-          budućnost.
+          Cilj emisije je osvijestiti javnost o problemima djece i mladih, njihovom pogledu na
+          svijet i percepciji stvarnosti. Bitno je javno progovarati o mladima i njihovim pravima
+          jer su oni budućnost.
         </p>
       </div>
     </div>

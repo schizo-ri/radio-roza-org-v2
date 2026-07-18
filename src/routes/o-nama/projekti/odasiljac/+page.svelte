@@ -31,15 +31,21 @@
         </dl>
 
         <div class="eu-links">
-          <a href="https://strukturnifondovi.hr/" target="_blank" rel="noopener noreferrer">strukturnifondovi.hr</a>
-          <a href="http://www.esf.hr/operativni-program/" target="_blank" rel="noopener noreferrer">esf.hr</a>
+          <a href="https://strukturnifondovi.hr/" target="_blank" rel="noopener noreferrer"
+            >strukturnifondovi.hr</a
+          >
+          <a href="http://www.esf.hr/operativni-program/" target="_blank" rel="noopener noreferrer"
+            >esf.hr</a
+          >
         </div>
 
         <div class="eu-notice">
           <p>Projekt je sufinancirala Europska unija iz Europskog socijalnog fonda.</p>
           <img
-            src="/images/projekti/odasiljac/eu_logosi_odasiljac.png"
+            src="/images/projekti/odasiljac/eu_logosi_odasiljac.webp"
             alt="EU logotipi - Europski socijalni fond"
+            loading="lazy"
+            decoding="async"
           />
         </div>
       </div>
@@ -48,11 +54,12 @@
     <div class="project-right">
       <div class="project-content">
         <p>
-          Projekt Odašiljač okuplja novinare iz tri partnerske udruge: <strong>Udruge Ri Rock, S.O.S.
-            Rijeka i Pariter.</strong> Cilj je izgradnja stručnih kadrova koji će adekvatno izvještavati
-          o ranjivim skupinama unutar tri radijske emisije emitirane na riječkom radiju zajednice –
-          Radio Roži. Putem emisija javnost će biti informirana o trima temama: djeca i mladi; rodna
-          ravnopravnost, diskriminacija i ženska prava; žrtve nasilja.
+          Projekt Odašiljač okuplja novinare iz tri partnerske udruge: <strong
+            >Udruge Ri Rock, S.O.S. Rijeka i Pariter.</strong
+          > Cilj je izgradnja stručnih kadrova koji će adekvatno izvještavati o ranjivim skupinama unutar
+          tri radijske emisije emitirane na riječkom radiju zajednice – Radio Roži. Putem emisija javnost
+          će biti informirana o trima temama: djeca i mladi; rodna ravnopravnost, diskriminacija i ženska
+          prava; žrtve nasilja.
         </p>
 
         <hr />
@@ -64,9 +71,9 @@
           <li>
             Jačanje stručnih kapaciteta medijskih djelatnika putem usavršavanja i osposobljavanja za
             medijsko izvještavanje, vezano uz rodnu ravnopravnost, rodno uvjetovano nasilje, žrtve
-            nasilja, komunikaciju s djecom i mladima, pristup mladima s teškoćama u učenju te pristup
-            mladima koji imaju traumatična iskustva, ciljeve održivog razvoja, medijskog pristupa djeci
-            i mladima romske nacionalne manjine
+            nasilja, komunikaciju s djecom i mladima, pristup mladima s teškoćama u učenju te
+            pristup mladima koji imaju traumatična iskustva, ciljeve održivog razvoja, medijskog
+            pristupa djeci i mladima romske nacionalne manjine
           </li>
           <li>Osiguranje stručnog, stalnog i stabilnog tima za razvoj programa</li>
           <li>Stvaranje preduvjeta za održivo djelovanje</li>

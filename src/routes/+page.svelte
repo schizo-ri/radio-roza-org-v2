@@ -1,18 +1,4 @@
-<script lang="ts">
-  import ArticleCard from '$lib/components/ArticleCard.svelte';
-  import ArticleGrid from '$lib/components/ArticleGrid.svelte';
-  import ShowCard from '$lib/components/ShowCard.svelte';
-  import ShowCardSkeleton from '$lib/components/ShowCardSkeleton.svelte';
-  import SeeAll from '$lib/components/SeeAll.svelte';
-  import Tag from '$lib/components/Tag.svelte';
-  import CtaSection from '$lib/components/CtaSection.svelte';
-  import { browser } from '$app/environment';
-  import { program, blocks, type Day } from '$lib/utils/program';
-  import type { PageData } from './$types';
-
-  let { data }: { data: PageData } = $props();
-
-  // --- Mixcloud shows (client-side fetch) ---
+<script lang="ts" module>
   interface Show {
     href: string;
     title: string;
@@ -31,20 +17,42 @@
     tags: Array<{ name: string }>;
   }
 
+  // Survives client-side navigations — returning to the homepage renders the
+  // last result instantly (refreshed in the background) instead of flashing
+  // skeletons while Mixcloud answers again.
+  let cachedShows: Show[] | null = null;
+</script>
+
+<script lang="ts">
+  import ArticleCard from '$lib/components/ArticleCard.svelte';
+  import ArticleGrid from '$lib/components/ArticleGrid.svelte';
+  import ShowCard from '$lib/components/ShowCard.svelte';
+  import ShowCardSkeleton from '$lib/components/ShowCardSkeleton.svelte';
+  import SeeAll from '$lib/components/SeeAll.svelte';
+  import Tag from '$lib/components/Tag.svelte';
+  import CtaSection from '$lib/components/CtaSection.svelte';
+  import Seo from '$lib/components/Seo.svelte';
+  import { browser } from '$app/environment';
+  import { program, blocks } from '$lib/utils/program';
+  import { stationWeekday, stationMinutes } from '$lib/utils/time';
+  import type { PageData } from './$types';
+
+  let { data }: { data: PageData } = $props();
+
+  // --- Mixcloud shows (client-side fetch, so the CDN-cached HTML stays fresh) ---
   const SKELETON_COUNT = 16;
   const skeletonItems = Array.from({ length: SKELETON_COUNT }, (_, i) => ({
     href: `__skeleton__${i}`,
   }));
 
-  let shows = $state<Show[]>([]);
-  let showsLoading = $state(true);
+  let shows = $state<Show[]>(cachedShows ?? []);
+  let showsLoading = $state(cachedShows === null);
 
   $effect(() => {
-    if (!browser) return;
     fetch('https://api.mixcloud.com/RadioRoza/cloudcasts/?limit=16&metadata=1')
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((json: { data: MixcloudCloudcast[] }) => {
-        shows = json.data.map((c) => ({
+        cachedShows = json.data.map((c) => ({
           href: c.url,
           title: c.name,
           date: new Date(c.created_time).toLocaleDateString('hr-HR', {
@@ -56,9 +64,10 @@
           tags: c.tags.slice(0, 3).map((t) => t.name),
           mixcloudKey: c.key,
         }));
+        shows = cachedShows;
       })
       .catch(() => {
-        shows = [];
+        if (!cachedShows) shows = [];
       })
       .finally(() => {
         showsLoading = false;
@@ -76,8 +85,8 @@
     return () => clearInterval(id);
   });
 
-  const today = $derived(now.toLocaleDateString('en-US', { weekday: 'long' }) as Day);
-  const currentTime = $derived(now.getHours() * 60 + now.getMinutes());
+  const today = $derived(stationWeekday(now));
+  const currentTime = $derived(stationMinutes(now));
 
   const todayShows = $derived(
     program.filter((s) => s.day === today).sort((a, b) => a.show_start.localeCompare(b.show_start))
@@ -110,8 +119,14 @@
 </script>
 
 <svelte:head>
-  <title>Radio Roža</title>
+  <link rel="preconnect" href="https://api.mixcloud.com" />
+  <link rel="preconnect" href="https://thumbnailer.mixcloud.com" />
 </svelte:head>
+
+<Seo
+  title="Radio Roža"
+  description="Nezavisna riječka internetska radio stanica — community radio iz Rijeke. Emisije, program i glazba koju ne biraju algoritmi."
+/>
 
 <!-- ── novo novo novo ─────────────────────────────── -->
 <section class="home-section">
@@ -177,7 +192,13 @@
     {#if albumTjedna}
       <a href={albumTjedna.href} class="album-card">
         {#if albumTjedna.image}
-          <img src={albumTjedna.image} alt={albumTjedna.title} class="album-image" />
+          <img
+            src={albumTjedna.image}
+            alt={albumTjedna.title}
+            class="album-image"
+            loading="lazy"
+            decoding="async"
+          />
         {/if}
         <div class="album-body">
           <p class="album-meta">

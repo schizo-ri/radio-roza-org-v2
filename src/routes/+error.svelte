@@ -10,7 +10,7 @@
   <p class="message">
     {is404
       ? 'Stranica koju tražiš ne postoji ili je premještena.'
-      : page.error?.message ?? 'Nešto je pošlo po krivu. Pokušaj ponovo.'}
+      : (page.error?.message ?? 'Nešto je pošlo po krivu. Pokušaj ponovo.')}
   </p>
   <a href="/">Natrag na početnu</a>
 </div>

@@ -33,17 +33,17 @@
     <div class="project-right">
       <div class="project-content">
         <p>
-          Projekt Žiroskop nastao je iz potrebe rješavanja problema nestabilnosti korištenja prostornih
-          resursa za sve izvaninstitucionalne aktere u kulturi, odnosno za svrhu ima razvoj
-          civilno-javnog partnerstva u upravljanju prostorima Filodrammatice, Omladinskog kulturnog
-          centra Palach i Hrvatskog kulturnog doma na Sušaku.
+          Projekt Žiroskop nastao je iz potrebe rješavanja problema nestabilnosti korištenja
+          prostornih resursa za sve izvaninstitucionalne aktere u kulturi, odnosno za svrhu ima
+          razvoj civilno-javnog partnerstva u upravljanju prostorima Filodrammatice, Omladinskog
+          kulturnog centra Palach i Hrvatskog kulturnog doma na Sušaku.
         </p>
         <p>
           Ovo partnerstvo fokus stavlja na uspostavu zajedničkog upravljanja ovim prostorima što
           uključuje razvoj modela upravljanja, uspostavljanje procedura uključivanja svih aktera u
           kulturi grada i povećanu participaciju građana u kulturnim aktivnostima, uključujući i
-          njihovo programiranje. Projekt doprinosi razvoju kapaciteta organizacija civilnog društva i
-          javne uprave za sudioničko upravljanje, jačanju socijalnog dijaloga kojemu je svrha
+          njihovo programiranje. Projekt doprinosi razvoju kapaciteta organizacija civilnog društva
+          i javne uprave za sudioničko upravljanje, jačanju socijalnog dijaloga kojemu je svrha
           kvalitetnije upravljanje i uključivanju građana u upravljanje javnim resursima.
         </p>
 
@@ -66,21 +66,21 @@
 
         <p>
           Radio zajednice služi kao kanal komunikacije s građanima i kao mehanizam uključivanja
-          građana u rasprave o civilno-javnom partnerstvu, programiranju, sudjelovanju u programima i
-          refleksiji uspostavljenih procedura i implementacije projekta.
+          građana u rasprave o civilno-javnom partnerstvu, programiranju, sudjelovanju u programima
+          i refleksiji uspostavljenih procedura i implementacije projekta.
         </p>
         <p>
           Kroz realizaciju ovog segmenta projekta Žiroskop 15 zaposlenika i članova Udruga (članica
           Saveza udruga Molekula) sudjelovat će u aktivnostima jačanja stručnog i iskustvenog
-          kapaciteta potrebne za uspostavu Radija Zajednice; 10 članova organizacija civilnog društva
-          sudjelovat će u aktivnostima jačanja kapaciteta u području video produkcije; min. 4
-          organizacije civilnog društva sudjelovat će u aktivnostima jačanja kapaciteta potrebnih za
-          uspostavu multimedijalnog radija zajednice.
+          kapaciteta potrebne za uspostavu Radija Zajednice; 10 članova organizacija civilnog
+          društva sudjelovat će u aktivnostima jačanja kapaciteta u području video produkcije; min.
+          4 organizacije civilnog društva sudjelovat će u aktivnostima jačanja kapaciteta potrebnih
+          za uspostavu multimedijalnog radija zajednice.
         </p>
         <p>
           Radio Roža postaje centralno mjesto za stvarno emitiranje, dokumentiranje i prijenos
-          multimedijskih sadržaja te informiranje zajednice o programskim aktivnostima DKC-a i udruga
-          članica.
+          multimedijskih sadržaja te informiranje zajednice o programskim aktivnostima DKC-a i
+          udruga članica.
         </p>
 
         <hr />
