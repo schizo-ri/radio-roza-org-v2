@@ -1,8 +1,14 @@
 <script lang="ts">
   import { program, blocks, type Day } from '$lib/utils/program';
-  import { DAYS_ORDER, stationWeekday, stationWeekDateLabels } from '$lib/utils/time';
+  import {
+    DAYS_ORDER,
+    stationWeekday,
+    stationMinutes,
+    stationWeekDateLabels,
+  } from '$lib/utils/time';
   import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
+  import { browser } from '$app/environment';
 
   const DAY_NAMES_HR: Record<Day, string> = {
     Monday: 'ponedjeljak',
@@ -15,7 +21,6 @@
   };
 
   const weekDates = stationWeekDateLabels();
-  const today = stationWeekday();
 
   // Group shows by day, sorted by start time
   const showsByDay = Object.fromEntries(
@@ -25,11 +30,41 @@
     ])
   ) as Record<Day, typeof program>;
 
-  // Scroll to today's section on mount
+  // --- trenutna emisija ---
+  let now = $state(new Date());
+
   $effect(() => {
-    const el = document.getElementById(today.toLowerCase());
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const id = setInterval(() => {
+      now = new Date();
+    }, 60_000);
+    return () => clearInterval(id);
   });
+
+  const today = $derived(stationWeekday(now));
+  const currentTime = $derived(stationMinutes(now));
+
+  // Samo u pregledniku — SSR HTML se kešira pa bi zapečena "sada" oznaka
+  // vrlo brzo postala kriva; nakon hidratacije računa se iz stvarnog vremena.
+  const currentShow = $derived(
+    browser
+      ? (showsByDay[today].findLast((s) => {
+          const [h, m] = s.show_start.split(':').map(Number);
+          return h * 60 + m <= currentTime;
+        }) ?? null)
+      : null
+  );
+
+  function scrollToNow() {
+    const row = currentShow ? document.getElementById('trenutno') : null;
+    if (row) {
+      // center: uz tekuću emisiju vidi se i što je bilo prije / što slijedi
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // prije prve emisije dana — na vrh današnje sekcije
+      const section = document.getElementById(today.toLowerCase());
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
 
   // Dropdown
   let detailsEl: HTMLDetailsElement | undefined = $state();
@@ -63,19 +98,23 @@
   <header class="page-header">
     <h1 class="page-title">program</h1>
 
-    <details class="pick-date" bind:this={detailsEl}>
-      <summary class="pick-date-btn">odaberi dan</summary>
-      <ul class="day-dropdown">
-        {#each DAYS_ORDER as day (day)}
-          <li>
-            <a href="#{day.toLowerCase()}" onclick={onDayClick}>
-              <span class="dropdown-day">{DAY_NAMES_HR[day]}</span>
-              <span class="dropdown-date">{weekDates[day]}</span>
-            </a>
-          </li>
-        {/each}
-      </ul>
-    </details>
+    <div class="header-actions">
+      <button class="now-btn" onclick={scrollToNow}>trenutno</button>
+
+      <details class="pick-date" bind:this={detailsEl}>
+        <summary class="pick-date-btn">odaberi dan</summary>
+        <ul class="day-dropdown">
+          {#each DAYS_ORDER as day (day)}
+            <li>
+              <a href="#{day.toLowerCase()}" onclick={onDayClick}>
+                <span class="dropdown-day">{DAY_NAMES_HR[day]}</span>
+                <span class="dropdown-date">{weekDates[day]}</span>
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </details>
+    </div>
   </header>
 
   <div class="content">
@@ -94,7 +133,8 @@
         <ul class="show-list">
           {#each showsByDay[day] as show (show.title + show.show_start)}
             {@const block = blocks.find((b) => b.title === show.title)}
-            <li class="show-row">
+            {@const isNow = show === currentShow}
+            <li class="show-row" class:is-now={isNow} id={isNow ? 'trenutno' : undefined}>
               <span class="show-time">{show.show_start}</span>
               <div class="show-info">
                 <h3 class="show-title">{show.title}</h3>
@@ -107,6 +147,9 @@
                   </div>
                 {/if}
               </div>
+              {#if isNow}
+                <span class="now-badge">sada</span>
+              {/if}
             </li>
           {/each}
         </ul>
@@ -160,6 +203,29 @@
     font-weight: 400;
     line-height: 1;
   }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .now-btn {
+    font: inherit;
+    font-weight: 600;
+    color: var(--color-brand);
+    background: none;
+    border: 2px solid var(--color-brand);
+    border-radius: 2em;
+    padding: 0.5em 1em;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .now-btn:hover {
+    background: var(--color-brand);
+    color: var(--color-bg);
+  }
+
   /* pick a date — <details> */
   .pick-date {
     position: relative;
@@ -259,6 +325,21 @@
     gap: 1rem;
     padding: 0.875rem 0;
     border-bottom: 1px solid rgb(0 0 0 / 0.1);
+  }
+
+  .show-row.is-now .show-time,
+  .show-row.is-now .show-title {
+    color: var(--color-brand);
+  }
+
+  .now-badge {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-brand);
+    flex-shrink: 0;
+    padding-top: 0.3em;
   }
 
   .show-time {
