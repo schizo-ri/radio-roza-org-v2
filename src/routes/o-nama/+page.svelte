@@ -9,10 +9,10 @@
     alt: `Fotografija ${i + 1}`,
   }));
 
-  const gallery2: LightboxImage[] = Array.from({ length: 8 }, (_, i) => ({
-    src: '',
-    alt: `Fotografija studija ${i + 9}`,
-  }));
+  // const gallery2: LightboxImage[] = Array.from({ length: 8 }, (_, i) => ({
+  //   src: '',
+  //   alt: `Fotografija studija ${i + 9}`,
+  // }));
 
   let lightboxImages: LightboxImage[] = $state([]);
   let lightboxIndex = $state(0);
@@ -106,7 +106,7 @@
   </section>
 
   <!-- ── Photo grid 2 ── -->
-  <div class="photo-grid photo-grid--landscape" aria-label="Galerija fotografija ekipe">
+  <!-- <div class="photo-grid photo-grid--landscape" aria-label="Galerija fotografija ekipe">
     {#each gallery2 as image, i (i)}
       <button
         class="photo-item"
@@ -120,11 +120,11 @@
         {/if}
       </button>
     {/each}
-  </div>
+  </div> -->
 
-  <!-- ── Crew / Naša priča / Šalji mjuzu ── -->
-  <section class="three-col-section">
-    <div class="three-col-block">
+  <!-- ── Crew / Projekti ── -->
+  <section class="link-section">
+    <div class="link-block">
       <h2 class="block-title"><a href="/o-nama/crew">→→→ crew</a></h2>
       <p class="block-body">
         Upoznaj ekipu radija. Selektori, novinari, tehničari, informatičari... Svatko ima svoju
@@ -132,26 +132,18 @@
       </p>
     </div>
 
-    <div class="three-col-block">
+    <div class="link-block">
       <h2 class="block-title"><a href="/o-nama/projekti">→→→ projekti</a></h2>
       <p class="block-body">
         Vidi kakve smo sve projekte provodili u ovom našem kratkom postojanju u suradnji s našim
         dragim partnerima!
       </p>
     </div>
-
-    <div class="three-col-block">
-      <h2 class="block-title">šalji mjuzu</h2>
-      <p class="block-body">
-        <!-- content TBD --> Istražujemo kako riječki underground prostori i kolektivi stvaraju jedinstvenu
-        glazbenu kulturu koja odolijeva mainstream pritiscima.
-      </p>
-    </div>
   </section>
-
-  <!-- ── CTAs ── -->
-  <CtaSection />
 </main>
+
+<!-- ── CTAs ── -->
+<CtaSection />
 
 <style>
   .page {
@@ -258,7 +250,7 @@
     line-height: 1;
   }
 
-  .three-col-block .block-title {
+  .link-block .block-title {
     font-size: var(--text-display);
   }
 
@@ -299,15 +291,15 @@
     text-underline-offset: 3px;
   }
 
-  /* ── Three-col section ── */
-  .three-col-section {
+  /* ── Link section (crew / projekti) ── */
+  .link-section {
     display: grid;
     grid-template-columns: 1fr;
     padding: 0 1rem;
     margin-bottom: 3rem;
   }
 
-  .three-col-block {
+  .link-block {
     padding: 1.5rem 0;
     display: flex;
     flex-direction: column;
@@ -332,18 +324,18 @@
       margin: 4rem 0;
     }
 
-    .three-col-section {
-      grid-template-columns: repeat(3, 1fr);
+    .link-section {
+      grid-template-columns: repeat(2, 1fr);
       padding: 1.5rem;
       margin-bottom: 4rem;
     }
 
-    .three-col-block {
+    .link-block {
       border-bottom: none;
       padding: 1.5rem;
     }
 
-    .three-col-block:not(:last-child) {
+    .link-block:not(:last-child) {
       border-right: 2px solid var(--color-black, #000);
     }
   }
@@ -360,19 +352,19 @@
       margin: 5rem 0;
     }
 
-    .three-col-section {
+    .link-section {
       padding: 2rem;
       margin-bottom: 5rem;
     }
 
-    .three-col-block {
+    .link-block {
       padding: 2rem;
     }
   }
 
   /* ── Big Desktop (1600x+) ── */
   @media (min-width: 1600px) {
-    .three-col-block {
+    .link-block {
       padding: 3rem;
     }
   }

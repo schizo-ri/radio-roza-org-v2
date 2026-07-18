@@ -96,9 +96,9 @@
       </a>
     </div>
   </section>
-
-  <CtaSection />
 </main>
+
+<CtaSection />
 
 <style>
   .page {

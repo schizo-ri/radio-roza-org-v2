@@ -48,9 +48,9 @@
       </div>
     {/each}
   </div>
-
-  <CtaSection />
 </main>
+
+<CtaSection />
 
 <style>
   .page {
