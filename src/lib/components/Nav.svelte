@@ -20,7 +20,7 @@
   });
 
   function getNavHeight() {
-    return window.innerWidth >= 1024 ? 70 : 60;
+    return 70;
   }
 
   function onScroll() {
@@ -127,7 +127,7 @@
   .nav-bar {
     display: flex;
     align-items: center;
-    height: 60px;
+    height: 70px;
     padding: 0 1rem;
     gap: 1rem;
   }
@@ -193,7 +193,7 @@
   /* Backdrop */
   .backdrop {
     position: fixed;
-    top: 60px;
+    top: 70px;
     left: 0;
     right: 0;
     bottom: 0;
@@ -206,7 +206,7 @@
   /* Mobile overlay menu */
   .mobile-menu {
     position: fixed;
-    top: 60px;
+    top: 70px;
     left: 0;
     right: 0;
     z-index: 301;
@@ -234,7 +234,6 @@
   /* md: landscape tablet and up */
   @media (min-width: 1024px) {
     .nav-bar {
-      height: 70px;
       padding: 0 1.25rem;
     }
 
