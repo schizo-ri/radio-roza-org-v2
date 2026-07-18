@@ -97,25 +97,26 @@
 <main class="page">
   <header class="page-header">
     <h1 class="page-title">program</h1>
-
-    <div class="header-actions">
-      <button class="now-btn" onclick={scrollToNow}>trenutno</button>
-
-      <details class="pick-date" bind:this={detailsEl}>
-        <summary class="pick-date-btn">odaberi dan</summary>
-        <ul class="day-dropdown">
-          {#each DAYS_ORDER as day (day)}
-            <li>
-              <a href="#{day.toLowerCase()}" onclick={onDayClick}>
-                <span class="dropdown-day">{DAY_NAMES_HR[day]}</span>
-                <span class="dropdown-date">{weekDates[day]}</span>
-              </a>
-            </li>
-          {/each}
-        </ul>
-      </details>
-    </div>
   </header>
+
+  <!-- izvan .page-header da sticky može trajati kroz cijelu stranicu -->
+  <div class="header-actions">
+    <button class="now-btn" onclick={scrollToNow}>trenutno</button>
+
+    <details class="pick-date" bind:this={detailsEl}>
+      <summary class="pick-date-btn">odaberi dan</summary>
+      <ul class="day-dropdown">
+        {#each DAYS_ORDER as day (day)}
+          <li>
+            <a href="#{day.toLowerCase()}" onclick={onDayClick}>
+              <span class="dropdown-day">{DAY_NAMES_HR[day]}</span>
+              <span class="dropdown-date">{weekDates[day]}</span>
+            </a>
+          </li>
+        {/each}
+      </ul>
+    </details>
+  </div>
 
   <div class="content">
     {#each DAYS_ORDER as day (day)}
@@ -178,12 +179,18 @@
 <style>
   .page {
     padding: 1.5rem 1rem 4rem;
+    /* donji rub playera: --nav-offset + 56px bar + 1px border */
+    --stack-top: calc(var(--nav-offset, 60px) + 57px);
+    --actions-h: 3rem;
   }
 
   .content {
     max-width: 640px;
     margin-inline: auto;
+    /* clip umjesto hidden: hidden bi pretvorio .content u scrollport i
+       ubio position: sticky na day-headerima */
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* Header row */
@@ -204,9 +211,16 @@
     line-height: 1;
   }
   .header-actions {
+    position: sticky;
+    top: var(--stack-top);
+    transition: top 0.3s ease; /* prati animaciju skrivanja nava, kao player */
+    z-index: 15;
     display: flex;
+    justify-content: flex-end;
     align-items: center;
     gap: 0.5rem;
+    height: var(--actions-h);
+    background: var(--color-bg);
   }
 
   .now-btn {
@@ -283,10 +297,16 @@
   /* Day section */
   .day-section {
     margin-top: 3rem;
-    scroll-margin-top: 1rem;
+    /* anchor skokovi moraju sletjeti ispod zaglavljenog bara s botunima */
+    scroll-margin-top: calc(var(--stack-top) + var(--actions-h) + 0.5rem);
   }
 
   .day-header {
+    position: sticky;
+    top: calc(var(--stack-top) + var(--actions-h));
+    transition: top 0.3s ease;
+    z-index: 10;
+    background: var(--color-bg);
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--color-black);
   }
@@ -406,6 +426,18 @@
   @media (min-width: 1600px) {
     .content {
       margin-top: -9rem;
+    }
+
+    /* Sadržaj je uska centrirana kolona povučena uz naslov — bar preko cijele
+       širine bi je prekrio, pa se stisne u desni kut, a dani se lijepe
+       direktno ispod playera, u istoj visini s botunima. */
+    .header-actions {
+      width: fit-content;
+      margin-left: auto;
+    }
+
+    .day-header {
+      top: var(--stack-top);
     }
   }
 
