@@ -40,7 +40,7 @@
   let { data }: { data: PageData } = $props();
 
   // --- Mixcloud shows (client-side fetch, so the CDN-cached HTML stays fresh) ---
-  const SKELETON_COUNT = 16;
+  const SKELETON_COUNT = 8;
   const skeletonItems = Array.from({ length: SKELETON_COUNT }, (_, i) => ({
     href: `__skeleton__${i}`,
   }));
@@ -49,7 +49,7 @@
   let showsLoading = $state(cachedShows === null);
 
   $effect(() => {
-    fetch('https://api.mixcloud.com/RadioRoza/cloudcasts/?limit=16&metadata=1')
+    fetch('https://api.mixcloud.com/RadioRoza/cloudcasts/?limit=8&metadata=1')
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((json: { data: MixcloudCloudcast[] }) => {
         cachedShows = json.data.map((c) => ({

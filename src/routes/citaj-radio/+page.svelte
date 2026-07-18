@@ -55,7 +55,7 @@
     </div>
   </div>
 
-  <ArticleGrid items={data.posts} rows={3}>
+  <ArticleGrid items={data.posts}>
     {#snippet card(item)}
       <ArticleCard {...item} />
     {/snippet}

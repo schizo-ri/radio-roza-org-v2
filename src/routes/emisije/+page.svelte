@@ -41,7 +41,7 @@
     </div>
   </header>
 
-  <ArticleGrid items={filteredShows} rows={filteredShows.length} cardMinEm={16}>
+  <ArticleGrid items={filteredShows} cardMinEm={16}>
     {#snippet card(show)}
       <ShowCard {...show} />
     {/snippet}

@@ -58,7 +58,7 @@ odrađen u kodu (vidi git log).
     hvatao kao mrtvi anchor, pa sam i link zakomentirao. Kad dobiješ fotke: odkomentiraj photo
     grid 2, dodaj mu `id="studio"` i vrati link.
 
-14. **ArticleGrid layout shift.** SSR renderira 1 stupac pa nakon hidratacije grid skoči na 3–4
-    stupca. Čisti CSS fix postoji, ali mijenja način crtanja linija između kartica (gap +
-    pozadina umjesto bordera) i izgled zadnjeg nepotpunog reda — dizajnerska odluka. Javi ako
-    želiš da napravim prototip.
+14. ~~**ArticleGrid layout shift.**~~ **Riješeno** — ugrađena varijanta C iz prototipa: stupce
+    određuje CSS (`auto-fill`), linije crta 2px outline na karticama, bez JS-a i bez skoka nakon
+    hidratacije. Broj kartica je sad fiksan (naslovnica dohvaća 8 emisija), a zadnji red smije
+    biti nepotpun.
