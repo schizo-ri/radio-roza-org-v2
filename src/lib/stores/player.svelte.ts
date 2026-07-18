@@ -14,6 +14,11 @@ class PlayerState {
   title = $state('');
   mixcloudShow = $state<MixcloudShow | null>(null);
 
+  // Request counters — consumers watch for increments (high-water mark), so a
+  // request fires even when the previous one asked for the same thing.
+  liveResumeRequests = $state(0); // Player starts the live stream when this grows
+  mixcloudPlayRequests = $state(0); // MixcloudBar calls widget.play() when this grows
+
   setLive() {
     this.src = LIVE_SRC;
     this.isLive = true;
@@ -34,11 +39,12 @@ class PlayerState {
     this.mixcloudShow = show;
     this.title = show.title;
     this.isLive = false;
+    this.mixcloudPlayRequests += 1;
   }
 
-  closeMixcloud() {
-    this.mixcloudShow = null;
+  requestLivePlayback() {
     this.setLive();
+    this.liveResumeRequests += 1;
   }
 }
 

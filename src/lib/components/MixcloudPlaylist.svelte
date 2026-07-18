@@ -1,6 +1,7 @@
 <script lang="ts">
   import { browser } from '$app/environment';
   import Tag from '$lib/components/Tag.svelte';
+  import { playerState } from '$lib/stores/player.svelte';
 
   interface MixcloudTag {
     name: string;
@@ -213,9 +214,24 @@
             <span class="episode-date">{formatDate(ep.created_time)}</span>
             <span class="episode-duration">{formatDuration(ep.audio_length)}</span>
           </div>
-          <a class="episode-title" href={ep.url} target="_blank" rel="noopener noreferrer">
+          <button
+            type="button"
+            class="episode-title"
+            onclick={() => playerState.setMixcloud({ key: ep.key, title: ep.name, url: ep.url })}
+            aria-label="Slušaj: {ep.name}"
+          >
+            <svg
+              class="episode-play"
+              width="11"
+              height="11"
+              viewBox="0 0 14 14"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <polygon points="2,1 13,7 2,13" />
+            </svg>
             {ep.name}
-          </a>
+          </button>
           {#if ep.tags && ep.tags.length > 0}
             <div class="episode-tags">
               {#each ep.tags as tag (tag.url)}
@@ -295,17 +311,29 @@
   }
 
   .episode-title {
+    all: unset;
+    cursor: pointer;
+    align-self: flex-start;
     font-family: var(--font-display);
     font-size: var(--text-card);
     font-weight: 400;
     line-height: 1.2;
     color: inherit;
-    text-decoration: none;
   }
 
   .episode-title:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+
+  .episode-title:focus-visible {
+    outline: 2px solid var(--color-black);
+    outline-offset: 2px;
+  }
+
+  .episode-play {
+    display: inline-block;
+    margin-right: 0.25rem;
   }
 
   .episode-tags {

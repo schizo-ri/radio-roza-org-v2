@@ -1,6 +1,7 @@
 <script lang="ts">
   import { untrack } from 'svelte';
   import type Hls from 'hls.js';
+  import MixcloudBar from '$lib/components/MixcloudBar.svelte';
   import { playerState } from '$lib/stores/player.svelte';
   import { getAlbumArt } from '$lib/utils/artwork';
   import type { ArtworkSizes } from '$lib/utils/artwork';
@@ -17,6 +18,7 @@
   type Status = 'idle' | 'loading' | 'retrying' | 'playing' | 'failed' | 'unsupported';
 
   let audioEl = $state<HTMLAudioElement | undefined>(undefined);
+  let playerEl = $state<HTMLDivElement | undefined>(undefined);
   let status = $state<Status>('idle');
   let attempt = $state(0);
   let artwork = $state<ArtworkSizes | null>(null);
@@ -255,6 +257,21 @@
     trySet('stop', pauseIntent);
   }
 
+  // While the Mixcloud widget plays, its iframe owns the media session — our
+  // handlers must not catch hardware keys and start the live stream underneath.
+  function teardownMediaSession() {
+    if (!mediaSessionReady || !('mediaSession' in navigator)) return;
+    mediaSessionReady = false;
+    try {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('stop', null);
+    } catch {
+      // action not supported by this browser
+    }
+  }
+
   function updateMediaSessionMetadata() {
     if (!('mediaSession' in navigator)) return;
     const mime = (src: string) => (src.endsWith('.png') ? 'image/png' : 'image/jpeg');
@@ -398,6 +415,37 @@
     }
   });
 
+  // "Natrag na live" or a Mixcloud show ending — start the live stream. If the
+  // browser demands a fresh gesture, onPlayRejected degrades to the idle bar.
+  let seenResumeRequests = playerState.liveResumeRequests;
+  $effect(() => {
+    const n = playerState.liveResumeRequests;
+    untrack(() => {
+      if (n > seenResumeRequests) {
+        seenResumeRequests = n;
+        playIntent();
+      }
+    });
+  });
+
+  // The bar's height varies by mode (live 56/70px + status row, Mixcloud 60/70px),
+  // so sticky UI below (program page) reads the real bottom edge from a CSS var.
+  $effect(() => {
+    const el = playerEl;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      document.documentElement.style.setProperty(
+        '--player-offset',
+        `calc(var(--nav-offset, 70px) + ${el.offsetHeight}px)`
+      );
+    });
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty('--player-offset');
+    };
+  });
+
   // Now-playing metadata — only relevant for the live stream
   $effect(() => {
     if (!playerState.isLive) {
@@ -405,6 +453,7 @@
       nowPlayingText = '';
       artworkRequestId += 1;
       artwork = null;
+      untrack(teardownMediaSession);
       return;
     }
 
@@ -420,50 +469,54 @@
 <svelte:window ononline={onOnline} />
 <svelte:document onvisibilitychange={onVisibilityChange} />
 
-<div class="player">
-  <div class="player-bar">
-    <button
-      class="play-btn"
-      onclick={togglePlay}
-      aria-label={isActive ? 'Pauziraj' : 'Reproduciraj'}
-    >
-      {#if status === 'loading' || status === 'retrying'}
-        <span class="spinner" aria-hidden="true"></span>
-      {:else if status === 'playing'}
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
-          <rect x="2" y="2" width="4" height="12" />
-          <rect x="10" y="2" width="4" height="12" />
-        </svg>
-      {:else}
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
-          <polygon points="2,1 14,8 2,15" />
-        </svg>
-      {/if}
-    </button>
-
-    <div class="now-playing">
-      <span class="source-badge">
-        {#if playerState.isLive}
-          <span class="live-dot" aria-hidden="true"></span>
-          <span class="live-label">Live</span>
+<div class="player" bind:this={playerEl}>
+  {#if playerState.mixcloudShow}
+    <MixcloudBar />
+  {:else}
+    <div class="player-bar">
+      <button
+        class="play-btn"
+        onclick={togglePlay}
+        aria-label={isActive ? 'Pauziraj' : 'Reproduciraj'}
+      >
+        {#if status === 'loading' || status === 'retrying'}
+          <span class="spinner" aria-hidden="true"></span>
+        {:else if status === 'playing'}
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
+            <rect x="2" y="2" width="4" height="12" />
+            <rect x="10" y="2" width="4" height="12" />
+          </svg>
         {:else}
-          <span class="archive-label">Arhiva</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">
+            <polygon points="2,1 14,8 2,15" />
+          </svg>
         {/if}
-      </span>
-      <span class="track-info">
-        {#if playerState.title}
-          {playerState.artist} – {playerState.title}
-        {:else}
-          {playerState.artist}
-        {/if}
-      </span>
-    </div>
-  </div>
+      </button>
 
-  {#if statusMessage}
-    <div class="player-status" aria-live="polite">
-      <span class="status-text">{statusMessage}</span>
+      <div class="now-playing">
+        <span class="source-badge">
+          {#if playerState.isLive}
+            <span class="live-dot" aria-hidden="true"></span>
+            <span class="live-label">Live</span>
+          {:else}
+            <span class="archive-label">Arhiva</span>
+          {/if}
+        </span>
+        <span class="track-info">
+          {#if playerState.title}
+            {playerState.artist} – {playerState.title}
+          {:else}
+            {playerState.artist}
+          {/if}
+        </span>
+      </div>
     </div>
+
+    {#if statusMessage}
+      <div class="player-status" aria-live="polite">
+        <span class="status-text">{statusMessage}</span>
+      </div>
+    {/if}
   {/if}
 </div>
 
@@ -472,7 +525,7 @@
 <style>
   .player {
     position: sticky;
-    top: var(--nav-offset, 60px);
+    top: var(--nav-offset, 70px);
     transition: top 0.3s ease;
     z-index: 200;
     background: var(--color-white);

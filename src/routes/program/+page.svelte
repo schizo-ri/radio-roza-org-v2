@@ -178,8 +178,9 @@
 <style>
   .page {
     padding: 1.5rem 1rem 4rem;
-    /* donji rub playera: --nav-offset + 56px bar + 1px border */
-    --stack-top: calc(var(--nav-offset, 60px) + 57px);
+    /* donji rub playera — Player.svelte mjeri stvarnu visinu bara (live/Mixcloud
+       mod se razlikuju); fallback za SSR prije nego što se --player-offset postavi */
+    --stack-top: var(--player-offset, calc(var(--nav-offset, 70px) + 57px));
   }
 
   .content {
