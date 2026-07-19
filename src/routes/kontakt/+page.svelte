@@ -1,19 +1,16 @@
 <script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
   import CtaSection from '$lib/components/CtaSection.svelte';
+  import Seo from '$lib/components/Seo.svelte';
 </script>
 
-<svelte:head>
-  <title>Kontakt — Radio Roža</title>
-  <meta
-    name="description"
-    content="Kontaktirajte Radio Rožu - nezavisnu riječku internetsku radio stanicu."
-  />
-</svelte:head>
+<Seo
+  title="Kontakt — Radio Roža"
+  description="Kontaktirajte Radio Rožu — nezavisnu riječku internetsku radio stanicu."
+/>
 
 <main class="page">
-  <header class="page-header">
-    <h1 class="page-title">kontakt</h1>
-  </header>
+  <PageHeader title="kontakt" />
 
   <!-- ── E-mail ── -->
   <section class="contact-section">
@@ -50,6 +47,21 @@
         <a href="mailto:edin.lockedin@gmail.com">edin.lockedin@gmail.com</a>
       </div>
     </div>
+  </section>
+
+  <!-- ── Studio ── -->
+  <section class="contact-section">
+    <h2 class="section-title">studio</h2>
+    <address class="studio-address">
+      <p>Kružna ulica 6, Rijeka</p>
+      <a
+        href="https://www.openstreetmap.org/search?query=Kru%C5%BEna%20ulica%206%2C%20Rijeka"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        prikaži na karti &nearr;
+      </a>
+    </address>
   </section>
 
   <!-- ── Pratite nas ── -->
@@ -103,23 +115,6 @@
 <style>
   .page {
     padding: 1.5rem 1rem 4rem;
-  }
-
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
   }
 
   /* ── Sections ── */
@@ -212,6 +207,33 @@
   }
 
   .person-card a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ── Studio ── */
+  .studio-address {
+    font-style: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .studio-address p {
+    font-size: var(--text-title);
+    font-weight: 400;
+  }
+
+  .studio-address a {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-brand);
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .studio-address a:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
   }
