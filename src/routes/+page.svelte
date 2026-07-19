@@ -41,7 +41,9 @@
   import SeeAll from '$lib/components/SeeAll.svelte';
   import Tag from '$lib/components/Tag.svelte';
   import CtaSection from '$lib/components/CtaSection.svelte';
+  import JsonLd from '$lib/components/JsonLd.svelte';
   import Seo from '$lib/components/Seo.svelte';
+  import { page } from '$app/state';
   import { browser } from '$app/environment';
   import { program, blocks } from '$lib/utils/program';
   import { stationWeekday, stationMinutes } from '$lib/utils/time';
@@ -141,6 +143,30 @@
 <Seo
   title="Radio Roža"
   description="Nezavisna riječka internetska radio stanica — community radio iz Rijeke. Emisije, program i glazba koju ne biraju algoritmi."
+/>
+
+<JsonLd
+  data={{
+    '@context': 'https://schema.org',
+    '@type': 'RadioStation',
+    name: 'Radio Roža',
+    url: page.url.origin,
+    logo: `${page.url.origin}/logo.svg`,
+    description:
+      'Nezavisna riječka internetska radio stanica — community radio iz Rijeke. Emisije, program i glazba koju ne biraju algoritmi.',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Kružna ulica 6',
+      addressLocality: 'Rijeka',
+      addressCountry: 'HR',
+    },
+    sameAs: [
+      'https://facebook.com/radiorozha',
+      'https://www.instagram.com/radio.rozari/',
+      'https://www.mixcloud.com/RadioRoza/',
+      'https://youtube.com/@radioroza9811',
+    ],
+  }}
 />
 
 <!-- ── novo novo novo ─────────────────────────────── -->

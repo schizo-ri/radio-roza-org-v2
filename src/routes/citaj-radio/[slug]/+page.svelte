@@ -1,10 +1,30 @@
 <script lang="ts">
+  import { page } from '$app/state';
   import ArticleCard from '$lib/components/ArticleCard.svelte';
+  import JsonLd from '$lib/components/JsonLd.svelte';
   import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
 
   let { data } = $props();
   const { article, related } = $derived(data);
+
+  const jsonLd = $derived({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    url: page.url.origin + page.url.pathname,
+    ...(article.excerpt ? { description: article.excerpt } : {}),
+    ...(article.image ? { image: article.image } : {}),
+    ...(article.publishedAt ? { datePublished: article.publishedAt } : {}),
+    dateModified: article.updatedAt,
+    ...(article.author ? { author: { '@type': 'Person', name: article.author } } : {}),
+    publisher: {
+      '@type': 'Organization',
+      name: 'Radio Roža',
+      url: page.url.origin,
+    },
+    inLanguage: 'hr',
+  });
 </script>
 
 <Seo
@@ -13,6 +33,8 @@
   image={article.ogImage}
   type="article"
 />
+
+<JsonLd data={jsonLd} />
 
 <main class="article-page">
   <div class="article-meta">

@@ -53,6 +53,8 @@ export const load: PageServerLoad = async ({ fetch, params, setHeaders }) => {
     article: {
       title: post.title,
       date,
+      publishedAt: post.publishedAt ?? undefined,
+      updatedAt: post.updatedAt,
       author: post.populatedAuthors[0]?.name ?? undefined,
       image: post.heroImage ? heroImageUrl(post.heroImage) : undefined,
       imageAlt: post.heroImage?.alt ?? post.title,
