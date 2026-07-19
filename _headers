@@ -10,3 +10,7 @@
 # Images can be swapped in place, so cache a week and revalidate via ETag.
 /images/*
   Cache-Control: public, max-age=604800
+
+# PWA ikone — mijenjaju se praktički nikad.
+/icons/*
+  Cache-Control: public, max-age=604800
