@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
   import CtaSection from '$lib/components/CtaSection.svelte';
   import Tag from '$lib/components/Tag.svelte';
   import crewData from '$lib/data/crew.json';
@@ -18,9 +19,7 @@
 </svelte:head>
 
 <main class="page">
-  <header class="page-header">
-    <h1 class="page-title">Ekipa</h1>
-  </header>
+  <PageHeader title="Ekipa" />
 
   <p class="intro-text">
     Radio Roža je community internet radio i njegova pokretačka snaga su volonteri raznih uloga.
@@ -59,22 +58,6 @@
 <style>
   .page {
     padding: 1.5rem 1rem 4rem;
-  }
-
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
   }
 
   .intro-text {

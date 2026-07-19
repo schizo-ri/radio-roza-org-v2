@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
   import { program, blocks, type Day } from '$lib/utils/program';
   import {
     DAYS_ORDER,
@@ -96,9 +97,7 @@
 />
 
 <main class="page">
-  <header class="page-header">
-    <h1 class="page-title">program</h1>
-
+  <PageHeader title="program">
     <div class="header-actions">
       <button class="now-btn" onclick={scrollToNow}>trenutno</button>
 
@@ -116,7 +115,7 @@
         </ul>
       </details>
     </div>
-  </header>
+  </PageHeader>
 
   <div class="content">
     {#each DAYS_ORDER as day (day)}
@@ -217,23 +216,6 @@
     overflow-x: clip;
   }
 
-  /* Header row */
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
-  }
   .header-actions {
     display: flex;
     align-items: center;

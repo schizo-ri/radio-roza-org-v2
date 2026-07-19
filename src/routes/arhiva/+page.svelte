@@ -24,6 +24,7 @@
 </script>
 
 <script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
   import ShowCard from '$lib/components/ShowCard.svelte';
   import ShowCardSkeleton from '$lib/components/ShowCardSkeleton.svelte';
@@ -111,13 +112,12 @@
 />
 
 <main class="arhiva-page">
-  <div class="page-header">
-    <h1 class="page-title">arhiva</h1>
+  <PageHeader title="arhiva" align="baseline">
     <p class="header-note">
       snimke emisija s našeg
       <a href={MIXCLOUD_PROFILE_URL} target="_blank" rel="noopener noreferrer">Mixclouda →</a>
     </p>
-  </div>
+  </PageHeader>
 
   {#if error && shows.length === 0}
     <p class="status">
@@ -152,22 +152,6 @@
 <style>
   .arhiva-page {
     padding: 1.5rem 1rem 4rem;
-  }
-
-  .page-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
   }
 
   .header-note {

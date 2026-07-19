@@ -1,12 +1,14 @@
+<script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
+</script>
+
 <svelte:head>
   <title>Projekti — Radio Roža</title>
   <meta name="description" content="Europski i nacionalni projekti provedeni na Radio Roži." />
 </svelte:head>
 
 <main class="page">
-  <header class="page-header">
-    <h1 class="page-title">projekti</h1>
-  </header>
+  <PageHeader title="projekti" />
 
   <div class="projects-grid">
     <a class="project-card" href="/o-nama/projekti/ziroskop">
@@ -78,17 +80,6 @@
 <style>
   .page {
     padding: 1.5rem 1rem 4rem;
-  }
-
-  .page-header {
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
   }
 
   .projects-grid {

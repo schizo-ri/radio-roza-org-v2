@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
   import Seo from '$lib/components/Seo.svelte';
   import ShowCard from '$lib/components/ShowCard.svelte';
@@ -23,8 +24,7 @@
 />
 
 <main class="page">
-  <header class="page-header">
-    <h1 class="page-title">emisije</h1>
+  <PageHeader title="emisije">
     <div class="filter-bar">
       <span class="filter-label">prikaži: </span>
       <div class="filter-tabs">
@@ -39,7 +39,7 @@
         {/each}
       </div>
     </div>
-  </header>
+  </PageHeader>
 
   <ArticleGrid items={filteredShows} cardMinEm={16}>
     {#snippet card(show)}
@@ -51,23 +51,6 @@
 <style>
   .page {
     padding: 1.5rem 1rem 4rem;
-  }
-
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
   }
 
   .filter-bar {

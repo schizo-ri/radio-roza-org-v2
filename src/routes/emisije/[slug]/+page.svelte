@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
   import { page } from '$app/state';
   import ListenNotesEpisodes from '$lib/components/ListenNotesEpisodes.svelte';
   import MixcloudPlaylist from '$lib/components/MixcloudPlaylist.svelte';
@@ -25,9 +26,7 @@
 
 {#if show}
   <main class="page">
-    <header class="page-header">
-      <h1 class="page-title">{show.title}</h1>
-    </header>
+    <PageHeader title={show.title} />
 
     <div class="show-layout">
       <!-- Left: cover + about -->
@@ -90,24 +89,6 @@
 <style>
   .page {
     padding: 1.5rem 1rem 4rem;
-  }
-
-  /* Header row */
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
   }
 
   .show-layout {

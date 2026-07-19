@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
   import Lightbox from '$lib/components/Lightbox.svelte';
   import CtaSection from '$lib/components/CtaSection.svelte';
   import type { LightboxImage } from '$lib/components/Lightbox.svelte';
@@ -42,9 +43,7 @@
 
 <main class="page">
   <!-- ── Title + intro ── -->
-  <header class="page-header">
-    <h1 class="page-title">o nama</h1>
-  </header>
+  <PageHeader title="o nama" />
 
   <p class="intro-text">
     Radio Roža je community internet radio nastao iz želje i potrebe za praćenjem nezavisne kulturne
@@ -156,24 +155,6 @@
     padding: 1.5rem 1rem 4rem;
   }
 
-  /* Header row */
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
-  }
-
   .intro-text {
     font-size: var(--text-body);
     font-weight: 500;
@@ -189,9 +170,30 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* Stilovi za zakomentiranu galeriju studija (TODO #13) — odkomentiraj s markupom:
   .photo-grid--landscape {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .photo-grid--landscape .photo-placeholder {
+    aspect-ratio: 4 / 3;
+  }
+
+  .studio-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-black);
+    text-decoration: none;
+    margin-top: auto;
+  }
+
+  .studio-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  */
 
   .photo-item {
     display: block;
@@ -224,10 +226,6 @@
     aspect-ratio: 3 / 4;
     width: 100%;
     transition: background 0.2s;
-  }
-
-  .photo-grid--landscape .photo-placeholder {
-    aspect-ratio: 4 / 3;
   }
 
   .photo-item:hover .photo-placeholder {
@@ -280,21 +278,6 @@
   .block-body {
     font-size: var(--text-body);
     line-height: 2;
-  }
-
-  .studio-link {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--color-black);
-    text-decoration: none;
-    margin-top: auto;
-  }
-
-  .studio-link:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
   }
 
   /* ── Link section (crew / projekti) ── */
