@@ -24,6 +24,7 @@
     { href: 'https://www.instagram.com/radio.rozari/', label: 'IG', title: 'Instagram' },
     { href: 'https://mixcloud.com/RadioRoza', label: 'MX', title: 'Mixcloud' },
     { href: 'https://youtube.com/@radioroza9811', label: 'YT', title: 'YouTube' },
+    { href: '/citaj-radio/rss.xml', label: 'RSS', title: 'RSS — Čitaj radio' },
   ];
 
   /* src prazan = placeholder; izvornici logotipa su u assets-src/logos */

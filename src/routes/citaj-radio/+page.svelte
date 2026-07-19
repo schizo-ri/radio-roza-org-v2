@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PageHeader from '$lib/components/PageHeader.svelte';
   import ArticleCard from '$lib/components/ArticleCard.svelte';
   import ArticleCardSkeleton from '$lib/components/ArticleCardSkeleton.svelte';
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
@@ -36,8 +37,7 @@
 />
 
 <main class="citaj-radio-page">
-  <div class="page-header">
-    <h1 class="page-title">čitaj radio</h1>
+  <PageHeader title="čitaj radio">
     <div class="filter-bar">
       <span class="filter-label">kategorije: </span>
       <div class="filter-tabs">
@@ -54,8 +54,9 @@
           </a>
         {/each}
       </div>
+      <a href="/citaj-radio/rss.xml" class="rss-link" title="Pretplati se na RSS feed">rss →</a>
     </div>
-  </div>
+  </PageHeader>
 
   {#await data.listing}
     <!-- Klijentska navigacija streama postove — skeletoni drže raster dok stignu. -->
@@ -94,24 +95,6 @@
 <style>
   .citaj-radio-page {
     padding: 1.5rem 1rem 4rem;
-  }
-
-  /* Header row */
-  .page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: 0;
-    padding-bottom: 1rem;
-  }
-
-  .page-title {
-    font-family: var(--font-display);
-    font-size: var(--text-display);
-    font-weight: 400;
-    line-height: 1;
   }
 
   /* Filter */
@@ -160,6 +143,21 @@
     background: var(--color-black);
     border-color: var(--color-black);
     color: var(--color-white, #fff);
+  }
+
+  .rss-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-brand);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .rss-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .load-error {
