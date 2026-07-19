@@ -18,6 +18,31 @@ class PlayerState {
   // request fires even when the previous one asked for the same thing.
   liveResumeRequests = $state(0); // Player starts the live stream when this grows
   mixcloudPlayRequests = $state(0); // MixcloudBar calls widget.play() when this grows
+  stopRequests = $state(0); // Player pauses the stream / MixcloudBar pauses the widget
+
+  // Sleep timer — null when inactive. Background tabs throttle timeouts, so the
+  // actual stop can drift up to ~a minute; fine for falling asleep to the radio.
+  sleepTimerEndsAt = $state<number | null>(null);
+  #sleepTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  startSleepTimer(minutes: number) {
+    this.cancelSleepTimer();
+    const ms = minutes * 60_000;
+    this.sleepTimerEndsAt = Date.now() + ms;
+    this.#sleepTimeout = setTimeout(() => {
+      this.#sleepTimeout = null;
+      this.sleepTimerEndsAt = null;
+      this.stopRequests += 1;
+    }, ms);
+  }
+
+  cancelSleepTimer() {
+    if (this.#sleepTimeout) {
+      clearTimeout(this.#sleepTimeout);
+      this.#sleepTimeout = null;
+    }
+    this.sleepTimerEndsAt = null;
+  }
 
   setLive() {
     this.src = LIVE_SRC;

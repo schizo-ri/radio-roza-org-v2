@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, untrack } from 'svelte';
   import { browser } from '$app/environment';
+  import PlayerMenu from '$lib/components/PlayerMenu.svelte';
   import { playerState } from '$lib/stores/player.svelte';
 
   const show = $derived(playerState.mixcloudShow);
@@ -82,6 +83,18 @@
     });
   });
 
+  // Sleep timer je istekao — pauziraj widget
+  let seenStopRequests = playerState.stopRequests;
+  $effect(() => {
+    const n = playerState.stopRequests;
+    untrack(() => {
+      if (n > seenStopRequests) {
+        seenStopRequests = n;
+        widget?.pause().catch(() => {});
+      }
+    });
+  });
+
   $effect(() => clearPoll);
 
   onMount(() => {
@@ -146,6 +159,8 @@
         </svg>
       </a>
     {/if}
+
+    <PlayerMenu mode="mixcloud" />
   </div>
 {/if}
 

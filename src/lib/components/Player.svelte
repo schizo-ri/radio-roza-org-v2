@@ -1,8 +1,10 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import type Hls from 'hls.js';
   import MixcloudBar from '$lib/components/MixcloudBar.svelte';
+  import PlayerMenu from '$lib/components/PlayerMenu.svelte';
   import { playerState } from '$lib/stores/player.svelte';
+  import { playerSettings } from '$lib/stores/settings.svelte';
   import { getAlbumArt } from '$lib/utils/artwork';
   import type { ArtworkSizes } from '$lib/utils/artwork';
 
@@ -415,6 +417,30 @@
     }
   });
 
+  // Autoplay preferencija — vrijedi samo za prvi dolazak (Player je u layoutu,
+  // mounta se jednom). Ako browser traži gestu, onPlayRejected spusti na idle.
+  onMount(() => {
+    if (playerSettings.autoplayOnVisit && playerState.isLive) playIntent();
+  });
+
+  // Zapamćena glasnoća — pokriva i mount i pomicanje slidera u meniju
+  $effect(() => {
+    const el = audioEl;
+    if (el) el.volume = playerSettings.volume;
+  });
+
+  // Sleep timer je istekao — pauziraj live stream ako svira
+  let seenStopRequests = playerState.stopRequests;
+  $effect(() => {
+    const n = playerState.stopRequests;
+    untrack(() => {
+      if (n > seenStopRequests) {
+        seenStopRequests = n;
+        if (wantsPlaying) pauseIntent();
+      }
+    });
+  });
+
   // "Natrag na live" or a Mixcloud show ending — start the live stream. If the
   // browser demands a fresh gesture, onPlayRejected degrades to the idle bar.
   let seenResumeRequests = playerState.liveResumeRequests;
@@ -510,6 +536,8 @@
           {/if}
         </span>
       </div>
+
+      <PlayerMenu mode="live" />
     </div>
 
     {#if statusMessage}
