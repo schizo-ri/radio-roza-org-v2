@@ -18,8 +18,7 @@ export const shows: Show[] = [
     tags: ['Live'],
     description:
       'Prijenos nastupa uživo različitih izvođača iz Rijeke, RH i regije. Kroz 60 minuta izvođači na radiju izvode autorske pjesme, te neobavezni razgovori s gostima.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/54fd082e03ea6f9508cfe89100ef882b4d835bdc-ZivoUzivoPodcastCover.jpg',
+    image: '/images/shows/zivo-uzivo.webp',
     authors: [],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/%C5%BEivo-u%C5%BEivo/',
     active: true,
@@ -31,8 +30,7 @@ export const shows: Show[] = [
     tags: ['Reggae', 'Dub', 'Roots'],
     description:
       'Worries in the dance je emisija posvećena reggae i dub glazbi te glazbama i (sub)kulturama koje su iz njih proizašle ili su im srodne glazbeno, svjetonazorom,  tematikom i dr. Primarni cilj emisije je, prije svega, promocija hrvatskih i regionalnih autora, izvođača te ostalih umjetnika i glazbenih djelatnika, ali i svih ostalih segmenata koji sudjeluju u funkcioniranju scene (npr. organizacija raznih događaja kao što su koncerti, festivali, radionice...). Namjera je pružiti više prostora neafirmiranim glazbenicima da predstave svoj rad publici, ali i popratiti aktualan rad afirmiranih glazbenika te informirati slušatelje o aktualnim događanjima unutar scene.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/59e8631b7d6b7e8f7b3dec7c4f7de627498e5150-WarriorsPodcastCover2.jpg',
+    image: '/images/shows/worries-in-the-dance.webp',
     authors: ['Tomislav Mile Milićević'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/worries-in-the-dance/',
     active: true,
@@ -44,8 +42,7 @@ export const shows: Show[] = [
     tags: ['Kultura', 'Zajednica'],
     description:
       'Rožaik je mozaična emisija Radio Rože u kojoj ugošćujemo lokalne predstavnike civilnog sektora, aktiviste, znanstvenike, književnike, glazbenike i mnoge druge inspirativne osobe i inicijative čiji rad cijenimo i koje želimo predstaviti slušateljima u formatu razgovora ili priloga. Rožaik – emisija zajednice za zajednicu. Emisiju slušajte svake druge srijede.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/7b9e5f42fee0a8760540bd895674e5ac7093dc21-rozaik.jpg',
+    image: '/images/shows/rozaik.webp',
     authors: ['Svi'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/ro%C5%BEaik/',
     active: true,
@@ -57,8 +54,7 @@ export const shows: Show[] = [
     tags: ['Electro', 'House', 'Tehno'],
     description:
       'Radio is not dead, a posebno je živ svaki drugi petak od 20,00 - 22,00 sati. Kako radnom tjednu bolje staviti točku na "i" nego uz emisiju elektroničke glazbe. Vikend mood is "on"! Na valovima Radio Rože čekaju vas throwback iskopi, promocija novih singlova, vijesti, gosti, intervjui i 60 minutni mixevi za kraj emisije. Predstavljamo vam kolektive, DJ-e, producente, festivale i događanja, sve zbog čega poželimo još jedan party i još jedan petak i još jedan... i još jedan... U svakoj emisiji očekuje vas i ekskluzivni "FADER Guest Mix".',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/5faef14560718705de525d0c2015f58ced8195f7-Fader%20cover%20RR%20page.jpg',
+    image: '/images/shows/fader.webp',
     authors: ['Marina Jakšić', 'Ivan Dragnić'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/fader/',
     active: true,
@@ -70,8 +66,7 @@ export const shows: Show[] = [
     tags: ['Guest mix', 'Eclectic'],
     description:
       'Imaš svoj novi mix ili playlistu i želiš ju podijeliti sa svijetom? Na pravom si mjestu! Javi se Radio Roži i zavrti svoje najdraže trake. Svakog utorka u 23:00h i subotu u 23:00h u bloku "Ja Biram" emitiraju se pristigli mixevi, playliste i live setovi. Od microhousea do sočnog funka, žanrovski neograničeno i neobuzdano, na radio-roza.org',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/573ff0f1f6da0d9977a35294457d17967150d524-ja_biram.jpg',
+    image: '/images/shows/ja-biram.webp',
     authors: [],
     playlist_url: '',
     active: true,
@@ -83,8 +78,7 @@ export const shows: Show[] = [
     tags: ['World music', 'Folk', 'Etno'],
     description:
       'Emisija koja promovira glazbu iz cijelog svijeta - world music. Urednik i voditelj Emir Fulurija vodi vas u svaki kutak svijeta i donosi najbolje od glazbe proizašle iz tradicionalnih načina izvođenja i tradicionalnim glazbalima.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/017911b9941ab09d1970efb511d10ec87c28c311-IZVORI%C5%A0TA%202808.png',
+    image: '/images/shows/izvorista.webp',
     authors: ['Emir Fulurija'],
     playlist_url: '',
     active: true,
@@ -96,8 +90,7 @@ export const shows: Show[] = [
     tags: ['Ex-yu', 'Eclectic'],
     description:
       'Glazbena emisija udruge Spirit koja sakuplja pjesme koje nemate prilike često čuti, a prođu kroz gusto kvalitativno sito glazbenog urednika emisije koji se krije iza veselog nadimka Otto Depilacius (Depilator ušiju). Glazba za dezinfekciju ušiju nedjeljom od 20h.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/1b756750792595e4183afd96eab265368c019ab6-depilacija.png',
+    image: '/images/shows/depilacija.webp',
     authors: ['Denis Pilepić'],
     playlist_url: '',
     active: true,
@@ -109,8 +102,7 @@ export const shows: Show[] = [
     tags: ['Punk'],
     description:
       'Radijska avantura Pankeraj obuhvaća upravo onaj dio alternativne scene koji je nedostajao na našem malom radiju! Slušate nas svaki drugi petak.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/a57200cc9844f9843da5353745f06aae20457511-b818bb99b3b2b38a696dff6dc1d3e3646283bc7d-fader_insta.jpg',
+    image: '/images/shows/pankeraj.webp',
     authors: ['Neven Babin', 'Andrej Vučinić', 'Hrvoje Šimić', 'Grga', 'Sebastijan Tomažin'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/pankeraj/',
     active: true,
@@ -122,8 +114,7 @@ export const shows: Show[] = [
     tags: ['Rijeka', 'Eclectic'],
     description:
       'Najnoviji singlovi s riječke scene vrte se u eteru radio Rože svaki dan, kroz cijeli dan! Ukoliko vi ili vaš bend imate novu pjesmu, pišite nam i predlažite.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/32daa1b983fe6d934eeb166aa0ac8ce2985f5fee-thumbnail_singlovi.jpg',
+    image: '/images/shows/novi-singlovi-rijecke-scene.webp',
     authors: ['Davor Popdankovski'],
     playlist_url: '',
     active: true,
@@ -135,8 +126,7 @@ export const shows: Show[] = [
     tags: ['Rock', 'Metal', 'Experimental'],
     description:
       'Svakog ponedjeljka od 19:30 do 20:30 slušajte HEX., emisiju koja pod krilaticom „heavy and experimental" u Rožin program donosi sat vremena rocka, metala, noisea, HC-a te svakojakih mikrožanrova ispred, iza i između ovih navedenih. Kroz domaće i strane glazbene novitete te intervjue s glazbenicima svaki vam put pružamo novu dozu buke.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/72e9947d1436db48237514e9249934ab46e02d92-hex.jpg',
+    image: '/images/shows/hex.webp',
     authors: ['Martina Blečić'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/hex/',
     active: true,
@@ -148,8 +138,7 @@ export const shows: Show[] = [
     tags: ['Etno', 'Soul', 'Funk', 'Eclectic'],
     description:
       'Štošta. će nam Rožu oplemeniti svojim setovima, naći će se tu zaista #štošta jer, kao i u svemu što radi, Mirela nije usmjerena isključivo na jedno područje, a u ovom slučaju selekcije moći ćete čuti ritmove i hitove različitih žanrova kao što je funky house, r&b, soul, hip hop, pop, indie-pop, disco i #štoštajoš.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/4cc81f688140218ced0aa968038456d505c23d8d-stosta.jpg',
+    image: '/images/shows/stosta.webp',
     authors: ['DJ Mirilo'],
     playlist_url: '',
     active: true,
@@ -161,8 +150,7 @@ export const shows: Show[] = [
     tags: ['Interview', 'Animals'],
     description:
       'Beštijada je emisija posvećena životinjama i njihovoj dobrobiti koju vode i uređuju Martina Blečić i Tomislav Milićević.\nU emisiji najviše prostora dobivaju teme vezane uz zaštitu i udomljavanje napuštenih pasa i mačaka, poput programa kastracije i sterilizacije, slobodnoživućih mačaka, zakonske problematike, problema s kojima se u svom radu susreću udruge koje se bave zaštitom životinja, kao i edukacija o njima. Uz to, donosimo i veterinarske savjete, pozitivne priče o udomljavanju, psećim sportovima, predstavljamo udruge i volontere, poduzetnike koji nude proizvode i usluge za ljubimce, a rado se dotičemo i ostalih životinjskih vrsta te zaštite prirode.',
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/67e1c9039047db3cb7143374e3ee6fedd10f69d2-thumbnail_bestijada_v3.png',
+    image: '/images/shows/bestijada.webp',
     authors: ['Martina Blečić', 'Tomislav Milićević'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/bestijada/',
     active: true,
@@ -178,8 +166,7 @@ export const shows: Show[] = [
      Svake zadnje subote u mjesecu u 22h
 
     LINK: https://www.listennotes.com/podcasts/o-seksu-uz-pivo-stella-i-kai-TOcBQwIYCdA/'`,
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/4bc4c3d89d4e8e0c4e7cd5a68098efdc1e73579e-4bc4c3d89d4e8e0c4e7cd5a68098efdc1e73579e-ousp.jpg',
+    image: '/images/shows/o-seksu-uz-pivo.webp',
     authors: ['Stella', 'Kai'],
     playlist_url: 'https://www.listennotes.com/podcasts/o-seksu-uz-pivo-stella-i-kai-TOcBQwIYCdA',
     listennotes_id: '26419921b1d7478ab041bc1e5effd167',
@@ -195,8 +182,7 @@ export const shows: Show[] = [
     Istovremeno, sve pjesme su predstavljene kroz video spotove na YouTube kanalu emisije Reality Check 808. Autor i voditelj emisije je Dubravko Jagatić – dugogodišnji novinar i glazbeni kritičar koji sustavno prati hrvatsku u regionalnu muzičku scenu oko 40 godina.
 
     Link: https://www.youtube.com/@RealityCheck-xv8wg`,
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/8adc3c89348c2ac79d5f6dc02a68f1745c9613b8-reality.jpg',
+    image: '/images/shows/reality-check.webp',
     authors: ['Dubravko Jagatić'],
     playlist_url: 'https://www.youtube.com/@RealityCheck-xv8wg',
     active: true,
@@ -247,8 +233,7 @@ export const shows: Show[] = [
     DJ FrenkyBoy www.facebook.com/DJFrenkyBoy
     Bass Couture www.facebook.com/basscouturezgb
     Klubskascena.hr www.klubskascena.hr`,
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/3a6d0950cf6f89b16d3dc81447a0bbe5b45c7beb-bb.jpg',
+    image: '/images/shows/bubanj-i-bass.webp',
     authors: ['DJ FrankyBoy'],
     playlist_url: '',
     active: false,
@@ -268,8 +253,7 @@ export const shows: Show[] = [
 
     Već neko vrijeme se emitira na RADIO D59B, a od danas i na radio-roza.org! Dr. Smeđi Šećer svakog drugog utorka u mjesecu u 19h stiže u eter Rože i kopa.
 `,
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/ff9c5dda3237bd33961e62b413caf7d29a2d59a7-salmiakkipop.png',
+    image: '/images/shows/salmiakki-pop.webp',
     authors: ['Dr. Smeđi Šećer'],
     playlist_url: 'https://soundcloud.com/smedi-secer/sets/salmiakki-pop-the-salty-sweet',
     active: false,
@@ -289,8 +273,7 @@ export const shows: Show[] = [
 
     Urednici: Luka Rodela, Kasja Borić
     IG:  https://www.instagram.com/silujobilnouhonekadrhti/  `,
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/791300bb91c89580cb7c9ab6871e4e12c9beac75-sound_deactivate.jpg',
+    image: '/images/shows/sound.webp',
     authors: ['Luka Rodela', 'Kasja Borić'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/sound/',
     active: false,
@@ -426,8 +409,7 @@ export const shows: Show[] = [
     title: 'RNDM',
     tags: ['Minimal', 'Ambient', 'Electro'],
     description: `Rezidenti RNDM na RR prezentiraju elektroniku u žanrovski neograničenim setovima te ovisno o trenutnom mindsetu. Imate priliku poslušati presjek glazbe prigodne za varijantu klupskog groovea ili pak „easy listening mood-a.“ RNFM rezidenciju programa imaju u klubu Tunel, a za više informacija o svemu što rade pogledajte na njihovoj FB stranici!`,
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/d0aaa24c5c9f3923633ed81d41f0380ef900f8b4-rndm.jpg',
+    image: '/images/shows/rndm.webp',
     authors: ['RNDM'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/rndm-crates/',
     active: false,
@@ -438,8 +420,7 @@ export const shows: Show[] = [
     title: 'Da Cratez',
     tags: ['Hip Hop', 'Rap'],
     description: `Emisija posvećena hip-hop kulturi u kojoj će se promovirati naefirmirani izvođači iz Rijeke, regije i svijeta.`,
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/e5dfb11049cbb2a84fa3b3cc4179b5c9e8e3f30b-rep_dese.jpg',
+    image: '/images/shows/da-cratez.webp',
     authors: ['Filip Žiljak'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/da-cratez/',
     active: true,
@@ -450,8 +431,7 @@ export const shows: Show[] = [
     title: 'Rapertoar',
     tags: ['Hip Hop', 'Rap'],
     description: `Emisija posvećena hip-hop kulturi u kojoj će se promovirati naefirmirani izvođači iz Rijeke, regije i svijeta.`,
-    image:
-      'https://www.mar-com.hr/radio-davor/admin/serijal/uploads/e5dfb11049cbb2a84fa3b3cc4179b5c9e8e3f30b-rep_dese.jpg',
+    image: '/images/shows/rapertoar.webp',
     authors: ['Filip Žiljak'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/rapertoar/',
     active: false,
