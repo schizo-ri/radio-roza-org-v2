@@ -3,8 +3,10 @@
   import { afterNavigate } from '$app/navigation';
   import { fly, fade } from 'svelte/transition';
   import logo from '$lib/assets/logo.svg';
+  import SearchPanel from '$lib/components/SearchPanel.svelte';
 
   let menuOpen = $state(false);
+  let searchOpen = $state(false);
   let hidden = $state(false);
   let lastScrollY = 0;
 
@@ -13,7 +15,7 @@
   });
 
   $effect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : '';
+    document.body.style.overflow = menuOpen || searchOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
@@ -43,7 +45,10 @@
   });
 
   function onKeydown(e: KeyboardEvent) {
-    if (e.key === 'Escape') menuOpen = false;
+    if (e.key === 'Escape') {
+      menuOpen = false;
+      searchOpen = false;
+    }
   }
 
   const links = [
@@ -80,8 +85,34 @@
     <a href="/" class="site-name" aria-label="Radio Roža — početna stranica">Radio Roža</a>
 
     <button
+      class="search-btn"
+      onclick={() => {
+        searchOpen = !searchOpen;
+        menuOpen = false;
+      }}
+      aria-expanded={searchOpen}
+      aria-label={searchOpen ? 'Zatvori pretragu' : 'Otvori pretragu'}
+    >
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+        <line
+          x1="15.5"
+          y1="15.5"
+          x2="21"
+          y2="21"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+
+    <button
       class="hamburger"
-      onclick={() => (menuOpen = !menuOpen)}
+      onclick={() => {
+        menuOpen = !menuOpen;
+        searchOpen = false;
+      }}
       aria-expanded={menuOpen}
       aria-label={menuOpen ? 'Zatvori izbornik' : 'Otvori izbornik'}
     >
@@ -91,6 +122,8 @@
     </button>
   </div>
 </nav>
+
+<SearchPanel open={searchOpen} onclose={() => (searchOpen = false)} />
 
 {#if menuOpen}
   <div
@@ -153,12 +186,28 @@
     white-space: nowrap;
   }
 
+  .search-btn {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+    color: var(--color-white);
+  }
+
+  .search-btn:hover,
+  .search-btn[aria-expanded='true'] {
+    color: var(--color-black);
+  }
+
   .hamburger {
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 5px;
-    margin-left: auto;
     background: none;
     border: none;
     cursor: pointer;
