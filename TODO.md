@@ -10,56 +10,61 @@ odrađen u kodu (vidi git log).
    fallbackom na original, pa stare slike i dalje idu u punoj veličini. U Payload adminu ponovno
    spremi (ili re-uploadaj) starije slike.
 
-2. **Coveri emisija hostani na mar-com.hr.** `src/lib/data/shows.ts` za više emisija vuče covere
-   s `www.mar-com.hr` — vanjski server izvan tvoje kontrole; ako se ugasi, coveri nestaju.
-   Skini ih, stavi u `static/images/shows/` (webp, max 800px) i ažuriraj putanje u shows.ts.
-
-3. **Default OG slika (1200×630).** Stranice bez vlastite slike (naslovnica, program, kontakt…)
+2. **Default OG slika (1200×630).** Stranice bez vlastite slike (naslovnica, program, kontakt…)
    nemaju og:image pri dijeljenju na društvenim mrežama. Treba brendirana slika 1200×630 —
    stavi je u `static/images/og-default.png` i javi da je uvežem u Seo komponentu.
 
-4. **Potvrdi kanonsku domenu.** U `svelte.config.js` (prerender.origin) i `static/robots.txt`
+3. **Potvrdi kanonsku domenu.** U `svelte.config.js` (prerender.origin) i `static/robots.txt`
    postavljeno je `https://radio-roza.org` (bez www). Ako je kanonska verzija drukčija,
    promijeni na oba mjesta. Provjeri i Netlify redirect www → apex.
 
-5. **CC BY-SA linija u footeru** — i dalje placeholder dok ekipa ne potvrdi licenciju.
+4. **CC BY-SA linija u footeru** — i dalje placeholder dok ekipa ne potvrdi licenciju.
 
-6. **Google Search Console** — dodaj property i pošalji `https://radio-roza.org/sitemap.xml`.
+5. **Google Search Console** — dodaj property i pošalji `https://radio-roza.org/sitemap.xml`.
+   Dok si tamo, možeš prijaviti i RSS feed: `https://radio-roza.org/citaj-radio/rss.xml`.
 
 ## Provjere nakon deploya
 
-7. **Netlify cache radi:** otvori članak dvaput i pogledaj response header `cache-status` —
+6. **Netlify cache radi:** otvori članak dvaput i pogledaj response header `cache-status` —
    drugi put treba pisati hit (Netlify Durable/Edge). Isto za `/emisije/<slug>`.
 
-8. **Prerender radi:** `/kontakt`, `/emisije` i `o-nama/*` više se ne renderiraju kroz funkciju
+7. **Prerender radi:** `/kontakt`, `/emisije` i `o-nama/*` više se ne renderiraju kroz funkciju
    nego kao statične datoteke (vidi se u Netlify deploy summaryju pod "Prerendered pages").
 
-9. **Player na stvarnom uređaju.** Player sada na Safariju/iOS-u koristi nativni HLS (ne skida
+8. **Player na stvarnom uređaju.** Player na Safariju/iOS-u koristi nativni HLS (ne skida
    hls.js uopće), a na ostalim preglednicima hls.js se učitava tek na prvi klik play.
    Provjeri: play/pause/lock-screen na iPhoneu, te u Chrome/Firefox Network tabu da se hls.js
    chunk pojavi tek nakon klika.
 
-10. **ListenNotes kvota** — CDN keširanje (30 min + SWR) bitno smanjuje potrošnju API poziva,
-    ali baci oko na mjesečnu potrošnju na listennotes.com dashboardu.
+9. **ListenNotes kvota** — CDN keširanje (30 min + SWR) bitno smanjuje potrošnju API poziva,
+   ali baci oko na mjesečnu potrošnju na listennotes.com dashboardu.
 
-## Pospremanje
+10. **PWA instalacija.** Dodan je `manifest.webmanifest` + ikone (generirane iz logo.svg u
+    `static/icons/`), pa se stranica na mobitelu može instalirati kao aplikacija ("Dodaj na
+    početni zaslon"). Provjeri na stvarnom Androidu/iPhoneu da instalacija radi i da ti se
+    ikone sviđaju — ako želiš drukčije, zamijeni PNG-ove u `static/icons/` i
+    `static/apple-touch-icon.png` (192/512/512-maskable/180 px). Service workera namjerno
+    nema — radio ionako ne radi offline, a stale cache zna raditi probleme.
 
-11. **Nereferencirane datoteke u static/images/** — nigdje se ne koriste, samo povećavaju deploy:
-    `popi_cover_edit.png` (1,1 MB), `projekti/korona-kid/kk_logo.png` (212 KB), `2.png`, `3.png`,
-    `projekti/inkluzivni-kotac/mix.png`. Obriši ih ili premjesti u `assets-src/`.
+11. **Pretraga na stvarnom sadržaju.** Novi botun (povećalo) u navigaciji otvara pretragu
+    preko emisija, članaka i Mixcloud arhive (zadnjih 300 snimki). Prođi kroz par upita
+    (dijakritici tipa "roza"/"roža" bi trebali raditi isto) i javi ako želiš drukčiji
+    redoslijed grupa ili više rezultata po grupi.
 
-12. **Izvornici logotipa iz footera** premješteni su u `assets-src/logos/` (visoke rezolucije,
-    izvan deploya). Commitaj ih ako ih želiš čuvati u repou.
+12. **RSS feed radi:** `https://radio-roza.org/citaj-radio/rss.xml` — provjeri nakon deploya
+    (npr. dodaj u neki RSS čitač). Link na feed je i u `<head>`u svih stranica.
 
 ## Odluka za kasnije
 
 13. **Galerija studija na /o-nama.** Link „\* \* \* posjeti studio" vodio je na `#studio` koji ne
-    postoji (galerija studija je zakomentirana dok ne stignu fotografije) — build je to sad
-    hvatao kao mrtvi anchor, pa sam i link zakomentirao. Kad dobiješ fotke: odkomentiraj photo
-    grid 2, dodaj mu `id="studio"` i vrati link.
+    postoji (galerija studija je zakomentirana dok ne stignu fotografije). Kad dobiješ fotke:
+    odkomentiraj photo grid 2 i pripadajuće stilove (u istoj datoteci, označeni komentarom
+    "TODO #13"), dodaj `id="studio"` i vrati link.
 
-14. ~~**ArticleGrid layout shift.**~~ **Riješeno** — ugrađena varijanta C iz prototipa: stupce
-    određuje CSS (`auto-fill`), linije crta 2px outline na karticama, bez JS-a i bez skoka nakon
-    hidratacije. Paginirane stranice (citaj-radio, emisije) prihvaćaju nepotpun zadnji red, a
-    "novo novo novo" na naslovnici ima poseban `ShowsGrid` s container queryjima koji uvijek
-    puni redove (1 stupac → 4 kartice, 2 → 8, 3 → 9, 4 → 8, šire → stupci × 2).
+## Riješeno u kodu (za referencu)
+
+- ~~Coveri emisija hostani na mar-com.hr~~ — svih 20 covera skinuto, konvertirano u webp
+  (max 800px) u `static/images/shows/` i prespojeno u `shows.ts`. Vanjske ovisnosti više nema.
+- ~~Nereferencirane datoteke u static/images/~~ — obrisane (`popi_cover_edit.png`, `2.png`,
+  `3.png`, `kk_logo.png`, `mix.png`); u git povijesti su ako ikad zatrebaju.
+- ~~ArticleGrid layout shift~~ — CSS stupci + outline linije, bez JS-a (varijanta C).
