@@ -1,4 +1,8 @@
 <script lang="ts" module>
+  import type { PageData } from './$types';
+
+  type CitajData = Awaited<PageData['citaj']>;
+
   interface Show {
     href: string;
     title: string;
@@ -21,10 +25,15 @@
   // last result instantly (refreshed in the background) instead of flashing
   // skeletons while Mixcloud answers again.
   let cachedShows: Show[] | null = null;
+
+  // Isti trik za CMS postove: dok streamani promise iz loada ne stigne,
+  // povratak na naslovnicu prikaže zadnji rezultat umjesto skeletona.
+  let cachedCitaj = $state<CitajData | null>(null);
 </script>
 
 <script lang="ts">
   import ArticleCard from '$lib/components/ArticleCard.svelte';
+  import ArticleCardSkeleton from '$lib/components/ArticleCardSkeleton.svelte';
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
   import ShowsGrid from '$lib/components/ShowsGrid.svelte';
   import ShowCard from '$lib/components/ShowCard.svelte';
@@ -36,7 +45,6 @@
   import { browser } from '$app/environment';
   import { program, blocks } from '$lib/utils/program';
   import { stationWeekday, stationMinutes } from '$lib/utils/time';
-  import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
 
@@ -113,11 +121,16 @@
     ].slice(0, 5)
   );
 
-  const {
-    albumTjedna,
-    previewPosts: citajRadioList,
-    archivePosts: archiveArticles,
-  } = $derived(data);
+  // --- Čitaj radio (streamano iz +page.server.ts pri klijentskoj navigaciji) ---
+  const citajSkeletonItems = Array.from({ length: 4 }, (_, i) => ({
+    href: `__citaj_skeleton__${i}`,
+  }));
+
+  $effect(() => {
+    Promise.resolve(data.citaj).then((citaj) => {
+      cachedCitaj = citaj;
+    });
+  });
 </script>
 
 <svelte:head>
@@ -186,12 +199,9 @@
   </section>
 
   <!-- Čitaj radio preview -->
-  <section class="mid-col mid-col--citaj">
-    <div class="section-header">
-      <h2 class="section-title">čitaj radio</h2>
-    </div>
-
-    {#if albumTjedna}
+  {#snippet citajPreview(citaj: CitajData)}
+    {#if citaj.albumTjedna}
+      {@const albumTjedna = citaj.albumTjedna}
       <a href={albumTjedna.href} class="album-card">
         {#if albumTjedna.image}
           <img
@@ -220,11 +230,39 @@
       </a>
     {/if}
 
-    <ArticleGrid items={citajRadioList}>
+    <ArticleGrid items={citaj.previewPosts}>
       {#snippet card(item)}
         <ArticleCard {...item} />
       {/snippet}
     </ArticleGrid>
+  {/snippet}
+
+  <section class="mid-col mid-col--citaj">
+    <div class="section-header">
+      <h2 class="section-title">čitaj radio</h2>
+    </div>
+
+    {#await data.citaj}
+      {#if cachedCitaj}
+        {@render citajPreview(cachedCitaj)}
+      {:else}
+        <div class="album-skeleton" aria-hidden="true">
+          <div class="album-skeleton-image"></div>
+          <div class="album-skeleton-body">
+            <div class="skeleton-line skeleton-line--meta"></div>
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        </div>
+        <ArticleGrid items={citajSkeletonItems}>
+          {#snippet card(item)}
+            <ArticleCardSkeleton />
+          {/snippet}
+        </ArticleGrid>
+      {/if}
+    {:then citaj}
+      {@render citajPreview(citaj)}
+    {/await}
 
     <div class="section-link">
       <SeeAll href="/citaj-radio" label="Pročitaj radio" />
@@ -421,6 +459,79 @@
 
   .album-tag {
     margin-top: auto;
+  }
+
+  /* Skeleton varijanta album kartice — dimenzije prate .album-card. */
+  .album-skeleton {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 2px solid var(--color-black);
+    padding: 12px;
+    background-color: white;
+  }
+
+  .album-skeleton-image {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1;
+    margin-bottom: 0.75rem;
+  }
+
+  .album-skeleton-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  .skeleton-line {
+    border-radius: 2px;
+    height: var(--text-body, 1rem);
+    width: 100%;
+  }
+
+  .skeleton-line--meta {
+    height: var(--text-meta, 0.75rem);
+    width: 5rem;
+  }
+
+  .skeleton-line--title {
+    height: var(--text-title, 1.25rem);
+    width: 80%;
+  }
+
+  .skeleton-line,
+  .album-skeleton-image {
+    background: linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.08) 25%,
+      rgb(0 0 0 / 0.14) 50%,
+      rgb(0 0 0 / 0.08) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+
+  @container (min-width: 400px) {
+    .album-skeleton {
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .album-skeleton-image {
+      width: 45%;
+      margin-bottom: 0;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
   }
 
   /* ── Tablet (640px+) ── */

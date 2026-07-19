@@ -9,16 +9,8 @@ const categoryMap = new Map(
   categoriesJson.docs.map((c) => [c.id, { title: c.title, slug: c.slug }])
 );
 
-export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
-  // Cache SSR HTML on Netlify CDN — the CMS answers in 0.7–1.4 s, so repeat
-  // visitors get the cached copy while stale-while-revalidate refreshes it in
-  // the background. Mixcloud shows are fetched client-side so staleness there
-  // is irrelevant here.
-  setHeaders({
-    'Cache-Control': 'public, max-age=60',
-    'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=300, stale-while-revalidate=3600',
-  });
-
+// CMS odgovara u 0.7–1.4 s; greška se guta da naslovnica preživi ispad CMS-a.
+async function loadCitaj(fetch: typeof globalThis.fetch) {
   let docs: Awaited<ReturnType<typeof fetchPosts>>['docs'];
   try {
     docs = (await fetchPosts(fetch, { limit: 10, page: 1 })).docs;
@@ -56,13 +48,27 @@ export const load: PageServerLoad = async ({ fetch, setHeaders }) => {
     };
   });
 
-  const albumTjedna = allPosts.find((p) => p.isAlbumTjedna) ?? null;
-  const previewPosts = allPosts.filter((p) => !p.isAlbumTjedna).slice(0, 4);
-  const archivePosts = allPosts.filter((p) => !p.isAlbumTjedna).slice(4);
+  return {
+    albumTjedna: allPosts.find((p) => p.isAlbumTjedna) ?? null,
+    previewPosts: allPosts.filter((p) => !p.isAlbumTjedna).slice(0, 4),
+    archivePosts: allPosts.filter((p) => !p.isAlbumTjedna).slice(4),
+  };
+}
+
+export const load: PageServerLoad = async ({ fetch, setHeaders, isDataRequest }) => {
+  // SSR HTML se kešira na Netlify CDN-u; dugi SWR prozor znači da i rijetki
+  // posjetitelji dobiju keširanu kopiju odmah, dok se svježa verzija povlači
+  // u pozadini. Mixcloud snimke se dohvaćaju klijentski pa tu ne stare.
+  setHeaders({
+    'Cache-Control': 'public, max-age=60',
+    'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=300, stale-while-revalidate=86400',
+  });
+
+  const citaj = loadCitaj(fetch);
 
   return {
-    albumTjedna,
-    previewPosts,
-    archivePosts,
+    // SSR čeka postove (pun HTML za tražilice i CDN cache); klijentska
+    // navigacija dobiva promise koji se streama, pa je prijelaz trenutan.
+    citaj: isDataRequest ? citaj : await citaj,
   };
 };

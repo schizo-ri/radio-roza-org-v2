@@ -1,10 +1,14 @@
 <script lang="ts">
   import ArticleCard from '$lib/components/ArticleCard.svelte';
+  import ArticleCardSkeleton from '$lib/components/ArticleCardSkeleton.svelte';
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
   import Seo from '$lib/components/Seo.svelte';
   import { page } from '$app/state';
 
   let { data } = $props();
+
+  // 9 = limit iz +page.server.ts
+  const skeletonItems = Array.from({ length: 9 }, (_, i) => ({ href: `__skeleton__${i}` }));
 
   const activeCategory = $derived(page.url.searchParams.get('kategorija') ?? 'sve');
 
@@ -24,8 +28,6 @@
     url.searchParams.set('stranica', String(n));
     return url.pathname + url.search;
   }
-
-  const pageNums = $derived(Array.from({ length: data.totalPages }, (_, i) => i + 1));
 </script>
 
 <Seo
@@ -55,26 +57,38 @@
     </div>
   </div>
 
-  <ArticleGrid items={data.posts}>
-    {#snippet card(item)}
-      <ArticleCard {...item} />
-    {/snippet}
-  </ArticleGrid>
+  {#await data.listing}
+    <!-- Klijentska navigacija streama postove — skeletoni drže raster dok stignu. -->
+    <ArticleGrid items={skeletonItems}>
+      {#snippet card(item)}
+        <ArticleCardSkeleton />
+      {/snippet}
+    </ArticleGrid>
+  {:then listing}
+    <ArticleGrid items={listing.posts}>
+      {#snippet card(item)}
+        <ArticleCard {...item} />
+      {/snippet}
+    </ArticleGrid>
 
-  {#if data.totalPages > 1}
-    <nav class="pagination" aria-label="Stranice">
-      {#each pageNums as n (n)}
-        <a
-          href={pageHref(n)}
-          class="page-num"
-          class:current={n === data.currentPage}
-          aria-current={n === data.currentPage ? 'page' : undefined}
-        >
-          {n}
-        </a>
-      {/each}
-    </nav>
-  {/if}
+    {#if listing.totalPages > 1}
+      {@const pageNums = Array.from({ length: listing.totalPages }, (_, i) => i + 1)}
+      <nav class="pagination" aria-label="Stranice">
+        {#each pageNums as n (n)}
+          <a
+            href={pageHref(n)}
+            class="page-num"
+            class:current={n === listing.currentPage}
+            aria-current={n === listing.currentPage ? 'page' : undefined}
+          >
+            {n}
+          </a>
+        {/each}
+      </nav>
+    {/if}
+  {:catch}
+    <p class="load-error">Članke trenutno nije moguće učitati. Pokušaj ponovno za koji trenutak.</p>
+  {/await}
 </main>
 
 <style>
@@ -146,6 +160,12 @@
     background: var(--color-black);
     border-color: var(--color-black);
     color: var(--color-white, #fff);
+  }
+
+  .load-error {
+    font-family: var(--font-mono);
+    font-size: var(--text-body);
+    padding: 2rem 0;
   }
 
   /* Pagination */
