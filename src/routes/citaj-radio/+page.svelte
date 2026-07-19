@@ -54,7 +54,6 @@
           </a>
         {/each}
       </div>
-      <a href="/citaj-radio/rss.xml" class="rss-link" title="Pretplati se na RSS feed">rss →</a>
     </div>
   </PageHeader>
 
@@ -143,21 +142,6 @@
     background: var(--color-black);
     border-color: var(--color-black);
     color: var(--color-white, #fff);
-  }
-
-  .rss-link {
-    font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--color-brand);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .rss-link:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
   }
 
   .load-error {
