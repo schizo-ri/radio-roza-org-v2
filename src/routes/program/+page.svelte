@@ -9,6 +9,7 @@
   import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
   import { browser } from '$app/environment';
+  import { downloadShowIcs } from '$lib/utils/ics';
 
   const DAY_NAMES_HR: Record<Day, string> = {
     Monday: 'ponedjeljak',
@@ -150,6 +151,30 @@
               {#if isNow}
                 <span class="now-badge">sada</span>
               {/if}
+              <button
+                class="cal-btn"
+                onclick={() => downloadShowIcs(show)}
+                aria-label="Dodaj u kalendar: {show.title}"
+                title="Dodaj u kalendar"
+              >
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <rect x="1.5" y="2.5" width="13" height="12" />
+                  <line x1="1.5" y1="6" x2="14.5" y2="6" />
+                  <line x1="5" y1="1" x2="5" y2="4" />
+                  <line x1="11" y1="1" x2="11" y2="4" />
+                  <line x1="8" y1="8.5" x2="8" y2="12.5" />
+                  <line x1="6" y1="10.5" x2="10" y2="10.5" />
+                </svg>
+              </button>
             </li>
           {/each}
         </ul>
@@ -353,6 +378,22 @@
     color: var(--color-brand);
     flex-shrink: 0;
     padding-top: 0.3em;
+  }
+
+  .cal-btn {
+    display: flex;
+    align-items: flex-start;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.2em 0 0;
+    color: rgb(0 0 0 / 0.35);
+  }
+
+  .cal-btn:hover,
+  .cal-btn:focus-visible {
+    color: var(--color-black);
   }
 
   .show-time {

@@ -42,6 +42,12 @@ export function stationMinutes(date: Date = new Date()): number {
   return h * 60 + m;
 }
 
+/** Station-local calendar date as a noon-UTC Date — safe for day arithmetic across DST. */
+export function stationDateAtNoonUTC(date: Date = new Date()): Date {
+  const [y, m, d] = ymdFmt.format(date).split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d, 12));
+}
+
 /** "18.7."-style labels for Monday–Sunday of the current station-time week. */
 export function stationWeekDateLabels(date: Date = new Date()): Record<Day, string> {
   const [y, m, d] = ymdFmt.format(date).split('-').map(Number);
