@@ -78,6 +78,17 @@
 
   {#if open}
     <div class="panel">
+      {#if mode === 'mixcloud' && playerState.mixcloudShow?.url}
+        <a
+          class="mc-link"
+          href={playerState.mixcloudShow.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          otvori na mixcloudu ↗
+        </a>
+      {/if}
+
       <label class="row">
         <input
           type="checkbox"
@@ -140,7 +151,7 @@
     border: none;
     cursor: pointer;
     padding: 0;
-    color: rgb(0 0 0 / 0.5);
+    color: rgb(0 0 0 / 0.9);
   }
 
   .cog-btn:hover,
@@ -199,6 +210,19 @@
     font-size: var(--text-meta);
     color: rgb(0 0 0 / 0.45);
     margin-top: -0.375rem;
+  }
+
+  .mc-link {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: var(--color-black);
+    text-decoration: none;
+  }
+
+  .mc-link:hover,
+  .mc-link:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   /* Glasnoća ima smisla samo uz miš/trackpad — na touch uređajima je vrte
