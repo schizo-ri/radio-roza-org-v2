@@ -2,6 +2,7 @@
   import { browser } from '$app/environment';
   import Tag from '$lib/components/Tag.svelte';
   import { playerState } from '$lib/stores/player.svelte';
+  import { tagChipsKeepUnknown } from '$lib/data/tags';
 
   interface MixcloudTag {
     name: string;
@@ -233,9 +234,10 @@
             {ep.name}
           </button>
           {#if ep.tags && ep.tags.length > 0}
+            {@const epChips = tagChipsKeepUnknown(ep.tags.map((t) => t.name))}
             <div class="episode-tags">
-              {#each ep.tags as tag (tag.url)}
-                <Tag label={tag.name} />
+              {#each epChips as tag (tag.label)}
+                <Tag label={tag.label} href={tag.href} />
               {/each}
             </div>
           {/if}

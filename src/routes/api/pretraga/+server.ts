@@ -10,12 +10,16 @@ export async function GET({ fetch, setHeaders }) {
   });
 
   try {
-    const { docs } = await fetchPosts(fetch, { limit: 100 });
+    // depth 2 da tagovi dođu kao objekti (za pretragu po tagu)
+    const { docs } = await fetchPosts(fetch, { limit: 100, depth: 2 });
     return json({
       posts: docs.map((p) => ({
         href: `/citaj-radio/${p.slug}`,
         title: p.title,
         excerpt: lexicalExcerpt(p.content, 120),
+        tags: (p.tags ?? [])
+          .map((t) => (typeof t === 'object' && t ? t.title : ''))
+          .filter(Boolean),
         date: p.publishedAt
           ? new Date(p.publishedAt).toLocaleDateString('hr-HR', {
               day: '2-digit',

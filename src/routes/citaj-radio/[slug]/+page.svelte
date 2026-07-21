@@ -4,6 +4,7 @@
   import JsonLd from '$lib/components/JsonLd.svelte';
   import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
+  import { tagHref } from '$lib/data/tags';
 
   let { data } = $props();
   const { article, related } = $derived(data);
@@ -59,10 +60,13 @@
     <div class="article-body">
       {@html article.contentHtml}
 
-      {#if article.categories.length > 0}
+      {#if article.categories.length > 0 || article.tags.length > 0}
         <div class="article-tags">
           {#each article.categories as cat (cat.slug)}
             <Tag label={cat.title} />
+          {/each}
+          {#each article.tags as tag (tag.slug)}
+            <Tag label={tag.title} href={tagHref(tag.slug)} />
           {/each}
         </div>
       {/if}

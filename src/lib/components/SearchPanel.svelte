@@ -4,6 +4,7 @@
     title: string;
     excerpt: string;
     date: string;
+    tags?: string[];
   }
 
   interface ArchiveHit {
@@ -76,7 +77,11 @@
   );
 
   const postHits = $derived(
-    active ? posts.filter((p) => normalize(`${p.title} ${p.excerpt}`).includes(q)).slice(0, 6) : []
+    active
+      ? posts
+          .filter((p) => normalize([p.title, p.excerpt, ...(p.tags ?? [])].join(' ')).includes(q))
+          .slice(0, 6)
+      : []
   );
 
   const archiveHits = $derived(

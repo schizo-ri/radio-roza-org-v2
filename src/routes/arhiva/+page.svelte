@@ -132,7 +132,7 @@
         {#if loading}
           <ShowCardSkeleton />
         {:else}
-          <ShowCard {...item as ArchiveShow} />
+          <ShowCard {...item as ArchiveShow} keepUnknownTags />
         {/if}
       {/snippet}
     </ArticleGrid>
