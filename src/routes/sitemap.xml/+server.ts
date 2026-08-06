@@ -1,5 +1,6 @@
 import { fetchPosts } from '$lib/api/cms';
 import { shows } from '$lib/data/shows';
+import { collectTagHits, taggedSlugs } from '$lib/utils/tagHits';
 
 export const prerender = false;
 
@@ -22,6 +23,7 @@ const STATIC_PATHS = [
   '/o-nama/projekti/odasiljac/skolica',
   '/o-nama/projekti/odasiljac/sos',
   '/o-nama/projekti/ziroskop',
+  '/tag',
 ];
 
 export async function GET({ fetch, url, setHeaders }) {
@@ -38,7 +40,11 @@ export async function GET({ fetch, url, setHeaders }) {
     // CMS unreachable — ship the static part of the sitemap anyway
   }
 
-  const paths = [...STATIC_PATHS, ...shows.map((s) => s.href), ...articlePaths];
+  // Samo tagovi koji stvarno nešto vraćaju. Prazne tag stranice (rječnik ima 81
+  // tag) nema smisla nuditi tražilicama.
+  const tagPaths = taggedSlugs(await collectTagHits(fetch)).map((slug) => `/tag/${slug}`);
+
+  const paths = [...STATIC_PATHS, ...shows.map((s) => s.href), ...articlePaths, ...tagPaths];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

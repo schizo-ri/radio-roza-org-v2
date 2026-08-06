@@ -335,7 +335,10 @@
   }
 
   async function pollNowPlayingSimple() {
-    if (document.hidden) return; // onVisibilityChange refreshes when the tab returns
+    // While playing, keep polling even in the background so the media session
+    // (lock screen / OS controls) stays current on song changes. When idle and
+    // hidden, skip — onVisibilityChange refreshes when the tab returns.
+    if (document.hidden && !wantsPlaying) return;
     try {
       const res = await fetch(NOW_PLAYING_SIMPLE_URL, { cache: 'no-store' });
       const text = (await res.text()).trim();

@@ -9,6 +9,8 @@
   let searchOpen = $state(false);
   let hidden = $state(false);
   let lastScrollY = 0;
+  let upDistance = 0;
+  const SHOW_THRESHOLD = 20; // px kontinuiranog scrolla prema gore prije nego se traka vrati
 
   afterNavigate(() => {
     menuOpen = false;
@@ -27,16 +29,25 @@
 
   function onScroll() {
     const y = window.scrollY;
+    const delta = y - lastScrollY;
+
     if (y < 80) {
       hidden = false;
-      document.documentElement.style.setProperty('--nav-offset', `${getNavHeight()}px`);
-    } else if (y > lastScrollY) {
+      upDistance = 0;
+    } else if (delta > 0) {
       hidden = true;
-      document.documentElement.style.setProperty('--nav-offset', '0px');
-    } else {
-      hidden = false;
-      document.documentElement.style.setProperty('--nav-offset', `${getNavHeight()}px`);
+      upDistance = 0;
+    } else if (delta < 0) {
+      upDistance += -delta;
+      if (upDistance > SHOW_THRESHOLD) {
+        hidden = false;
+      }
     }
+
+    document.documentElement.style.setProperty(
+      '--nav-offset',
+      hidden ? '0px' : `${getNavHeight()}px`
+    );
     lastScrollY = y;
   }
 

@@ -47,6 +47,7 @@
 
   a.tag:hover {
     border-color: var(--color-black);
-    background: rgb(0 0 0 / 0.05);
+    color: var(--color-black, #000);
+    background: rgb(0 0 0 / 0);
   }
 </style>

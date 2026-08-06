@@ -6,10 +6,13 @@
   import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
   import { shows } from '$lib/data/shows';
+  import { tagChips } from '$lib/data/tags';
 
   let { data } = $props();
 
   const show = $derived(shows.find((s) => s.href === `/emisije/${page.params.slug}`));
+
+  const showTags = $derived(show ? tagChips(show.tags) : []);
 
   const seoDescription = $derived.by(() => {
     const desc = show?.description;
@@ -46,10 +49,10 @@
           {#if show.authors.length > 0}
             <p class="show-authors">{show.authors.join(', ')}</p>
           {/if}
-          {#if show.tags.length > 0}
+          {#if showTags.length > 0}
             <div class="show-tags">
-              {#each show.tags as tag (tag)}
-                <Tag label={tag} />
+              {#each showTags as tag (tag.label)}
+                <Tag label={tag.label} href={tag.href} />
               {/each}
             </div>
           {/if}

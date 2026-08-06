@@ -585,7 +585,7 @@
 
     /* Program + čitaj radio side by side */
     .mid-section {
-      grid-template-columns: minmax(0, 50em) 1fr;
+      grid-template-columns: minmax(0, 32em) 1fr;
       margin-bottom: 5rem;
       padding: 0 2rem;
     }
@@ -599,8 +599,9 @@
       padding-right: 2rem;
     }
 
-    .mid-col--citaj {
-      padding-left: 2rem;
+    .mid-col--citaj .section-header,
+    .mid-col--citaj .section-link {
+      padding-left: 12px;
     }
 
     .mid-col .section-header {

@@ -95,9 +95,9 @@
     transition: transform 0.3s ease;
   }
 
-  .article-card:hover .card-image {
-    transform: scale(1.03);
-  }
+  /*.article-card:hover .card-image {*/
+    /*transform: scale(1.03);*/
+  /*}*/
 
   /* Body */
   .card-body {

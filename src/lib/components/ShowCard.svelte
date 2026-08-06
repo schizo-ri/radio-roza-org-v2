@@ -1,6 +1,7 @@
 <script lang="ts">
   import Tag from './Tag.svelte';
   import { playerState } from '$lib/stores/player.svelte';
+  import { tagChips, tagChipsKeepUnknown } from '$lib/data/tags';
 
   interface Props {
     href: string;
@@ -8,10 +9,16 @@
     date?: string;
     image?: string;
     tags?: string[];
+    // Mixcloud (arhiva) donosi nekurirane tagove — zadrži nepoznate bez linka.
+    keepUnknownTags?: boolean;
     mixcloudKey?: string;
   }
 
-  let { href, title, date, image, tags, mixcloudKey }: Props = $props();
+  let { href, title, date, image, tags, keepUnknownTags = false, mixcloudKey }: Props = $props();
+
+  const chips = $derived(
+    tags ? (keepUnknownTags ? tagChipsKeepUnknown(tags) : tagChips(tags)) : []
+  );
 
   function play() {
     if (!mixcloudKey) return;
@@ -57,10 +64,10 @@
       {/if}
     </h3>
 
-    {#if tags && tags.length > 0}
+    {#if chips.length > 0}
       <div class="card-tags">
-        {#each tags as tag (tag)}
-          <Tag label={tag} />
+        {#each chips as tag (tag.label)}
+          <Tag label={tag.label} href={tag.href} />
         {/each}
       </div>
     {/if}

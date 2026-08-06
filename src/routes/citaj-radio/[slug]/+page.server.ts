@@ -34,6 +34,12 @@ export const load: PageServerLoad = async ({ fetch, params, setHeaders }) => {
     )
     .filter(Boolean) as { title: string; slug: string }[];
 
+  // Tagovi dolaze kao objekti (depth 2). Slug iz CMS-a je isti kao frontend
+  // kanonski slug, pa vode izravno na /tag/[slug].
+  const articleTags = (post.tags ?? [])
+    .map((raw) => (typeof raw === 'number' ? null : { title: raw.title, slug: raw.slug }))
+    .filter(Boolean) as { title: string; slug: string }[];
+
   const related = post.relatedPosts
     .filter((r): r is Exclude<typeof r, number> => typeof r !== 'number')
     .map((r) => ({
@@ -61,6 +67,7 @@ export const load: PageServerLoad = async ({ fetch, params, setHeaders }) => {
       ogImage: post.heroImage ? ogImageUrl(post.heroImage) : undefined,
       excerpt: lexicalExcerpt(post.content, 160),
       categories: cats,
+      tags: articleTags,
       contentHtml: lexicalToHtml(post.content),
     },
     related,

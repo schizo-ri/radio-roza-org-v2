@@ -21,6 +21,12 @@ export interface CmsCategory {
   slug: string;
 }
 
+export interface CmsTag {
+  id: number;
+  title: string;
+  slug: string;
+}
+
 export interface LexicalNode {
   type: string;
   version: number;
@@ -40,6 +46,7 @@ export interface CmsPost {
   heroImage: CmsMedia | null;
   content: LexicalContent;
   categories: (number | CmsCategory)[];
+  tags?: (number | CmsTag)[];
   populatedAuthors: { id: number; name: string | null }[];
   relatedPosts: (number | CmsPost)[];
   _status: 'published' | 'draft';
@@ -77,10 +84,10 @@ export function ogImageUrl(media: CmsMedia): string {
 
 export async function fetchPosts(
   fetch: typeof globalThis.fetch,
-  opts: { page?: number; limit?: number; categoryId?: number } = {}
+  opts: { page?: number; limit?: number; categoryId?: number; depth?: number } = {}
 ): Promise<PostsResponse> {
   const params = new URLSearchParams({
-    depth: '1',
+    depth: String(opts.depth ?? 1),
     limit: String(opts.limit ?? 10),
     page: String(opts.page ?? 1),
     sort: '-publishedAt',
@@ -88,6 +95,26 @@ export async function fetchPosts(
   if (opts.categoryId) {
     params.set('where[categories][in]', String(opts.categoryId));
   }
+  const res = await fetch(`${CMS_BASE}/api/posts?${params}`);
+  if (!res.ok) throw new Error(`CMS error: ${res.status}`);
+  return res.json();
+}
+
+// Članci s danim tagom, po slugu taga (ugniježđeni upit na relaciju). Slug u
+// CMS-u je isti kao frontend kanonski slug (isto slugify pravilo), pa se
+// /tag/[slug] izravno preslikava.
+export async function fetchPostsByTag(
+  fetch: typeof globalThis.fetch,
+  tagSlug: string,
+  opts: { page?: number; limit?: number } = {}
+): Promise<PostsResponse> {
+  const params = new URLSearchParams({
+    depth: '1',
+    limit: String(opts.limit ?? 24),
+    page: String(opts.page ?? 1),
+    sort: '-publishedAt',
+    'where[tags.slug][equals]': tagSlug,
+  });
   const res = await fetch(`${CMS_BASE}/api/posts?${params}`);
   if (!res.ok) throw new Error(`CMS error: ${res.status}`);
   return res.json();

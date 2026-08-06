@@ -11,6 +11,7 @@
   import Tag from '$lib/components/Tag.svelte';
   import { browser } from '$app/environment';
   import { downloadShowIcs } from '$lib/utils/ics';
+  import { tagChips } from '$lib/data/tags';
 
   const DAY_NAMES_HR: Record<Day, string> = {
     Monday: 'ponedjeljak',
@@ -140,11 +141,14 @@
                 <h3 class="show-title">{show.title}</h3>
                 {#if block}
                   <p class="show-desc">{block.description}</p>
-                  <div class="show-tags">
-                    {#each block.tags as tag (tag)}
-                      <Tag label={tag} color="black" />
-                    {/each}
-                  </div>
+                  {@const blockChips = tagChips(block.tags)}
+                  {#if blockChips.length > 0}
+                    <div class="show-tags">
+                      {#each blockChips as tag (tag.label)}
+                        <Tag label={tag.label} href={tag.href} color="black" />
+                      {/each}
+                    </div>
+                  {/if}
                 {/if}
               </div>
               {#if isNow}
