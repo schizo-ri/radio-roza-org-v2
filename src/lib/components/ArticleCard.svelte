@@ -96,7 +96,7 @@
   }
 
   /*.article-card:hover .card-image {*/
-    /*transform: scale(1.03);*/
+  /*transform: scale(1.03);*/
   /*}*/
 
   /* Body */
