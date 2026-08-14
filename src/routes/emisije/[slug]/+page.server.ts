@@ -1,10 +1,14 @@
-import { LISTENNOTES_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { shows } from '$lib/data/shows';
 
 export async function load({ params, fetch, setHeaders }) {
   const show = shows.find((s) => s.href === `/emisije/${params.slug}`);
 
   if (!show?.listennotes_id) return {};
+
+  // Čita se u runtimeu, ne pri buildu — bez ključa stranica radi, samo bez epizoda.
+  const apiKey = env.LISTENNOTES_API_KEY;
+  if (!apiKey) return {};
 
   // Episodes change weekly at most — long CDN cache also protects the
   // ListenNotes monthly request quota.
@@ -15,7 +19,7 @@ export async function load({ params, fetch, setHeaders }) {
 
   const res = await fetch(
     `https://listen-api.listennotes.com/api/v2/podcasts/${show.listennotes_id}?sort=recent_first`,
-    { headers: { 'X-ListenAPI-Key': LISTENNOTES_API_KEY } }
+    { headers: { 'X-ListenAPI-Key': apiKey } }
   );
 
   if (!res.ok) return {};
