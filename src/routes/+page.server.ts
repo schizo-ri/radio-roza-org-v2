@@ -48,10 +48,16 @@ async function loadCitaj(fetch: typeof globalThis.fetch) {
     };
   });
 
+  // Postovi stižu sortirani po -publishedAt, pa je prvi pogodak ujedno i
+  // zadnji album tjedna. Iz liste ispada samo on; stariji albumi tjedna
+  // izlistavaju se normalno među ostalim člancima.
+  const albumTjedna = allPosts.find((p) => p.isAlbumTjedna) ?? null;
+  const rest = allPosts.filter((p) => p !== albumTjedna);
+
   return {
-    albumTjedna: allPosts.find((p) => p.isAlbumTjedna) ?? null,
-    previewPosts: allPosts.filter((p) => !p.isAlbumTjedna).slice(0, 4),
-    archivePosts: allPosts.filter((p) => !p.isAlbumTjedna).slice(4),
+    albumTjedna,
+    previewPosts: rest.slice(0, 4),
+    archivePosts: rest.slice(4),
   };
 }
 
