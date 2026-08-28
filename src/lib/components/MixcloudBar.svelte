@@ -479,10 +479,12 @@
     height: 60px;
     border: 0;
     display: block;
-    /* The visible widget's chrome (cool-grey border, seek track, near-white fill)
-       lives inside a cross-origin iframe we can't restyle, so a warm filter nudges
-       those neutral greys toward the site's palette. Irrelevant once hidden. */
-    filter: sepia(0.25) saturate(1.2) brightness(1.03);
+    /* Deliberately unfiltered. Mixcloud's light widget is already near-white
+       (#fcfcfc fill, cool-grey track) so it sits flush on the white player bar.
+       A warm filter used to tint it here, but on a phone — where this iframe is
+       the full-width transport — it read as a yellow band pasted over the bar.
+       It's a Mixcloud player; the link-out (MX, or the cog menu on phones)
+       already says so. */
   }
 
   .mc-frame--hidden {

@@ -457,7 +457,7 @@
     });
   });
 
-  // The bar's height varies by mode (live 56/70px + status row, Mixcloud 60/70px),
+  // Both modes are 60px (70px on desktop), but live mode can add a status row,
   // so sticky UI below (program page) reads the real bottom edge from a CSS var.
   $effect(() => {
     const el = playerEl;
@@ -563,10 +563,12 @@
     border-bottom: 1px solid rgb(0 0 0 / 0.08);
   }
 
+  /* 60px matches .mc-bar — the Mixcloud widget's own control row is a hard 60px,
+     so the live bar meets it there and the bar height stays put across modes. */
   .player-bar {
     display: flex;
     align-items: center;
-    height: 56px;
+    height: 60px;
     padding: 0 1rem;
     gap: 0.75rem;
   }
