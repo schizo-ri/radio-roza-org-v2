@@ -284,9 +284,12 @@
 
     if (stale) {
       pendingResync = true;
-      // iOS honours `muted` where it ignores `volume`, so the stale buffer stays
-      // silent everywhere; volume 0 gives the fade something to ramp back up from
-      el.muted = true;
+      // Muting suppresses the stale buffer on the MSE path — but NEVER on the
+      // native one: iOS gives a muted element no audio session, so the lock screen
+      // control empties and hands play to the last media app. That is what broke
+      // resume on iPhone. volume 0 is all we do there (iOS ignores that too, so a
+      // moment of stale audio is audible — far better than losing the session).
+      if (hls) el.muted = true;
       el.volume = 0;
       resyncTimer = setTimeout(finishResync, RESYNC_TIMEOUT_MS);
     } else {
@@ -385,23 +388,11 @@
     if (!resumeStream()) tryPlay();
   }
 
-  // Soft pause only pays off on the MSE path: there hls.stopLoad() stops the
-  // network while the element stays loaded, so the OS media session survives and
-  // play works from the lock screen. On the native path we cannot stop the network
-  // without emptying the element, and iOS releases the audio session on pause
-  // anyway (the lock screen control empties and hands play to the last media app —
-  // no web-side fix exists, WakeLock is unavailable there). So a native pause
-  // would keep buffering for nothing: stop it hard instead.
-  function releaseForPause() {
-    if (hls) pauseStream();
-    else stopStream();
-  }
-
-  // The user or the OS pausing. stopIntent is the unconditionally hard version,
-  // for when nothing should be left to resume at all.
+  // The user or the OS pausing — keep the media session alive so play still works
+  // from the lock screen. stopIntent is the hard version, for when it shouldn't.
   function pauseIntent() {
     wantsPlaying = false;
-    releaseForPause();
+    pauseStream();
     status = 'idle';
   }
 
@@ -572,9 +563,9 @@
         if (status !== 'failed' && status !== 'unsupported') status = 'idle';
       } else if (!internalPausePending()) {
         // External pause (unplugged headphones, another app taking over) — respect
-        // it, on the same terms as a deliberate pause
+        // it, but keep the source attached so play still works from the lock screen
         wantsPlaying = false;
-        releaseForPause();
+        pauseStream();
         status = 'idle';
       }
     };
