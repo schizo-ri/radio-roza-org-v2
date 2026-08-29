@@ -22,6 +22,7 @@
   // kept low because maxLiveSyncPlaybackRate absorbs drift at only 0.1s/s.
   const LIVE_RESYNC_AFTER_MS = 1500;
   const RESYNC_TIMEOUT_MS = 4000; // stop waiting for a live edge and unmute regardless
+  const LIVE_EDGE_MARGIN_S = 3; // native HLS only — hls.liveSyncPosition has its own
   const FADE_OUT_MS = 120; // takes the click off a pause
   const FADE_IN_MS = 350; // and eases the jump back to the live edge in
 
@@ -319,12 +320,16 @@
   function resyncToLiveEdge() {
     const el = audioEl;
     if (!el || !pendingResync) return;
+    // liveSyncPosition already sits a safety delay behind the edge; seekable.end()
+    // is the raw edge, and landing exactly on it stalls, so back off by hand.
     const { seekable } = el;
-    const target = hls
-      ? hls.liveSyncPosition
-      : seekable.length
-        ? seekable.end(seekable.length - 1)
-        : null;
+    let target: number | null = null;
+    if (hls) {
+      target = hls.liveSyncPosition;
+    } else if (seekable.length) {
+      const last = seekable.length - 1;
+      target = Math.max(seekable.start(last), seekable.end(last) - LIVE_EDGE_MARGIN_S);
+    }
     if (target == null || !Number.isFinite(target)) return;
     pendingResync = false;
     try {
@@ -380,11 +385,23 @@
     if (!resumeStream()) tryPlay();
   }
 
-  // The user or the OS pausing — keep the media session alive so play still works
-  // from the lock screen. stopIntent is the hard version, for when it shouldn't.
+  // Soft pause only pays off on the MSE path: there hls.stopLoad() stops the
+  // network while the element stays loaded, so the OS media session survives and
+  // play works from the lock screen. On the native path we cannot stop the network
+  // without emptying the element, and iOS releases the audio session on pause
+  // anyway (the lock screen control empties and hands play to the last media app —
+  // no web-side fix exists, WakeLock is unavailable there). So a native pause
+  // would keep buffering for nothing: stop it hard instead.
+  function releaseForPause() {
+    if (hls) pauseStream();
+    else stopStream();
+  }
+
+  // The user or the OS pausing. stopIntent is the unconditionally hard version,
+  // for when nothing should be left to resume at all.
   function pauseIntent() {
     wantsPlaying = false;
-    pauseStream();
+    releaseForPause();
     status = 'idle';
   }
 
@@ -555,9 +572,9 @@
         if (status !== 'failed' && status !== 'unsupported') status = 'idle';
       } else if (!internalPausePending()) {
         // External pause (unplugged headphones, another app taking over) — respect
-        // it, but keep the source attached so play still works from the lock screen
+        // it, on the same terms as a deliberate pause
         wantsPlaying = false;
-        pauseStream();
+        releaseForPause();
         status = 'idle';
       }
     };
