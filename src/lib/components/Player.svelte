@@ -17,6 +17,14 @@
   const MAX_ATTEMPTS = 12; // ~2 min of automatic retrying before giving up
   const LONG_OUTAGE_ATTEMPT = 3; // after this many attempts the message switches to "unavailable"
 
+  // A pause now keeps the element loaded (see pauseStream), so it can last a long
+  // time. Past this the buffer counts as stale and we seek to the live edge —
+  // kept low because maxLiveSyncPlaybackRate absorbs drift at only 0.1s/s.
+  const LIVE_RESYNC_AFTER_MS = 1500;
+  const RESYNC_TIMEOUT_MS = 4000; // stop waiting for a live edge and unmute regardless
+  const FADE_OUT_MS = 120; // takes the click off a pause
+  const FADE_IN_MS = 350; // and eases the jump back to the live edge in
+
   type Status = 'idle' | 'loading' | 'retrying' | 'playing' | 'failed' | 'unsupported';
 
   let audioEl = $state<HTMLAudioElement | undefined>(undefined);
@@ -52,6 +60,13 @@
   let usingNativeSrc = false; // native HLS / MP3 fallback path (no MSE)
   let stallTimer: ReturnType<typeof setTimeout> | null = null;
   let retryTimer: ReturnType<typeof setTimeout> | null = null;
+  let canResume = false; // paused with the source still attached — resumeStream can pick it up
+  let pausedAt = 0; // start of the soft pause, to measure how far behind live we fell
+  let loadStopped = false; // hls.stopLoad() actually ran — a cut-short fade never stops it
+  let pendingResync = false; // waiting for a live edge to seek to
+  let awaitingSeek = false; // our own resync seek is in flight, so `seeked` is ours
+  let resyncTimer: ReturnType<typeof setTimeout> | null = null;
+  let fadeTimer: ReturnType<typeof setInterval> | null = null;
 
   function clearTimers() {
     if (stallTimer) {
@@ -102,7 +117,7 @@
     if (name === 'AbortError') return; // our own teardown interrupted play(); the retry cycle handles it
     if (name === 'NotAllowedError') {
       // Autoplay blocked — a fresh user gesture is required, so stop trying quietly
-      pauseIntent();
+      stopIntent();
       return;
     }
     // Anything else: the stall watchdog will schedule the next attempt
@@ -132,11 +147,16 @@
     if (!el) return;
 
     clearTimers();
+    cancelFade();
+    cancelResync();
+    canResume = false;
+    loadStopped = false;
     status = attempt === 0 ? 'loading' : 'retrying';
     armStallWatchdog(); // armed before teardown, so pause events fired by teardown are ignored
 
     destroyHls();
     usingNativeSrc = false;
+    resetOutput(el); // a fade or resync cut short must not carry over
     const src = playerState.src;
 
     // Native HLS (Safari, iOS) plays the stream without hls.js — no download needed
@@ -163,6 +183,9 @@
         maxMaxBufferLength: 30,
         backBufferLength: 30,
         liveDurationInfinity: true,
+        // Small drift (a short pause, a stall) is eased out by nudging the rate
+        // rather than seeking — inaudible, unlike a jump.
+        maxLiveSyncPlaybackRate: 1.1,
       });
       let mediaErrorRecovered = false;
 
@@ -178,6 +201,10 @@
           handleFailure();
         }
       });
+      // A refreshed live playlist is the first point liveSyncPosition is current
+      instance.on(HlsMod.Events.LEVEL_UPDATED, () => {
+        if (instance === hls) resyncToLiveEdge();
+      });
     } else if (playerState.isLive) {
       usingNativeSrc = true;
       el.src = LIVE_MP3_FALLBACK;
@@ -192,12 +219,19 @@
     el.play().catch(onPlayRejected);
   }
 
+  // Hard stop — empties the media element, which also drops the OS media session.
+  // Only for cases where nothing should be left to resume.
   function stopStream() {
     clearTimers();
+    cancelFade();
+    cancelResync();
+    canResume = false;
+    loadStopped = false;
     destroyHls();
     const el = audioEl;
     if (!el) return;
     el.pause();
+    resetOutput(el); // a fade or resync cut short must not carry over
     if (usingNativeSrc) {
       // Actually stop the network connection, not just playback
       el.removeAttribute('src');
@@ -206,13 +240,155 @@
     }
   }
 
+  // --- Soft pause ---
+
+  // Emptying the element drops the OS media session with it, which is why a
+  // lock-screen pause used to leave nothing to press play on. This keeps the
+  // element loaded instead: hls.stopLoad() aborts every request but leaves
+  // MediaSource attached, and the native path simply stops. The buffer goes stale
+  // in exchange, so resumeStream rejoins the live edge.
+  function pauseStream() {
+    clearTimers();
+    cancelResync();
+    canResume = true;
+    pausedAt = Date.now();
+    const el = audioEl;
+    if (!el) return;
+    // fadeVolume always defers, so this never runs before pauseIntent finishes
+    fadeVolume(0, FADE_OUT_MS, () => {
+      if (wantsPlaying) return; // play was pressed again mid-fade
+      el.pause();
+      hls?.stopLoad();
+      loadStopped = true;
+      resetOutput(el); // inaudible now, and never left stuck muted or at volume 0
+    });
+  }
+
+  // Returns false when there is nothing to resume — a hard stop emptied the
+  // element, so the caller has to reconnect from scratch.
+  function resumeStream() {
+    const el = audioEl;
+    if (!el || !canResume) return false;
+    canResume = false;
+    cancelFade();
+    clearTimers();
+
+    // Play pressed during the fade-out means nothing ever stopped: no startLoad
+    // (it would re-init and re-seek a healthy stream) and no drift to make up.
+    const wasStopped = loadStopped;
+    loadStopped = false;
+    if (wasStopped) hls?.startLoad();
+
+    const stale = wasStopped && playerState.isLive && Date.now() - pausedAt > LIVE_RESYNC_AFTER_MS;
+
+    if (stale) {
+      pendingResync = true;
+      // iOS honours `muted` where it ignores `volume`, so the stale buffer stays
+      // silent everywhere; volume 0 gives the fade something to ramp back up from
+      el.muted = true;
+      el.volume = 0;
+      resyncTimer = setTimeout(finishResync, RESYNC_TIMEOUT_MS);
+    } else {
+      fadeVolume(playerSettings.volume, FADE_IN_MS);
+    }
+
+    if (el.paused) {
+      status = 'loading';
+      armStallWatchdog();
+      // Native HLS keeps its seekable range current, so it can land on the live
+      // edge before making a sound. The MSE path waits for a refreshed playlist.
+      if (!hls) resyncToLiveEdge();
+      el.play().catch(onPlayRejected);
+    } else {
+      status = 'playing'; // the fade-out never got as far as pausing it
+    }
+    return true;
+  }
+
+  function cancelResync() {
+    pendingResync = false;
+    awaitingSeek = false;
+    if (resyncTimer) {
+      clearTimeout(resyncTimer);
+      resyncTimer = null;
+    }
+  }
+
+  // Called whenever a current live edge may have become known. Stays a no-op until
+  // one is; the resync timer is the backstop for when none ever arrives.
+  function resyncToLiveEdge() {
+    const el = audioEl;
+    if (!el || !pendingResync) return;
+    const { seekable } = el;
+    const target = hls
+      ? hls.liveSyncPosition
+      : seekable.length
+        ? seekable.end(seekable.length - 1)
+        : null;
+    if (target == null || !Number.isFinite(target)) return;
+    pendingResync = false;
+    try {
+      el.currentTime = target;
+      awaitingSeek = true;
+    } catch {
+      // not seekable yet — the backstop timer unmutes us where we are
+    }
+  }
+
+  // Fades the live edge back in, on our own `seeked` or off the backstop timer,
+  // so playback can never be left silently muted.
+  function finishResync() {
+    cancelResync();
+    const el = audioEl;
+    if (el) el.muted = false;
+    fadeVolume(playerSettings.volume, FADE_IN_MS);
+  }
+
+  function resetOutput(el: HTMLAudioElement) {
+    el.muted = false;
+    el.volume = playerSettings.volume;
+  }
+
+  function cancelFade() {
+    if (fadeTimer) {
+      clearInterval(fadeTimer);
+      fadeTimer = null;
+    }
+  }
+
+  // Time-based rather than per-step: a backgrounded tab throttles the interval,
+  // and this way the fade still lands on the target instead of stalling part-way.
+  // iOS ignores volume writes entirely, so there the fade is silently a no-op.
+  function fadeVolume(to: number, ms: number, done?: () => void) {
+    cancelFade();
+    const el = audioEl;
+    const from = el ? el.volume : to;
+    const started = Date.now();
+    fadeTimer = setInterval(() => {
+      const p = ms > 0 ? Math.min(1, (Date.now() - started) / ms) : 1;
+      if (el) el.volume = Math.min(1, Math.max(0, from + (to - from) * p));
+      if (p === 1) {
+        cancelFade();
+        done?.();
+      }
+    }, 25);
+  }
+
   function playIntent() {
     wantsPlaying = true;
     attempt = 0;
-    tryPlay();
+    if (!resumeStream()) tryPlay();
   }
 
+  // The user or the OS pausing — keep the media session alive so play still works
+  // from the lock screen. stopIntent is the hard version, for when it shouldn't.
   function pauseIntent() {
+    wantsPlaying = false;
+    pauseStream();
+    status = 'idle';
+  }
+
+  function stopIntent() {
     wantsPlaying = false;
     stopStream();
     status = 'idle';
@@ -256,7 +432,7 @@
     };
     trySet('play', playIntent);
     trySet('pause', pauseIntent);
-    trySet('stop', pauseIntent);
+    trySet('stop', stopIntent);
   }
 
   // While the Mixcloud widget plays, its iframe owns the media session — our
@@ -360,6 +536,17 @@
       attempt = 0;
       status = 'playing';
       if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+      // Native only: after stopLoad, hls.liveSyncPosition still points at the
+      // pre-pause playlist, so the MSE path waits for LEVEL_UPDATED instead
+      if (!hls) resyncToLiveEdge();
+    };
+
+    // hls.js seeks to the live edge on stall recovery too — only our own resync
+    // seek should restart the fade-in
+    const onSeeked = () => {
+      if (!awaitingSeek) return;
+      awaitingSeek = false;
+      finishResync();
     };
 
     const onPause = () => {
@@ -367,9 +554,10 @@
       if (!wantsPlaying) {
         if (status !== 'failed' && status !== 'unsupported') status = 'idle';
       } else if (!internalPausePending()) {
-        // External pause (unplugged headphones, another app taking over) — respect it
+        // External pause (unplugged headphones, another app taking over) — respect
+        // it, but keep the source attached so play still works from the lock screen
         wantsPlaying = false;
-        stopStream();
+        pauseStream();
         status = 'idle';
       }
     };
@@ -386,16 +574,20 @@
     };
 
     el.addEventListener('playing', onPlaying);
+    el.addEventListener('seeked', onSeeked);
     el.addEventListener('pause', onPause);
     el.addEventListener('waiting', onWaiting);
     el.addEventListener('error', onError);
 
     return () => {
       el.removeEventListener('playing', onPlaying);
+      el.removeEventListener('seeked', onSeeked);
       el.removeEventListener('pause', onPause);
       el.removeEventListener('waiting', onWaiting);
       el.removeEventListener('error', onError);
       clearTimers();
+      cancelFade();
+      cancelResync();
       destroyHls();
     };
   });
@@ -414,9 +606,9 @@
   // Pause the live stream when a Mixcloud embed takes over
   $effect(() => {
     if (playerState.mixcloudShow) {
-      untrack(() => {
-        if (wantsPlaying) pauseIntent();
-      });
+      // Hard stop: a soft-paused element would keep our media session in the
+      // notification shade, competing with the widget's own
+      untrack(stopIntent);
     }
   });
 
