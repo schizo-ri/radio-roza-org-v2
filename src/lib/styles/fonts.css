@@ -150,3 +150,46 @@
   font-display: swap;
   src: url('/fonts/PT_Mono/PTMono-Regular.woff2') format('woff2');
 }
+
+/* ============================================================
+   PT Mono — metrički usklađen fallback
+
+   Isti pristup kao kod Synea, ali ovdje je posao samo okomit:
+   PT Mono, Courier i Courier New imaju identičnu širinu znaka
+   (točno 0.6 em), pa size-adjust ne treba — zato ga i nema.
+
+   Razlika je u liniji. PT Mono ima ascent 0.885 / descent 0.235
+   (kutija 1.120), Courier 0.603 / 0.397 / gap 0.200 (kutija 1.200).
+   Bez overridea baseline vidljivo skoči kod datuma i tagova.
+
+   Ciljamo Courier i Courier New izravno, umjesto da se oslanjamo na
+   ono što koji browser uzme za generički monospace — Courier New
+   postoji i na Windowsu i na macOS/iOS-u, pa je rezultat isti svugdje.
+   Obje varijante se overrideom svedu na istu kutiju.
+
+   Lice za 700 postoji jer Tag.svelte i još nekoliko mjesta traže bold:
+   bez njega bi jedno lice od 400 dalo sintetički bold umjesto pravog
+   Courier Bolda koji monospace danas uredno bira.
+   ============================================================ */
+
+@font-face {
+  font-family: 'PT Mono fallback';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Courier New'), local('CourierNewPSMT'), local('Courier');
+  ascent-override: 88.5%;
+  descent-override: 23.5%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'PT Mono fallback';
+  font-style: normal;
+  font-weight: 700;
+  src:
+    local('Courier New Bold'), local('CourierNewPS-BoldMT'), local('Courier Bold'),
+    local('Courier-Bold');
+  ascent-override: 88.5%;
+  descent-override: 23.5%;
+  line-gap-override: 0%;
+}
