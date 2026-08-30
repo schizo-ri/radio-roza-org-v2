@@ -201,7 +201,7 @@
     background: none;
     color: var(--color-black);
     font-size: var(--text-body);
-    font-weight: 500;
+    font-weight: 400;
     text-decoration: none;
     cursor: pointer;
     transition: background-color 0.15s ease;

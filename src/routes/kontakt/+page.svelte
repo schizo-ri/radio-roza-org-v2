@@ -156,7 +156,7 @@
 
   dd a {
     font-size: var(--text-title);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--color-brand);
     text-decoration: none;
   }
@@ -200,7 +200,7 @@
 
   .person-card a {
     font-size: var(--text-body);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--color-brand);
     text-decoration: none;
     word-break: break-all;
@@ -254,7 +254,7 @@
     text-decoration: none;
     color: var(--color-black);
     font-size: var(--text-body);
-    font-weight: 500;
+    font-weight: 400;
     transition: background-color 0.15s ease;
   }
 

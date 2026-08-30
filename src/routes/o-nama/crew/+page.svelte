@@ -62,7 +62,7 @@
 
   .intro-text {
     font-size: var(--text-body);
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.7;
     max-width: 600px;
     margin-bottom: 1rem;

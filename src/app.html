@@ -3,10 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- The two above-the-fold fonts: Syne for titles, PT Mono for meta text -->
+    <!-- The above-the-fold fonts: Syne for titles, PT Mono for meta text.
+         latin-ext is preloaded too — Croatian diacritics appear on every page
+         (the "Radio Roža" header alone needs it). -->
     <link
       rel="preload"
       href="/fonts/syne/webfonts/syne-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/syne/webfonts/syne-latin-ext-400-normal.woff2"
       as="font"
       type="font/woff2"
       crossorigin
