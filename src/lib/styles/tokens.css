@@ -12,7 +12,8 @@
      Fonts
      ========================================================== */
 
-  --font-display: 'Syne', sans-serif;
+  /* 'Syne fallback' je metrički usklađen local() Helvetica/Arial — vidi fonts.css */
+  --font-display: 'Syne', 'Syne fallback', sans-serif;
   --font-mono: 'PT Mono', monospace;
 
   /* ==========================================================

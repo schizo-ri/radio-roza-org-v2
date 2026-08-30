@@ -77,6 +77,66 @@
 }
 
 /* ============================================================
+   Syne — metrički usklađen fallback
+
+   Lokalni Helvetica/Arial prilagođen Syneovim proporcijama, da razmak
+   koji tekst zauzima ostane isti dok se Syne učitava — i da ostane
+   podnošljiv kad se Syne uopće ne učita (content blocker koji blokira
+   web fontove, isključen JS na fontovima, spora veza).
+
+   Bez ovoga Syne 700 je 15% širi od Helvetice Bold, pa naslovi na
+   zamjeni vidljivo poskoče.
+
+   src je isključivo local() — nema mrežnog zahtjeva, pa prolazi i kroz
+   blokere koji blokiraju web fontove. Ako Helvetica ni Arial ne postoje
+   (Android, Linux), lice se ne učita i stack propada na sans-serif.
+
+   Vrijednosti izmjerene iz samih fajlova fontaine metodom: prosječna
+   širina znaka na uzorku stvarnog teksta sa sitea; ascent/descent
+   izvedeni iz Syneove hhea metrike podijeljene sa size-adjustom.
+   Ako se Syne ikad zamijeni, preračunaj ih.
+   ============================================================ */
+
+@font-face {
+  font-family: 'Syne fallback';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local('Helvetica Neue'), local('HelveticaNeue'), local('Helvetica'), local('Arial'),
+    local('ArialMT');
+  size-adjust: 98.4%;
+  ascent-override: 94%;
+  descent-override: 27.9%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Syne fallback';
+  font-style: normal;
+  font-weight: 600;
+  src:
+    local('Helvetica Neue Bold'), local('HelveticaNeue-Bold'), local('Helvetica Bold'),
+    local('Helvetica-Bold'), local('Arial Bold'), local('Arial-BoldMT');
+  size-adjust: 106.2%;
+  ascent-override: 87.1%;
+  descent-override: 25.9%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Syne fallback';
+  font-style: normal;
+  font-weight: 700;
+  src:
+    local('Helvetica Neue Bold'), local('HelveticaNeue-Bold'), local('Helvetica Bold'),
+    local('Helvetica-Bold'), local('Arial Bold'), local('Arial-BoldMT');
+  size-adjust: 114.6%;
+  ascent-override: 80.7%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+/* ============================================================
    PT Mono — weight 400
    Single file, subset to latin + latin-ext (covers Croatian).
    Subset with fontTools; regenerate from the upstream font if a
