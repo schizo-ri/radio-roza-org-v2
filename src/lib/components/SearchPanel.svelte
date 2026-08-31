@@ -1,28 +1,13 @@
 <script lang="ts" module>
+  // Arhiva stiže s /api/arhiva — server je već sasjekao na ova polja.
+  import { loadArchive, type ArchiveHit } from '$lib/api/mixcloud';
+
   interface PostHit {
     href: string;
     title: string;
     excerpt: string;
     date: string;
     tags?: string[];
-  }
-
-  interface ArchiveHit {
-    key: string;
-    url: string;
-    title: string;
-    image?: string;
-    date: string;
-    tags: string[];
-  }
-
-  interface MixcloudCloudcast {
-    key: string;
-    url: string;
-    name: string;
-    created_time: string;
-    pictures: { extra_large?: string; '640wx640h'?: string; large?: string };
-    tags: Array<{ name: string }>;
   }
 
   // Članci i arhiva dohvaćaju se tek kad posjetitelj počne tipkati,
@@ -98,33 +83,6 @@
       archiveHits.length === 0
   );
 
-  async function fetchArchivePages(): Promise<ArchiveHit[]> {
-    const out: ArchiveHit[] = [];
-    let url: string | null = 'https://api.mixcloud.com/RadioRoza/cloudcasts/?limit=100';
-    // Najviše 3 stranice (300 najnovijih snimki) da pretraga ostane lagana
-    for (let i = 0; i < 3 && url; i++) {
-      const r = await fetch(url);
-      if (!r.ok) break;
-      const json: { data: MixcloudCloudcast[]; paging?: { next?: string } } = await r.json();
-      out.push(
-        ...json.data.map((c) => ({
-          key: c.key,
-          url: c.url,
-          title: c.name,
-          image: c.pictures['640wx640h'] ?? c.pictures.extra_large ?? c.pictures.large,
-          date: new Date(c.created_time).toLocaleDateString('hr-HR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          }),
-          tags: c.tags.map((t) => t.name),
-        }))
-      );
-      url = json.paging?.next ?? null;
-    }
-    return out;
-  }
-
   async function loadRemote() {
     if (loadingRemote || (cachedPosts !== null && cachedArchive !== null)) return;
     loadingRemote = true;
@@ -134,7 +92,7 @@
         : fetch('/api/pretraga')
             .then((r) => (r.ok ? r.json() : { posts: [] }))
             .then((j: { posts: PostHit[] }) => j.posts),
-      cachedArchive !== null ? Promise.resolve(cachedArchive) : fetchArchivePages(),
+      cachedArchive !== null ? Promise.resolve(cachedArchive) : loadArchive(),
     ]);
     if (postsRes.status === 'fulfilled') {
       cachedPosts = postsRes.value;

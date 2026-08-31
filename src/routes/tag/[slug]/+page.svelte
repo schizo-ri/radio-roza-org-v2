@@ -5,6 +5,7 @@
   import ShowCard from '$lib/components/ShowCard.svelte';
   import Seo from '$lib/components/Seo.svelte';
   import { normalizeTag } from '$lib/data/tags';
+  import { loadArchive, type ArchiveHit as ArchiveEntry } from '$lib/api/mixcloud';
 
   interface ArchiveHit {
     href: string;
@@ -15,15 +16,6 @@
     mixcloudKey: string;
   }
 
-  interface MixcloudCloudcast {
-    key: string;
-    url: string;
-    name: string;
-    created_time: string;
-    pictures: { extra_large?: string; '640wx640h'?: string; large?: string };
-    tags: Array<{ name: string }>;
-  }
-
   let { data } = $props();
 
   let archive = $state<ArchiveHit[]>([]);
@@ -31,31 +23,21 @@
 
   // Arhiva se filtrira klijentski po najviše 300 najnovijih snimki (Mixcloud
   // nema pretragu po tagu) — zato "best-effort": stariji zapisi mogu izostati.
+  // Popis stiže s /api/arhiva: Mixcloud ne gzipa, pa bi izravno bilo ~1,3 MB
+  // u tri serijska zahtjeva, na svakom otvaranju tag stranice.
   async function collectArchive(slug: string): Promise<ArchiveHit[]> {
-    const out: ArchiveHit[] = [];
-    let url: string | null = 'https://api.mixcloud.com/RadioRoza/cloudcasts/?limit=100&metadata=1';
-    for (let i = 0; i < 3 && url; i++) {
-      const r = await fetch(url);
-      if (!r.ok) break;
-      const json: { data: MixcloudCloudcast[]; paging?: { next?: string } } = await r.json();
-      for (const c of json.data) {
-        if (!c.tags.some((t) => normalizeTag(t.name)?.slug === slug)) continue;
-        out.push({
-          href: c.url,
-          title: c.name,
-          date: new Date(c.created_time).toLocaleDateString('hr-HR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          }),
-          image: c.pictures['640wx640h'] ?? c.pictures.extra_large ?? c.pictures.large,
-          tags: c.tags.slice(0, 3).map((t) => t.name),
-          mixcloudKey: c.key,
-        });
-      }
-      url = json.paging?.next ?? null;
-    }
-    return out;
+    const archive: ArchiveEntry[] = await loadArchive();
+
+    return archive
+      .filter((c) => c.tags.some((t) => normalizeTag(t)?.slug === slug))
+      .map((c) => ({
+        href: c.url,
+        title: c.title,
+        date: c.date,
+        image: c.image,
+        tags: c.tags.slice(0, 3),
+        mixcloudKey: c.key,
+      }));
   }
 
   $effect(() => {
