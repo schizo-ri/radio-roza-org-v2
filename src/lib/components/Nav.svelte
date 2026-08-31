@@ -4,9 +4,11 @@
   import { fly, fade } from 'svelte/transition';
   import logo from '$lib/assets/logo.svg';
   import SearchPanel from '$lib/components/SearchPanel.svelte';
+  import { installState } from '$lib/stores/install.svelte';
 
   let menuOpen = $state(false);
   let searchOpen = $state(false);
+  let iosHelpOpen = $state(false);
   let hidden = $state(false);
   let lastScrollY = 0;
   let upDistance = 0;
@@ -14,10 +16,11 @@
 
   afterNavigate(() => {
     menuOpen = false;
+    iosHelpOpen = false;
   });
 
   $effect(() => {
-    document.body.style.overflow = menuOpen || searchOpen ? 'hidden' : '';
+    document.body.style.overflow = menuOpen || searchOpen || iosHelpOpen ? 'hidden' : '';
     return () => {
       document.body.style.overflow = '';
     };
@@ -59,6 +62,7 @@
     if (e.key === 'Escape') {
       menuOpen = false;
       searchOpen = false;
+      iosHelpOpen = false;
     }
   }
 
@@ -74,6 +78,15 @@
   function isActive(href: string): boolean {
     if (href === '/') return page.url.pathname === '/';
     return page.url.pathname.startsWith(href);
+  }
+
+  function onInstallClick() {
+    menuOpen = false;
+    if (installState.mode === 'prompt') {
+      installState.promptInstall();
+    } else {
+      iosHelpOpen = true;
+    }
   }
 </script>
 
@@ -149,7 +162,51 @@
         <a {href} class={{ active: isActive(href) }}>{label}</a>
       </li>
     {/each}
+    {#if installState.mode !== 'none'}
+      <li class="install-item">
+        <button class="install-btn" onclick={onInstallClick}>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 19h16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Instaliraj aplikaciju
+        </button>
+      </li>
+    {/if}
   </ul>
+{/if}
+
+{#if iosHelpOpen}
+  <div
+    class="backdrop"
+    role="presentation"
+    onclick={() => (iosHelpOpen = false)}
+    transition:fade={{ duration: 200 }}
+  ></div>
+  <div
+    class="ios-help"
+    role="dialog"
+    aria-label="Upute za dodavanje na početni zaslon"
+    transition:fly={{ y: -8, duration: 200 }}
+  >
+    <h2>Dodaj Radio Rožu na početni zaslon</h2>
+    <ol>
+      <li>Dodirni ikonu <strong>Podijeli</strong> u traci preglednika</li>
+      <li>Odaberi <strong>Dodaj na početni zaslon</strong></li>
+      <li>Potvrdi s <strong>Dodaj</strong></li>
+    </ol>
+    <p class="hint">
+      Stigla si iz Instagrama ili Facebooka? Prvo otvori stranicu u Safariju — u pregledniku unutar
+      aplikacije te opcije nema.
+    </p>
+    <button class="close-btn" onclick={() => (iosHelpOpen = false)}>U redu</button>
+  </div>
 {/if}
 
 <style>
@@ -289,6 +346,74 @@
 
   .mobile-menu a.active {
     color: var(--color-black);
+  }
+
+  .install-item {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgb(255 255 255 / 0.3);
+  }
+
+  .install-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem 0;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: 400;
+    color: var(--color-white);
+    text-align: left;
+  }
+
+  /* Upute za iOS — ondje nema install API-ja, samo Podijeli izbornik */
+  .ios-help {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    z-index: 301;
+    background: var(--color-bg);
+    color: var(--color-black);
+    padding: 1.25rem 1rem 1.5rem;
+  }
+
+  .ios-help h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-card);
+    font-weight: 400;
+    margin: 0 0 0.75rem;
+  }
+
+  .ios-help ol {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+
+  .ios-help .hint {
+    margin: 0.75rem 0 0;
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    line-height: 1.5;
+  }
+
+  .close-btn {
+    margin-top: 1rem;
+    background: var(--color-brand);
+    color: var(--color-white);
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   /* md: landscape tablet and up */

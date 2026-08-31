@@ -131,18 +131,19 @@ Zadnji redak nije ukras: velik dio prometa dolazi iz in-app webviewa gdje Dodaj
 na početni zaslon uopće ne postoji, pa bi upute bez toga završile u slijepoj
 ulici.
 
-Pristupačnost: gumb je `<button>` s `aria-expanded` vezanim na `iosHelpOpen`,
-panel ima `role="dialog"` i `aria-label`.
+Pristupačnost: panel ima `role="dialog"` i `aria-label`. Gumb **nema**
+`aria-expanded` — klik zatvara izbornik prije otvaranja panela, pa bi atribut
+cijelo vrijeme dok je gumb vidljiv bio `false` i ne bi opisivao ništa.
 
 ## Ponašanje po platformama
 
-| Situacija | Ishod |
-|---|---|
-| Android Chrome, neinstalirano | Stavka vidljiva → sistemski dijalog |
-| iOS Safari/Chrome, neinstalirano | Stavka vidljiva → panel s uputama |
-| Već instalirano (bilo gdje) | Stavke nema |
-| Desktop | Burger izbornik se ne prikazuje |
-| Firefox Android i ostali bez API-ja | Stavke nema |
+| Situacija                           | Ishod                               |
+| ----------------------------------- | ----------------------------------- |
+| Android Chrome, neinstalirano       | Stavka vidljiva → sistemski dijalog |
+| iOS Safari/Chrome, neinstalirano    | Stavka vidljiva → panel s uputama   |
+| Već instalirano (bilo gdje)         | Stavke nema                         |
+| Desktop                             | Burger izbornik se ne prikazuje     |
+| Firefox Android i ostali bez API-ja | Stavke nema                         |
 
 ## Verifikacija
 
