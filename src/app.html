@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Player je u layoutu, dakle na svakoj stranici, i odmah po montiranju
+         traži nowplaying s ovog hosta — otvori vezu prije nego zatreba. -->
+    <link rel="preconnect" href="https://radio.radio-roza.org" crossorigin />
+
     <!-- The above-the-fold fonts: Syne for titles, PT Mono for meta text.
          latin-ext is preloaded too — Croatian diacritics appear on every page
          (the "Radio Roža" header alone needs it). -->
