@@ -18,5 +18,42 @@
     { "name": "Program", "short_name": "Program", "url": "/program" },
     { "name": "Arhiva", "short_name": "Arhiva", "url": "/arhiva" },
     { "name": "Čitaj radio", "short_name": "Čitaj radio", "url": "/citaj-radio" }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/naslovnica-narrow.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Naslovnica s trakom playera i najnovijim emisijama"
+    },
+    {
+      "src": "/screenshots/program-narrow.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tjedni raspored programa"
+    },
+    {
+      "src": "/screenshots/citaj-radio-narrow.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Čitaj radio — tekstovi o glazbi"
+    },
+    {
+      "src": "/screenshots/search-narrow.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pretraga emisija i tekstova"
+    },
+    {
+      "src": "/screenshots/join-narrow.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pridruži nam se — poziv zajednici"
+    }
   ]
 }

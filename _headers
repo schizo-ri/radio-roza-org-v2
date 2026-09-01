@@ -14,3 +14,7 @@
 # PWA ikone — mijenjaju se praktički nikad.
 /icons/*
   Cache-Control: public, max-age=604800
+
+# PWA screenshots — povlače se samo u instalacijskom dijalogu, mijenjaju se rijetko.
+/screenshots/*
+  Cache-Control: public, max-age=604800
