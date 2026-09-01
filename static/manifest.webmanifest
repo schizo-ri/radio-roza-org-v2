@@ -1,4 +1,5 @@
 {
+  "id": "/",
   "name": "Radio Roža",
   "short_name": "Radio Roža",
   "description": "Nezavisna riječka internetska radio stanica — community radio iz Rijeke.",
@@ -12,5 +13,10 @@
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
     { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Program", "short_name": "Program", "url": "/program" },
+    { "name": "Arhiva", "short_name": "Arhiva", "url": "/arhiva" },
+    { "name": "Čitaj radio", "short_name": "Čitaj radio", "url": "/citaj-radio" }
   ]
 }
