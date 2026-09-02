@@ -22,6 +22,7 @@
   // kept low because maxLiveSyncPlaybackRate absorbs drift at only 0.1s/s.
   const LIVE_RESYNC_AFTER_MS = 1500;
   const RESYNC_TIMEOUT_MS = 4000; // stop waiting for a live edge and unmute regardless
+  const LIVE_EDGE_MARGIN_S = 3; // native HLS only — hls.liveSyncPosition has its own
   const FADE_IN_MS = 350; // eases the jump back to the live edge in
 
   type Status = 'idle' | 'loading' | 'retrying' | 'playing' | 'failed' | 'unsupported';
@@ -228,14 +229,16 @@
     }
   }
 
-  // --- Soft pause (MSE only) ---
+  // --- Soft pause ---
 
   // Emptying the element drops the OS media session with it, which is why a
-  // lock-screen pause leaves nothing to press play on. Keeping it loaded avoids
-  // that, but only pays off on the MSE path: hls.stopLoad() aborts every request
-  // while MediaSource stays attached. A bare media element has no such lever — it
-  // would keep filling its buffer for a resume iOS does not honour anyway — so
-  // pauseIntent sends the native path to stopStream instead.
+  // lock-screen pause leaves nothing to press play on. Keeping it loaded is the
+  // only thing that prevents that, so both paths pause softly. On MSE
+  // hls.stopLoad() aborts every request as well; a bare media element has no such
+  // lever and keeps topping up its buffer until the browser's own cap stops it.
+  // That bounded cost buys back the lock-screen resume on Android, which runs on
+  // this path — since Chrome 147 canPlayType answers "maybe" for the HLS type, so
+  // tryPlay picks native there and never reaches hls.js.
   function pauseStream() {
     clearTimers();
     cancelFade();
@@ -253,22 +256,36 @@
   // element, so the caller has to reconnect from scratch.
   function resumeStream() {
     const el = audioEl;
-    if (!el || !canResume || !hls) return false;
+    if (!el || !canResume) return false;
     canResume = false;
+    // A pause can now outlive the source itself — the live window slides away from
+    // under a native element left loaded for long enough. Reconnect from scratch
+    // rather than play() into a dead element and wait out the stall watchdog.
+    if (el.error || el.readyState === 0) return false;
     cancelFade();
     clearTimers();
     status = 'loading';
     armStallWatchdog();
-    hls.startLoad();
+    hls?.startLoad();
 
-    if (playerState.isLive && Date.now() - pausedAt > LIVE_RESYNC_AFTER_MS) {
-      // Hold the stale buffer silent until we land on the live edge. Muted rather
-      // than just volume 0 because a fade is inaudible on some platforms; this
-      // path is never reached on native, where muting costs the media session.
+    // Only worth holding the output down if there is in fact a live edge to land
+    // on: MSE always gets one from the next playlist refresh, while native only
+    // does where the browser publishes a seekable range. Chrome publishes none and
+    // catches up on its own, so holding there would just be silence for nothing.
+    const stale = playerState.isLive && Date.now() - pausedAt > LIVE_RESYNC_AFTER_MS;
+    if (stale && (hls !== null || liveEdgeTarget(el) !== null)) {
+      // Keep the stale buffer quiet until we land. Muting is the only dependable
+      // silence on the MSE path — but never on native: iOS gives a muted element
+      // no audio session, which empties the lock-screen control. There volume 0 is
+      // all we do; iOS ignores that too, so a moment of stale audio is audible,
+      // still better than losing the session.
       pendingResync = true;
-      el.muted = true;
+      if (hls) el.muted = true;
       el.volume = 0;
       resyncTimer = setTimeout(finishResync, RESYNC_TIMEOUT_MS);
+      // A native edge is already current by the time we get here, so it can land
+      // before making a sound. The MSE path waits for a refreshed playlist.
+      if (!hls) resyncToLiveEdge();
     } else {
       el.volume = playerSettings.volume;
     }
@@ -286,15 +303,29 @@
     }
   }
 
+  // Where to rejoin live, or null while no current edge is known. liveSyncPosition
+  // already sits a safety delay behind the edge; seekable.end() is the raw edge,
+  // and landing exactly on it stalls, so that one is backed off by hand. Chrome's
+  // native HLS publishes no seekable range at all, so there this is always null.
+  function liveEdgeTarget(el: HTMLAudioElement): number | null {
+    if (hls) {
+      const target = hls.liveSyncPosition;
+      return target != null && Number.isFinite(target) ? target : null;
+    }
+    const { seekable } = el;
+    if (!seekable.length) return null;
+    const last = seekable.length - 1;
+    const target = Math.max(seekable.start(last), seekable.end(last) - LIVE_EDGE_MARGIN_S);
+    return Number.isFinite(target) ? target : null;
+  }
+
   // Called whenever a current live edge may have become known. Stays a no-op until
   // one is; the resync timer is the backstop for when none ever arrives.
-  // liveSyncPosition already sits a safety delay behind the raw edge, which is
-  // what keeps the seek from landing somewhere that immediately stalls.
   function resyncToLiveEdge() {
     const el = audioEl;
-    if (!el || !pendingResync || !hls) return;
-    const target = hls.liveSyncPosition;
-    if (target == null || !Number.isFinite(target)) return;
+    if (!el || !pendingResync) return;
+    const target = liveEdgeTarget(el);
+    if (target === null) return;
     pendingResync = false;
     try {
       el.currentTime = target;
@@ -356,13 +387,11 @@
     if (!resumeStream()) tryPlay();
   }
 
-  // The user or the OS pausing. Soft where it keeps the OS media session alive and
-  // still stops the network (MSE), hard otherwise — see pauseStream. stopIntent is
-  // the unconditionally hard version, for when nothing should be resumable at all.
+  // The user or the OS pausing — keep the media session alive so play still works
+  // from the lock screen. stopIntent is the hard version, for when it shouldn't.
   function pauseIntent() {
     wantsPlaying = false;
-    if (hls) pauseStream();
-    else stopStream();
+    pauseStream();
     status = 'idle';
   }
 
@@ -514,6 +543,9 @@
       attempt = 0;
       status = 'playing';
       if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+      // Native only: after stopLoad, hls.liveSyncPosition still points at the
+      // pre-pause playlist, so the MSE path waits for LEVEL_UPDATED instead
+      if (!hls) resyncToLiveEdge();
     };
 
     // hls.js seeks to the live edge on stall recovery too — only our own resync
