@@ -40,38 +40,36 @@
 <JsonLd data={jsonLd} />
 
 <main class="article-page">
-  <div class="article-layout">
-    <!-- Na desktopu sticky: naslovna slika, pa meta i naslov ispod nje.
-         Na mobitelu meta i naslov idu iznad slike (order). Bez slike ostaje
-         samo naslovni blok, s većim naslovom na desktopu. -->
-    <header class="article-aside" class:no-image={!article.image}>
-      {#if article.image}
-        <figure class="article-figure">
-          <div class="article-cover" style:aspect-ratio={article.imageRatio}>
-            <img
-              src={article.image}
-              alt={article.imageAlt}
-              style:object-position={article.imagePosition}
-            />
-          </div>
-          {#if article.imageCaption}
-            <figcaption class="cover-caption">{@html article.imageCaption}</figcaption>
-          {/if}
-        </figure>
-      {/if}
-
-      <div class="article-heading">
-        <div class="article-meta">
-          <span class="meta-date">{article.date}</span>
-          {#if article.author}
-            <span class="meta-sep">·</span>
-            <span class="meta-author">{article.author}</span>
-          {/if}
-        </div>
-
-        <h1 class="article-title">{article.title}</h1>
+  <!-- Na desktopu: lijevo samo naslovna slika, sticky i uvijek cijela (visina
+       ograničena na ekran); desno meta i naslov pa tekst. Na mobitelu redom:
+       naslov, slika, tekst. Bez slike naslov ide u lijevi stupac. -->
+  <div class="article-layout" class:no-image={!article.image}>
+    <header class="article-heading">
+      <div class="article-meta">
+        <span class="meta-date">{article.date}</span>
+        {#if article.author}
+          <span class="meta-sep">·</span>
+          <span class="meta-author">{article.author}</span>
+        {/if}
       </div>
+
+      <h1 class="article-title">{article.title}</h1>
     </header>
+
+    {#if article.image}
+      <figure class="article-figure" style:--ratio={article.imageRatio}>
+        <div class="article-cover">
+          <img
+            src={article.image}
+            alt={article.imageAlt}
+            style:object-position={article.imagePosition}
+          />
+        </div>
+        {#if article.imageCaption}
+          <figcaption class="cover-caption">{@html article.imageCaption}</figcaption>
+        {/if}
+      </figure>
+    {/if}
 
     <div class="article-body">
       {@html article.contentHtml}
@@ -141,16 +139,8 @@
     margin-bottom: 4rem;
   }
 
-  .article-aside {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    align-self: start;
-    min-width: 0;
-  }
-
   .article-heading {
-    order: -1;
+    min-width: 0;
     padding-bottom: 1.5rem;
     border-bottom: 2px solid var(--color-black);
   }
@@ -160,12 +150,12 @@
     flex-direction: column;
     gap: 0.5rem;
     margin: 0;
-    min-height: 0;
+    min-width: 0;
   }
 
   /* Omjer dolazi iz CMS-a (ograničen na 4:5–16:9), 4:3 je samo rezerva */
   .article-cover {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: var(--ratio, 4 / 3);
     overflow: hidden;
   }
 
@@ -304,23 +294,14 @@
 
     .article-layout {
       grid-template-columns: 45fr 55fr;
+      grid-template-rows: auto 1fr;
       column-gap: clamp(3rem, 5vw, 8rem);
+      row-gap: 2rem;
     }
 
-    /* Sticky ispod playera (--player-offset prati i skrivanje izbornika).
-       max-height + skupljanje slike drže cijeli blok unutar ekrana. */
-    .article-aside {
-      position: sticky;
-      top: calc(var(--player-offset, 140px) + 1.5rem);
-      max-height: calc(100svh - var(--player-offset, 140px) - 3rem);
-      gap: 1rem;
-      transition: top 0.3s ease;
-    }
-
-    .article-figure,
-    .article-cover {
-      flex: 0 1 auto;
-      min-height: 0;
+    .article-heading,
+    .article-body {
+      grid-column: 2;
     }
 
     .article-heading {
@@ -328,18 +309,41 @@
       border-bottom: none;
     }
 
+    /* Sticky ispod playera (--player-offset prati i skrivanje izbornika). Širina
+       je ograničena tako da cijela slika s opisom stane u visinu ekrana; visina
+       izbornika i playera je fiksna (140px) da se slika ne mijenja kad se
+       izbornik skrije. Uža slika (portret) prislanja se uz tekst. */
+    .article-figure {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      align-self: start;
+      justify-self: end;
+      width: min(100%, calc((100svh - 140px - 3rem - 2rem) * var(--ratio, 4 / 3)));
+      position: sticky;
+      top: calc(var(--player-offset, 140px) + 1.5rem);
+      transition: top 0.3s ease;
+    }
+
     .article-meta {
       margin-bottom: 0.5rem;
     }
 
     .article-title {
-      font-size: clamp(2.5rem, 2.2vw, 3.25rem);
+      font-size: clamp(2.5rem, 2.9vw, 3.5rem);
+      text-wrap: balance;
+    }
+
+    .no-image .article-heading {
+      grid-column: 1;
+    }
+
+    .no-image .article-body {
+      grid-row: 1 / span 2;
     }
 
     .no-image .article-title {
       font-size: var(--text-display);
       line-height: 1.05;
-      text-wrap: balance;
     }
 
     .article-body {
