@@ -1,6 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state';
   import ArticleCard from '$lib/components/ArticleCard.svelte';
+  import ArticleGrid from '$lib/components/ArticleGrid.svelte';
   import JsonLd from '$lib/components/JsonLd.svelte';
   import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
@@ -40,15 +41,14 @@
 <main class="article-page">
   <div class="article-layout">
     <!-- Na desktopu sticky: naslovna slika, pa meta i naslov ispod nje.
-         Na mobitelu meta i naslov idu iznad slike (order). -->
-    <header class="article-aside">
-      <div class="article-cover">
-        {#if article.image}
+         Na mobitelu meta i naslov idu iznad slike (order). Bez slike ostaje
+         samo naslovni blok, s većim naslovom na desktopu. -->
+    <header class="article-aside" class:no-image={!article.image}>
+      {#if article.image}
+        <div class="article-cover">
           <img src={article.image} alt={article.imageAlt} />
-        {:else}
-          <div class="cover-placeholder" aria-hidden="true"></div>
-        {/if}
-      </div>
+        </div>
+      {/if}
 
       <div class="article-heading">
         <div class="article-meta">
@@ -82,11 +82,11 @@
   {#if related.length > 0}
     <section class="related">
       <h2 class="related-title">vezani članci</h2>
-      <div class="related-grid">
-        {#each related as item (item.href)}
+      <ArticleGrid items={related}>
+        {#snippet card(item)}
           <ArticleCard {...item} />
-        {/each}
-      </div>
+        {/snippet}
+      </ArticleGrid>
     </section>
   {/if}
 </main>
@@ -151,12 +151,6 @@
     height: 100%;
     object-fit: cover;
     display: block;
-  }
-
-  .cover-placeholder {
-    width: 100%;
-    height: 100%;
-    background: rgb(0 0 0 / 0.08);
   }
 
   /* Body text */
@@ -260,25 +254,14 @@
     font-size: var(--text-display);
     font-weight: 400;
     line-height: 1;
-    margin-bottom: 0;
-  }
-
-  .related-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    column-gap: 1px;
-    row-gap: 0;
-    background: rgb(0 0 0 / 0.12);
+    /* Isti razmak do mreže kao PageHeader na Čitaj radio */
+    margin-bottom: 1rem;
   }
 
   /* Tablet */
   @media (min-width: 640px) {
     .article-page {
       padding: 2rem 1.5rem 5rem;
-    }
-
-    .related-grid {
-      grid-template-columns: repeat(2, 1fr);
     }
   }
 
@@ -322,12 +305,14 @@
       font-size: clamp(2.5rem, 2.2vw, 3.25rem);
     }
 
-    .article-body {
-      font-size: 1.125rem;
+    .no-image .article-title {
+      font-size: var(--text-display);
+      line-height: 1.05;
+      text-wrap: balance;
     }
 
-    .related-grid {
-      grid-template-columns: repeat(4, 1fr);
+    .article-body {
+      font-size: 1.125rem;
     }
   }
 

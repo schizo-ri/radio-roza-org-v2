@@ -120,6 +120,24 @@ export async function fetchPostsByTag(
   return res.json();
 }
 
+// Članci po id-u, npr. vezani članci: CMS ih uz članak vraća samo s naslovom,
+// slugom i kategorijama, bez slike, datuma, autora i sadržaja koje kartica treba.
+export async function fetchPostsByIds(
+  fetch: typeof globalThis.fetch,
+  ids: number[]
+): Promise<CmsPost[]> {
+  if (ids.length === 0) return [];
+  const params = new URLSearchParams({
+    depth: '1',
+    limit: String(ids.length),
+    'where[id][in]': ids.join(','),
+  });
+  const res = await fetch(`${CMS_BASE}/api/posts?${params}`);
+  if (!res.ok) throw new Error(`CMS error: ${res.status}`);
+  const data: PostsResponse = await res.json();
+  return data.docs;
+}
+
 export async function fetchPostBySlug(
   fetch: typeof globalThis.fetch,
   slug: string

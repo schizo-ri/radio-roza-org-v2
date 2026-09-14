@@ -1,12 +1,29 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { fetchPostBySlug, cardImageUrl, heroImageUrl, ogImageUrl } from '$lib/api/cms';
+import {
+  fetchPostBySlug,
+  fetchPostsByIds,
+  cardImageUrl,
+  heroImageUrl,
+  ogImageUrl,
+} from '$lib/api/cms';
+import type { CmsPost } from '$lib/api/cms';
 import { lexicalToHtml, lexicalExcerpt } from '$lib/utils/lexical';
 import categoriesJson from '$lib/data/categories.json';
 
 const categoryMap = new Map(
   categoriesJson.docs.map((c) => [c.id, { title: c.title, slug: c.slug }])
 );
+
+function formatDate(iso: string | null | undefined): string {
+  return iso
+    ? new Date(iso).toLocaleDateString('hr-HR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    : '';
+}
 
 export const load: PageServerLoad = async ({ fetch, params, setHeaders }) => {
   const post = await fetchPostBySlug(fetch, params.slug);
@@ -18,13 +35,7 @@ export const load: PageServerLoad = async ({ fetch, params, setHeaders }) => {
     'Netlify-CDN-Cache-Control': 'public, durable, s-maxage=300, stale-while-revalidate=3600',
   });
 
-  const date = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString('hr-HR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      })
-    : '';
+  const date = formatDate(post.publishedAt);
 
   const cats = post.categories
     .map((rawCat) =>
@@ -40,20 +51,28 @@ export const load: PageServerLoad = async ({ fetch, params, setHeaders }) => {
     .map((raw) => (typeof raw === 'number' ? null : { title: raw.title, slug: raw.slug }))
     .filter(Boolean) as { title: string; slug: string }[];
 
-  const related = post.relatedPosts
-    .filter((r): r is Exclude<typeof r, number> => typeof r !== 'number')
-    .map((r) => ({
-      href: `/citaj-radio/${r.slug}`,
-      title: r.title,
-      date: r.publishedAt
-        ? new Date(r.publishedAt).toLocaleDateString('hr-HR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          })
-        : '',
-      image: r.heroImage && typeof r.heroImage !== 'number' ? cardImageUrl(r.heroImage) : undefined,
-    }));
+  // Redoslijed iz CMS-a; članci koje javni API ne vrati (npr. nacrti) ispadaju.
+  // Ako dohvat padne, članak se prikazuje bez vezanih.
+  const relatedIds = post.relatedPosts.map((r) => (typeof r === 'number' ? r : r.id));
+  const relatedPosts = await fetchPostsByIds(fetch, relatedIds).catch(() => []);
+  const relatedById = new Map(relatedPosts.map((r) => [r.id, r]));
+
+  const related = relatedIds
+    .map((id) => relatedById.get(id))
+    .filter((r): r is CmsPost => r !== undefined)
+    .map((r) => {
+      const rawCat = r.categories[0];
+      const cat = typeof rawCat === 'number' ? categoryMap.get(rawCat) : rawCat;
+      return {
+        href: `/citaj-radio/${r.slug}`,
+        title: r.title,
+        date: formatDate(r.publishedAt),
+        author: r.populatedAuthors[0]?.name ?? undefined,
+        image: r.heroImage ? cardImageUrl(r.heroImage) : undefined,
+        excerpt: lexicalExcerpt(r.content),
+        category: cat?.title ?? undefined,
+      };
+    });
 
   return {
     article: {
