@@ -70,10 +70,14 @@ function renderNode(node: LexicalNode): string {
       const blockType = fields?.blockType as string | undefined;
 
       if (blockType === 'mediaBlock') {
-        const media = fields?.media as { url?: string; alt?: string | null } | undefined;
+        const media = fields?.media as
+          | { url?: string; alt?: string | null; caption?: LexicalContent | null }
+          | undefined;
         if (media?.url) {
           const src = escapeHtml(media.url.startsWith('http') ? media.url : CMS_BASE + media.url);
-          return `<figure><img src="${src}" alt="${escapeHtml(media.alt ?? '')}" /></figure>`;
+          const caption = media.caption?.root ? lexicalToHtml(media.caption) : '';
+          const figcaption = caption ? `<figcaption>${caption}</figcaption>` : '';
+          return `<figure><img src="${src}" alt="${escapeHtml(media.alt ?? '')}" />${figcaption}</figure>`;
         }
       }
 
