@@ -47,8 +47,12 @@
     <header class="article-aside" class:no-image={!article.image}>
       {#if article.image}
         <figure class="article-figure">
-          <div class="article-cover">
-            <img src={article.image} alt={article.imageAlt} />
+          <div class="article-cover" style:aspect-ratio={article.imageRatio}>
+            <img
+              src={article.image}
+              alt={article.imageAlt}
+              style:object-position={article.imagePosition}
+            />
           </div>
           {#if article.imageCaption}
             <figcaption class="cover-caption">{@html article.imageCaption}</figcaption>
@@ -159,6 +163,7 @@
     min-height: 0;
   }
 
+  /* Omjer dolazi iz CMS-a (ograničen na 4:5–16:9), 4:3 je samo rezerva */
   .article-cover {
     aspect-ratio: 4 / 3;
     overflow: hidden;
@@ -319,7 +324,6 @@
     }
 
     .article-heading {
-      order: 0;
       padding-bottom: 0;
       border-bottom: none;
     }

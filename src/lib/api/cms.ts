@@ -5,6 +5,11 @@ export interface CmsMedia {
   url: string;
   alt: string | null;
   caption?: LexicalContent | null;
+  width?: number | null;
+  height?: number | null;
+  /** Fokusna točka iz CMS-a, u postocima (0–100) */
+  focalX?: number | null;
+  focalY?: number | null;
   sizes: {
     thumbnail?: { url: string | null };
     square?: { url: string | null };
@@ -75,8 +80,21 @@ export function cardImageUrl(media: CmsMedia): string {
   return mediaUrl(media.sizes?.small?.url ?? media.sizes?.medium?.url ?? media.url);
 }
 
+// `large` is only generated when the original is bigger than it, so the original
+// itself is the next-best (and never smaller) choice.
 export function heroImageUrl(media: CmsMedia): string {
-  return mediaUrl(media.sizes?.large?.url ?? media.sizes?.medium?.url ?? media.url);
+  return mediaUrl(media.sizes?.large?.url ?? media.url);
+}
+
+// Stvarni omjer slike, ograničen između 4:5 (portret) i 16:9 (pejzaž)
+export function heroAspectRatio(media: CmsMedia): number {
+  if (!media.width || !media.height) return 4 / 3;
+  return Math.min(Math.max(media.width / media.height, 4 / 5), 16 / 9);
+}
+
+// Kad slika ipak mora biti odrezana, fokusna točka ostaje vidljiva
+export function focalPosition(media: CmsMedia): string {
+  return `${media.focalX ?? 50}% ${media.focalY ?? 50}%`;
 }
 
 export function ogImageUrl(media: CmsMedia): string {
