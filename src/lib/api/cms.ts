@@ -80,10 +80,12 @@ export function cardImageUrl(media: CmsMedia): string {
   return mediaUrl(media.sizes?.small?.url ?? media.sizes?.medium?.url ?? media.url);
 }
 
-// `large` is only generated when the original is bigger than it, so the original
-// itself is the next-best (and never smaller) choice.
+// Generated sizes are made from the cropped image, but the original file can still
+// be the uncropped upload (seen with Payload + S3 storage), so the largest generated
+// size that keeps the aspect ratio wins; the original is only a last resort.
 export function heroImageUrl(media: CmsMedia): string {
-  return mediaUrl(media.sizes?.large?.url ?? media.url);
+  const s = media.sizes;
+  return mediaUrl(s?.xlarge?.url ?? s?.large?.url ?? s?.medium?.url ?? s?.small?.url ?? media.url);
 }
 
 // Stvarni omjer slike, ograničen između 4:5 (portret) i 16:9 (pejzaž)
