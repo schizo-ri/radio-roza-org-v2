@@ -38,24 +38,30 @@
 <JsonLd data={jsonLd} />
 
 <main class="article-page">
-  <div class="article-meta">
-    <span class="meta-date">{article.date}</span>
-    {#if article.author}
-      <span class="meta-sep">·</span>
-      <span class="meta-author">{article.author}</span>
-    {/if}
-  </div>
-
-  <h1 class="article-title">{article.title}</h1>
-
   <div class="article-layout">
-    <div class="article-cover">
-      {#if article.image}
-        <img src={article.image} alt={article.imageAlt} />
-      {:else}
-        <div class="cover-placeholder" aria-hidden="true"></div>
-      {/if}
-    </div>
+    <!-- Na desktopu sticky: naslovna slika, pa meta i naslov ispod nje.
+         Na mobitelu meta i naslov idu iznad slike (order). -->
+    <header class="article-aside">
+      <div class="article-cover">
+        {#if article.image}
+          <img src={article.image} alt={article.imageAlt} />
+        {:else}
+          <div class="cover-placeholder" aria-hidden="true"></div>
+        {/if}
+      </div>
+
+      <div class="article-heading">
+        <div class="article-meta">
+          <span class="meta-date">{article.date}</span>
+          {#if article.author}
+            <span class="meta-sep">·</span>
+            <span class="meta-author">{article.author}</span>
+          {/if}
+        </div>
+
+        <h1 class="article-title">{article.title}</h1>
+      </div>
+    </header>
 
     <div class="article-body">
       {@html article.contentHtml}
@@ -111,7 +117,6 @@
     font-size: var(--text-display);
     font-weight: 400;
     line-height: 1.1;
-    margin-bottom: 1.5rem;
   }
 
   /* Two-column layout */
@@ -120,8 +125,20 @@
     grid-template-columns: 1fr;
     gap: 1.5rem;
     margin-bottom: 4rem;
-    border-top: 2px solid var(--color-black);
-    padding-top: 1.5rem;
+  }
+
+  .article-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-self: start;
+    min-width: 0;
+  }
+
+  .article-heading {
+    order: -1;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--color-black);
   }
 
   .article-cover {
@@ -146,11 +163,12 @@
   .article-body {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1em;
+    min-width: 0;
+    font-size: var(--text-body);
   }
 
   .article-body :global(p) {
-    font-size: var(--text-body);
     line-height: 1.7;
     color: rgb(0 0 0 / 0.85);
     margin: 0;
@@ -203,6 +221,19 @@
     width: 100%;
     height: auto;
     display: block;
+  }
+
+  .article-body :global(figcaption) {
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: rgb(0 0 0 / 0.6);
+  }
+
+  .article-body :global(figcaption p) {
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
   }
 
   .article-body :global(ul),
@@ -259,15 +290,51 @@
 
     .article-layout {
       grid-template-columns: 45fr 55fr;
-      gap: 3rem;
+      column-gap: clamp(3rem, 5vw, 8rem);
+    }
+
+    /* Sticky ispod playera (--player-offset prati i skrivanje izbornika).
+       max-height + skupljanje slike drže cijeli blok unutar ekrana. */
+    .article-aside {
+      position: sticky;
+      top: calc(var(--player-offset, 140px) + 1.5rem);
+      max-height: calc(100svh - var(--player-offset, 140px) - 3rem);
+      gap: 1rem;
+      transition: top 0.3s ease;
     }
 
     .article-cover {
-      aspect-ratio: auto;
+      flex: 0 1 auto;
+      min-height: 0;
+    }
+
+    .article-heading {
+      order: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .article-meta {
+      margin-bottom: 0.5rem;
+    }
+
+    .article-title {
+      font-size: clamp(2.5rem, 2.2vw, 3.25rem);
+    }
+
+    .article-body {
+      font-size: 1.125rem;
     }
 
     .related-grid {
       grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Širi od 1920px: veći tekst preko cijelog stupca */
+  @media (min-width: 1921px) {
+    .article-body {
+      font-size: 24px;
     }
   }
 </style>
