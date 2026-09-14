@@ -75,7 +75,7 @@ function renderNode(node: LexicalNode): string {
           | undefined;
         if (media?.url) {
           const src = escapeHtml(media.url.startsWith('http') ? media.url : CMS_BASE + media.url);
-          const caption = media.caption?.root ? lexicalToHtml(media.caption) : '';
+          const caption = captionHtml(media.caption);
           const figcaption = caption ? `<figcaption>${caption}</figcaption>` : '';
           return `<figure><img src="${src}" alt="${escapeHtml(media.alt ?? '')}" />${figcaption}</figure>`;
         }
@@ -104,6 +104,14 @@ function renderNode(node: LexicalNode): string {
 
 export function lexicalToHtml(content: LexicalContent): string {
   return content.root.children.map(renderNode).join('');
+}
+
+// Opis slike iz Media kolekcije (rich text). Prazan editor ostavi prazan
+// odlomak, pa se caption bez teksta tretira kao da ga nema.
+export function captionHtml(caption: LexicalContent | null | undefined): string {
+  if (!caption?.root) return '';
+  const html = lexicalToHtml(caption);
+  return html.replace(/<[^>]*>/g, '').trim() ? html : '';
 }
 
 export function lexicalExcerpt(content: LexicalContent, maxLength = 220): string {

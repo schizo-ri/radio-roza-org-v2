@@ -4,6 +4,7 @@ export interface CmsMedia {
   id: number;
   url: string;
   alt: string | null;
+  caption?: LexicalContent | null;
   sizes: {
     thumbnail?: { url: string | null };
     square?: { url: string | null };

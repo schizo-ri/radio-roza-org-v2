@@ -45,9 +45,14 @@
          samo naslovni blok, s većim naslovom na desktopu. -->
     <header class="article-aside" class:no-image={!article.image}>
       {#if article.image}
-        <div class="article-cover">
-          <img src={article.image} alt={article.imageAlt} />
-        </div>
+        <figure class="article-figure">
+          <div class="article-cover">
+            <img src={article.image} alt={article.imageAlt} />
+          </div>
+          {#if article.imageCaption}
+            <figcaption class="cover-caption">{@html article.imageCaption}</figcaption>
+          {/if}
+        </figure>
       {/if}
 
       <div class="article-heading">
@@ -99,8 +104,9 @@
   /* Meta */
   .article-meta {
     font-family: var(--font-mono);
-    font-size: var(--text-meta);
-    color: rgb(0 0 0 / 0.45);
+    /* Veće i tamnije od opisa slike (13px, 0.8) */
+    font-size: 0.875rem;
+    color: var(--color-black);
     display: flex;
     align-items: center;
     gap: 0.4em;
@@ -108,7 +114,7 @@
   }
 
   .meta-sep {
-    color: rgb(0 0 0 / 0.3);
+    color: rgb(0 0 0 / 0.4);
   }
 
   /* Title */
@@ -141,9 +147,24 @@
     border-bottom: 2px solid var(--color-black);
   }
 
+  .article-figure {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    min-height: 0;
+  }
+
   .article-cover {
     aspect-ratio: 4 / 3;
     overflow: hidden;
+  }
+
+  /* Isto kao opis slika u tekstu */
+  .cover-caption {
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: rgb(0 0 0 / 0.8);
   }
 
   .article-cover img {
@@ -221,7 +242,7 @@
     margin-top: 0.5rem;
     font-size: 0.8125rem;
     line-height: 1.4;
-    color: rgb(0 0 0 / 0.6);
+    color: rgb(0 0 0 / 0.8);
   }
 
   .article-body :global(figcaption p) {
@@ -286,6 +307,7 @@
       transition: top 0.3s ease;
     }
 
+    .article-figure,
     .article-cover {
       flex: 0 1 auto;
       min-height: 0;

@@ -8,7 +8,7 @@ import {
   ogImageUrl,
 } from '$lib/api/cms';
 import type { CmsPost } from '$lib/api/cms';
-import { lexicalToHtml, lexicalExcerpt } from '$lib/utils/lexical';
+import { lexicalToHtml, lexicalExcerpt, captionHtml } from '$lib/utils/lexical';
 import categoriesJson from '$lib/data/categories.json';
 
 const categoryMap = new Map(
@@ -83,6 +83,7 @@ export const load: PageServerLoad = async ({ fetch, params, setHeaders }) => {
       author: post.populatedAuthors[0]?.name ?? undefined,
       image: post.heroImage ? heroImageUrl(post.heroImage) : undefined,
       imageAlt: post.heroImage?.alt ?? post.title,
+      imageCaption: captionHtml(post.heroImage?.caption),
       ogImage: post.heroImage ? ogImageUrl(post.heroImage) : undefined,
       excerpt: lexicalExcerpt(post.content, 160),
       categories: cats,
