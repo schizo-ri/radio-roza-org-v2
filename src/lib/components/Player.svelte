@@ -122,9 +122,10 @@
     // Anything else: the stall watchdog will schedule the next attempt
   }
 
-  // hls.js is ~160 KB gzipped, so it stays out of the initial bundle and loads
-  // on the first play attempt. A failed download resets the promise so the
-  // regular retry cycle can try fetching it again.
+  // hls.js is ~128 KB brotli, so it stays out of the initial bundle — warmHls
+  // fetches it on idle instead, since most browsers need it to play at all and
+  // the first play should not be waiting on it. A failed download resets the
+  // promise so the regular retry cycle can try fetching it again.
   function loadHls(): Promise<HlsClass | null> {
     if (!hlsLoadPromise) {
       hlsLoadPromise = import('hls.js').then(
@@ -153,16 +154,47 @@
     usingNativeSrc = false;
     const src = playerState.src;
 
-    // Native HLS (Safari, iOS) plays the stream without hls.js — no download needed
-    if (el.canPlayType('application/vnd.apple.mpegurl')) {
-      usingNativeSrc = true;
-      el.src = src;
-      el.load();
-      el.play().catch(onPlayRejected);
-      return;
-    }
+    if (prefersNativeHls(el)) playNative(el, src);
+    else attachMse(el, src);
+  }
 
-    attachMse(el, src);
+  // Whether to hand the playlist straight to the browser instead of hls.js.
+  //
+  // canPlayType used to answer that on its own: only WebKit claimed HLS, so a
+  // truthy answer meant Apple's implementation. Chrome 147 ended that by
+  // answering "maybe" for a format it feeds through its generic pipeline, which
+  // is how every Chrome silently stopped using hls.js. The claim is now only the
+  // gate; engine identity decides.
+  //
+  // navigator.vendor is that identity — the HTML spec fixes it to one of three
+  // values by compatibility mode: "Apple Computer, Inc." for WebKit, "Google
+  // Inc." for Chrome, "" for Gecko. WebKit gets the native player because it owns
+  // the format, because it is the path the iOS lock-screen behaviour was measured
+  // on, and because on older iPhones it is the only one there is. The MediaSource
+  // clause covers anything else that can play HLS but could never run hls.js.
+  function prefersNativeHls(el: HTMLAudioElement) {
+    if (!el.canPlayType('application/vnd.apple.mpegurl')) return false;
+    return navigator.vendor === 'Apple Computer, Inc.' || typeof MediaSource === 'undefined';
+  }
+
+  function playNative(el: HTMLAudioElement, src: string) {
+    usingNativeSrc = true;
+    el.src = src;
+    el.load();
+    el.play().catch(onPlayRejected);
+  }
+
+  // Every browser that needs hls.js would otherwise pay for it between the play
+  // press and the first note. Skipped where it would never be used, and on a
+  // metered connection, where 128 KB nobody asked for is not ours to spend.
+  function warmHls() {
+    const el = audioEl ?? document.createElement('audio');
+    if (prefersNativeHls(el)) return;
+    const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    if (conn?.saveData) return;
+    const warm = () => void loadHls();
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(warm, { timeout: 5000 });
+    else setTimeout(warm, 2000);
   }
 
   async function attachMse(el: HTMLAudioElement, src: string) {
@@ -199,18 +231,19 @@
       instance.on(HlsMod.Events.LEVEL_UPDATED, () => {
         if (instance === hls) resyncToLiveEdge();
       });
+      el.play().catch(onPlayRejected);
+    } else if (el.canPlayType('application/vnd.apple.mpegurl')) {
+      // hls.js unusable — no MSE, or its own chunk failed to download. Native is
+      // the better degradation than MP3 wherever it is on offer, and it keeps a
+      // misjudged prefersNativeHls from costing more than one wasted round trip.
+      playNative(el, src);
     } else if (playerState.isLive) {
-      usingNativeSrc = true;
-      el.src = LIVE_MP3_FALLBACK;
-      el.load();
+      playNative(el, LIVE_MP3_FALLBACK);
     } else {
       clearTimers();
       wantsPlaying = false;
       status = 'unsupported';
-      return;
     }
-
-    el.play().catch(onPlayRejected);
   }
 
   // Hard stop — empties the media element, which also drops the OS media session.
@@ -232,13 +265,12 @@
   // --- Soft pause ---
 
   // Emptying the element drops the OS media session with it, which is why a
-  // lock-screen pause leaves nothing to press play on. Keeping it loaded is the
-  // only thing that prevents that, so both paths pause softly. On MSE
-  // hls.stopLoad() aborts every request as well; a bare media element has no such
-  // lever and keeps topping up its buffer until the browser's own cap stops it.
-  // That bounded cost buys back the lock-screen resume on Android, which runs on
-  // this path — since Chrome 147 canPlayType answers "maybe" for the HLS type, so
-  // tryPlay picks native there and never reaches hls.js.
+  // lock-screen pause leaves nothing to press play on. Keeping it loaded is what
+  // buys the resume back, so both paths pause softly. On MSE hls.stopLoad() then
+  // aborts every outstanding request too, and the buffer simply stops where it is.
+  // A bare media element has no such lever and keeps topping up until the
+  // browser's own cap stops it — that cap is only what bounds the cost of pausing
+  // softly there, measured at ~11.6 s.
   function pauseStream() {
     clearTimers();
     cancelFade();
@@ -270,8 +302,8 @@
 
     // Only worth holding the output down if there is in fact a live edge to land
     // on: MSE always gets one from the next playlist refresh, while native only
-    // does where the browser publishes a seekable range. Chrome publishes none and
-    // catches up on its own, so holding there would just be silence for nothing.
+    // does where the browser publishes a seekable range. Where it publishes none
+    // the element catches up by itself, so holding would be silence for nothing.
     const stale = playerState.isLive && Date.now() - pausedAt > LIVE_RESYNC_AFTER_MS;
     if (stale && (hls !== null || liveEdgeTarget(el) !== null)) {
       // Keep the stale buffer quiet until we land. Muting is the only dependable
@@ -305,8 +337,9 @@
 
   // Where to rejoin live, or null while no current edge is known. liveSyncPosition
   // already sits a safety delay behind the edge; seekable.end() is the raw edge,
-  // and landing exactly on it stalls, so that one is backed off by hand. Chrome's
-  // native HLS publishes no seekable range at all, so there this is always null.
+  // and landing exactly on it stalls, so that one is backed off by hand. A native
+  // implementation publishing no seekable range leaves this null throughout —
+  // Chrome's did, back when Chrome still took that path.
   function liveEdgeTarget(el: HTMLAudioElement): number | null {
     if (hls) {
       const target = hls.liveSyncPosition;
@@ -623,6 +656,7 @@
   // mounta se jednom). Ako browser traži gestu, onPlayRejected spusti na idle.
   onMount(() => {
     if (playerSettings.autoplayOnVisit && playerState.isLive) playIntent();
+    else warmHls();
   });
 
   // Zapamćena glasnoća — pokriva i mount i pomicanje slidera u meniju. Preskače se
