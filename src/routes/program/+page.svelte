@@ -12,6 +12,7 @@
   import { browser } from '$app/environment';
   import { downloadShowIcs } from '$lib/utils/ics';
   import { tagChips } from '$lib/data/tags';
+  import ScrollTopButton from '$lib/components/ScrollTopButton.svelte';
 
   const DAY_NAMES_HR: Record<Day, string> = {
     Monday: 'ponedjeljak',
@@ -74,21 +75,6 @@
 
   function onDayClick() {
     if (detailsEl) detailsEl.open = false;
-  }
-
-  // Scroll-to-top
-  let showScrollTop = $state(false);
-
-  $effect(() => {
-    function onScroll() {
-      showScrollTop = window.scrollY > 300;
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  });
-
-  function scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 </script>
 
@@ -186,22 +172,7 @@
   </div>
 </main>
 
-<button
-  class="scroll-top"
-  class:visible={showScrollTop}
-  onclick={scrollToTop}
-  aria-label="Scroll to top"
->
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-    <polyline
-      points="4,13 10,7 16,13"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
-</button>
+<ScrollTopButton />
 
 <style>
   .page {
@@ -449,34 +420,5 @@
          pa header zauzima samo visinu naslova + 1rem paddinga) */
       margin-top: -9.5rem;
     }
-  }
-
-  .scroll-top {
-    position: fixed;
-    bottom: 1.5rem;
-    right: 1.5rem;
-    z-index: 50;
-    background: var(--color-bg);
-    border: 2px solid var(--color-black);
-    color: var(--color-black);
-    width: 2.5rem;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s;
-  }
-
-  .scroll-top.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .scroll-top:hover {
-    background: var(--color-black);
-    color: var(--color-bg);
   }
 </style>

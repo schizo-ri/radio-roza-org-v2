@@ -3,6 +3,7 @@
   import ArticleCard from '$lib/components/ArticleCard.svelte';
   import ArticleGrid from '$lib/components/ArticleGrid.svelte';
   import JsonLd from '$lib/components/JsonLd.svelte';
+  import ScrollTopButton from '$lib/components/ScrollTopButton.svelte';
   import Seo from '$lib/components/Seo.svelte';
   import Tag from '$lib/components/Tag.svelte';
   import { tagHref } from '$lib/data/tags';
@@ -96,6 +97,9 @@
   {/if}
 </main>
 
+<!-- Veći prag nego na programu: gumb se pojavi tek kad je čitanje stvarno počelo -->
+<ScrollTopButton threshold={800} />
+
 <style>
   .article-page {
     padding: 1.5rem 1rem 4rem;
@@ -164,7 +168,8 @@
   .cover-caption {
     font-size: 0.8125rem;
     line-height: 1.4;
-    color: rgb(0 0 0 / 0.8);
+    color: rgb(0 0 0 / 0.7);
+    text-align: right;
   }
 
   .article-cover img {
