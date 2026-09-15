@@ -45,7 +45,16 @@
   import Seo from '$lib/components/Seo.svelte';
   import { page } from '$app/state';
   import { browser } from '$app/environment';
-  import { program, blocks } from '$lib/utils/program';
+  import {
+    program,
+    airsOn,
+    currentEntry,
+    durationLabel,
+    isInsert,
+    parseMinutes,
+    showInfo,
+    startLabel,
+  } from '$lib/utils/program';
   import { stationWeekday, stationMinutes } from '$lib/utils/time';
 
   let { data }: { data: PageData } = $props();
@@ -101,25 +110,15 @@
   const currentTime = $derived(stationMinutes(now));
 
   const todayShows = $derived(
-    program.filter((s) => s.day === today).sort((a, b) => a.show_start.localeCompare(b.show_start))
+    program.filter((s) => airsOn(s, now)).sort((a, b) => a.show_start.localeCompare(b.show_start))
   );
 
-  const currentShow = $derived(
-    todayShows.findLast((s) => {
-      const [h, m] = s.show_start.split(':').map(Number);
-      return h * 60 + m <= currentTime;
-    }) ?? null
-  );
+  const currentShow = $derived(currentEntry(todayShows, currentTime));
 
   const programPreview = $derived(
     [
       ...(currentShow ? [currentShow] : []),
-      ...todayShows
-        .filter((s) => {
-          const [h, m] = s.show_start.split(':').map(Number);
-          return h * 60 + m > currentTime;
-        })
-        .slice(0, 4),
+      ...todayShows.filter((s) => parseMinutes(s.show_start) > currentTime).slice(0, 4),
     ].slice(0, 5)
   );
 
@@ -199,15 +198,18 @@
     <ul class="program-list">
       {#each programPreview as show (show.title + show.show_start)}
         {@const isNow = show === currentShow}
-        {@const block = blocks.find((b) => b.title === show.title)}
+        {@const info = showInfo(show)}
         <li class="program-row" class:is-now={isNow}>
-          <span class="program-time">{show.show_start}</span>
+          <span class="program-time">{startLabel(show)}</span>
           <div class="program-info">
             <span class="program-name">{show.title}</span>
-            {#if block}
-              <p class="program-desc">{block.description}</p>
+            {#if isInsert(show)}
+              <span class="program-meta">emisija · {durationLabel(show)}</span>
+            {/if}
+            {#if info}
+              <p class="program-desc">{info.description}</p>
               <div class="program-tags">
-                {#each block.tags as tag (tag)}
+                {#each info.tags as tag (tag)}
                   <Tag label={tag} />
                 {/each}
               </div>
@@ -390,6 +392,12 @@
     font-family: var(--font-display);
     font-size: var(--text-title);
     line-height: 1.2;
+  }
+
+  .program-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: rgb(0 0 0 / 0.55);
   }
 
   .program-desc {

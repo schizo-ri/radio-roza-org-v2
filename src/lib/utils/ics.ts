@@ -1,4 +1,13 @@
-import { blocks, program, type Day, type Show } from './program';
+import {
+  airsOn,
+  isInsert,
+  maxDuration,
+  parseMinutes,
+  program,
+  showInfo,
+  type Day,
+  type Show,
+} from './program';
 import { DAYS_ORDER, stationDateAtNoonUTC, stationMinutes, stationWeekday } from './time';
 
 // Mora odgovarati VTIMEZONE bloku dolje
@@ -36,22 +45,20 @@ const VTIMEZONE = [
   'END:VTIMEZONE',
 ];
 
-function parseMinutes(hhmm: string): number {
-  const [h, m] = hhmm.split(':').map(Number);
-  return h * 60 + m;
-}
-
 /** Minuta u tjednu, ponedjeljak 00:00 = 0. */
 function weekMinute(day: Day, hhmm: string): number {
   return DAYS_ORDER.indexOf(day) * 1440 + parseMinutes(hhmm);
 }
 
-// Emisije u rasporedu nemaju eksplicitni kraj — blok traje do sljedeće emisije
-// u tjednom redoslijedu (i preko ponoći / preko kraja tjedna).
+// Emisije traju okvirno `duration`; blok nema eksplicitni kraj — traje do
+// sljedećeg bloka u tjednom redoslijedu (i preko ponoći / preko kraja tjedna).
+// Emisije ubačene u blok ga ne prekidaju.
 function durationMinutes(show: Show): number {
+  if (isInsert(show)) return maxDuration(show);
   const start = weekMinute(show.day, show.show_start);
   let best = Infinity;
   for (const other of program) {
+    if (isInsert(other)) continue;
     const delta = (weekMinute(other.day, other.show_start) - start + WEEK_MINUTES) % WEEK_MINUTES;
     if (delta > 0 && delta < best) best = delta;
   }
@@ -110,14 +117,24 @@ function slugify(s: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+function rrule(show: Show): string {
+  const byday = BYDAY[show.day];
+  const f = show.frequency;
+  if (!f) return `FREQ=WEEKLY;BYDAY=${byday}`;
+  if (f.type === 'biweekly') return `FREQ=WEEKLY;INTERVAL=2;BYDAY=${byday}`;
+  return `FREQ=MONTHLY;BYDAY=${f.weeks.map((w) => `${w}${byday}`).join(',')}`;
+}
+
 export function buildShowIcs(show: Show): string {
   const base = stationDateAtNoonUTC();
   const todayIdx = DAYS_ORDER.indexOf(stationWeekday());
   const targetIdx = DAYS_ORDER.indexOf(show.day);
 
-  // Prva pojava: sljedeći takav dan u tjednu; danas vrijedi samo ako termin nije prošao
+  // Prva pojava: sljedeći takav dan u tjednu; danas vrijedi samo ako termin nije prošao.
+  // Povremene emisije preskaču tjedne u kojima ne idu.
   let ahead = (targetIdx - todayIdx + 7) % 7;
   if (ahead === 0 && parseMinutes(show.show_start) <= stationMinutes()) ahead = 7;
+  while (!airsOn(show, addDays(base, ahead))) ahead += 7;
 
   const startDate = addDays(base, ahead);
   const startMin = parseMinutes(show.show_start);
@@ -129,7 +146,7 @@ export function buildShowIcs(show: Show): string {
     .toISOString()
     .replace(/[-:]/g, '')
     .replace(/\.\d{3}/, '');
-  const description = blocks.find((b) => b.title === show.title)?.description;
+  const description = showInfo(show)?.description;
 
   const lines = [
     'BEGIN:VCALENDAR',
@@ -143,10 +160,10 @@ export function buildShowIcs(show: Show): string {
     `DTSTAMP:${dtstamp}`,
     `DTSTART;TZID=${TZID}:${fmtLocal(startDate, startMin)}`,
     `DTEND;TZID=${TZID}:${fmtLocal(endDate, endMin)}`,
-    `RRULE:FREQ=WEEKLY;BYDAY=${BYDAY[show.day]}`,
+    `RRULE:${rrule(show)}`,
     `SUMMARY:${escapeText(show.title)}`,
     ...(description ? [`DESCRIPTION:${escapeText(description)}`] : []),
-    'URL:https://radio-roza.org/program',
+    `URL:https://radio-roza.org${show.href ?? '/program'}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ];

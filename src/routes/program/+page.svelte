@@ -1,10 +1,21 @@
 <script lang="ts">
   import PageHeader from '$lib/components/PageHeader.svelte';
-  import { program, blocks, type Day } from '$lib/utils/program';
+  import {
+    program,
+    airsOn,
+    currentEntry,
+    durationLabel,
+    isInsert,
+    showInfo,
+    startLabel,
+    type Day,
+    type Show,
+  } from '$lib/utils/program';
   import {
     DAYS_ORDER,
     stationWeekday,
     stationMinutes,
+    stationWeekDates,
     stationWeekDateLabels,
   } from '$lib/utils/time';
   import Seo from '$lib/components/Seo.svelte';
@@ -25,14 +36,38 @@
   };
 
   const weekDates = stationWeekDateLabels();
+  const weekDays = stationWeekDates();
 
-  // Group shows by day, sorted by start time
+  // Ide li emisija ovaj tjedan — povremene emisije neke tjedne preskaču
+  const airsThisWeek = (show: Show) => airsOn(show, weekDays[show.day]);
+
+  // Group shows by day, sorted by start time; u istom terminu prvo ona koja ide ovaj tjedan
   const showsByDay = Object.fromEntries(
     DAYS_ORDER.map((day) => [
       day,
-      program.filter((s) => s.day === day).sort((a, b) => a.show_start.localeCompare(b.show_start)),
+      program
+        .filter((s) => s.day === day)
+        .sort(
+          (a, b) =>
+            a.show_start.localeCompare(b.show_start) ||
+            Number(airsThisWeek(b)) - Number(airsThisWeek(a))
+        ),
     ])
   ) as Record<Day, typeof program>;
+
+  function frequencyLabel(show: Show): string | null {
+    const f = show.frequency;
+    if (!f) return null;
+    if (f.type === 'biweekly') return 'svaki drugi tjedan';
+    const weeks = f.weeks.map((w) => (w === -1 ? 'zadnji' : `${w}.`)).join(' i ');
+    return `${weeks} ${DAY_NAMES_HR[show.day]} u mjesecu`;
+  }
+
+  // "emisija · 15 min · svaki drugi tjedan" — blokovi bez oznake osim učestalosti
+  function metaLabel(show: Show): string {
+    const parts = isInsert(show) ? ['emisija', durationLabel(show)] : [];
+    return [...parts, frequencyLabel(show)].filter(Boolean).join(' · ');
+  }
 
   // --- trenutna emisija ---
   let now = $state(new Date());
@@ -51,10 +86,10 @@
   // vrlo brzo postala kriva; nakon hidratacije računa se iz stvarnog vremena.
   const currentShow = $derived(
     browser
-      ? (showsByDay[today].findLast((s) => {
-          const [h, m] = s.show_start.split(':').map(Number);
-          return h * 60 + m <= currentTime;
-        }) ?? null)
+      ? currentEntry(
+          showsByDay[today].filter((s) => airsOn(s, now)),
+          currentTime
+        )
       : null
   );
 
@@ -119,15 +154,34 @@
 
         <ul class="show-list">
           {#each showsByDay[day] as show (show.title + show.show_start)}
-            {@const block = blocks.find((b) => b.title === show.title)}
+            {@const info = showInfo(show)}
             {@const isNow = show === currentShow}
-            <li class="show-row" class:is-now={isNow} id={isNow ? 'trenutno' : undefined}>
-              <span class="show-time">{show.show_start}</span>
+            {@const meta = metaLabel(show)}
+            {@const isOff = !airsThisWeek(show)}
+            <li
+              class="show-row"
+              class:is-now={isNow}
+              class:is-off={isOff}
+              class:is-insert={isInsert(show)}
+              id={isNow ? 'trenutno' : undefined}
+            >
+              <span class="show-time">{startLabel(show)}</span>
               <div class="show-info">
-                <h3 class="show-title">{show.title}</h3>
-                {#if block}
-                  <p class="show-desc">{block.description}</p>
-                  {@const blockChips = tagChips(block.tags)}
+                <h3 class="show-title">
+                  {#if show.href}
+                    <a href={show.href}>{show.title}</a>
+                  {:else}
+                    {show.title}
+                  {/if}
+                </h3>
+                {#if meta}
+                  <p class="show-meta">
+                    {meta}{#if isOff}<span class="show-off">{' · ne ide ovaj tjedan'}</span>{/if}
+                  </p>
+                {/if}
+                {#if info}
+                  <p class="show-desc">{info.description}</p>
+                  {@const blockChips = tagChips(info.tags)}
                   {#if blockChips.length > 0}
                     <div class="show-tags">
                       {#each blockChips as tag (tag.label)}
@@ -358,7 +412,8 @@
     font-size: var(--text-card);
     /*color: rgb(0 0 0 / 0.45);*/
     flex-shrink: 0;
-    width: 2.75rem;
+    width: 3.25em;
+    white-space: nowrap;
     /*padding-top: 0.2em;*/
   }
 
@@ -374,6 +429,40 @@
     font-family: var(--font-display);
     font-size: var(--text-card);
     font-weight: 400;
+  }
+
+  .show-title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .show-title a:hover {
+    text-decoration: underline;
+  }
+
+  .show-meta {
+    font-family: var(--font-mono);
+    font-size: var(--text-meta);
+    color: rgb(0 0 0 / 0.55);
+  }
+
+  /* emisije su kratki umetci preko bloka — opis s njihove stranice zna biti dug */
+  .show-row.is-insert .show-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .show-off {
+    color: var(--color-brand);
+  }
+
+  .show-row.is-off .show-time,
+  .show-row.is-off .show-title,
+  .show-row.is-off .show-desc {
+    opacity: 0.45;
   }
 
   .show-desc {
@@ -399,7 +488,7 @@
     }
 
     .show-time {
-      width: 3.5rem;
+      width: 3.5em;
     }
   }
 

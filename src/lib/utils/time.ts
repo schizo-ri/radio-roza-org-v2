@@ -48,11 +48,10 @@ export function stationDateAtNoonUTC(date: Date = new Date()): Date {
   return new Date(Date.UTC(y, m - 1, d, 12));
 }
 
-/** "18.7."-style labels for Monday–Sunday of the current station-time week. */
-export function stationWeekDateLabels(date: Date = new Date()): Record<Day, string> {
-  const [y, m, d] = ymdFmt.format(date).split('-').map(Number);
+/** Monday–Sunday of the current station-time week, as noon-UTC Dates. */
+export function stationWeekDates(date: Date = new Date()): Record<Day, Date> {
   // Noon UTC keeps day arithmetic away from DST boundaries
-  const base = new Date(Date.UTC(y, m - 1, d, 12));
+  const base = stationDateAtNoonUTC(date);
   const monday = new Date(base);
   monday.setUTCDate(base.getUTCDate() - DAYS_ORDER.indexOf(stationWeekday(date)));
 
@@ -60,7 +59,15 @@ export function stationWeekDateLabels(date: Date = new Date()): Record<Day, stri
     DAYS_ORDER.map((day, i) => {
       const dd = new Date(monday);
       dd.setUTCDate(monday.getUTCDate() + i);
-      return [day, `${dd.getUTCDate()}.${dd.getUTCMonth() + 1}.`];
+      return [day, dd];
     })
+  ) as Record<Day, Date>;
+}
+
+/** "18.7."-style labels for Monday–Sunday of the current station-time week. */
+export function stationWeekDateLabels(date: Date = new Date()): Record<Day, string> {
+  const dates = stationWeekDates(date);
+  return Object.fromEntries(
+    DAYS_ORDER.map((day) => [day, `${dates[day].getUTCDate()}.${dates[day].getUTCMonth() + 1}.`])
   ) as Record<Day, string>;
 }
