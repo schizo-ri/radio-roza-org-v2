@@ -6,9 +6,12 @@
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+/* Namjerno BEZ `scroll-behavior: smooth`. SvelteKit nakon navigacije zove goli
+   `scrollTo(0, 0)` (kit/src/runtime/client/client.js), koji poštuje ovo CSS
+   svojstvo — pa bi svaka navigacija animirala skrol na vrh umjesto da skoči.
+   Na mobitelu to izgleda kao da link nije radio (a iOS prekida animaciju na
+   prvi dodir), pa se tapne drugi put. Tko treba glatko, traži ga u JS-u:
+   `scrollIntoView({ behavior: 'smooth' })`. */
 
 body {
   font-family: var(--font-display);

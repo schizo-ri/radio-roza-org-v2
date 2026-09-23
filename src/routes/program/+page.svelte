@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { pushState } from '$app/navigation';
   import PageHeader from '$lib/components/PageHeader.svelte';
   import {
     program,
@@ -108,8 +109,21 @@
   // Dropdown
   let detailsEl: HTMLDetailsElement | undefined = $state();
 
-  function onDayClick() {
+  // Globalni `html { scroll-behavior: smooth }` je maknut — lomio je SvelteKitov
+  // scroll reset pri navigaciji (goli `scrollTo(0, 0)` poštuje to svojstvo).
+  // Skok na dan zato animiramo ovdje, a hash gurnemo sami da URL i tipka natrag
+  // rade kao prije.
+  function onDayClick(e: MouseEvent, day: Day) {
     if (detailsEl) detailsEl.open = false;
+
+    const id = day.toLowerCase();
+    const section = document.getElementById(id);
+    if (!section) return; // nema cilja — pusti nativni skok
+
+    e.preventDefault();
+    // block: 'start' uz `scroll-margin-top` sekcije drži naslov ispod fiksne trake
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    pushState(`#${id}`, {});
   }
 </script>
 
@@ -128,7 +142,7 @@
         <ul class="day-dropdown">
           {#each DAYS_ORDER as day (day)}
             <li>
-              <a href="#{day.toLowerCase()}" onclick={onDayClick}>
+              <a href="#{day.toLowerCase()}" onclick={(e) => onDayClick(e, day)}>
                 <span class="dropdown-day">{DAY_NAMES_HR[day]}</span>
                 <span class="dropdown-date">{weekDates[day]}</span>
               </a>
