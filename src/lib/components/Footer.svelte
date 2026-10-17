@@ -105,16 +105,18 @@
     </p>
   </div>
 
-  <div class="supported-by">
-    <p class="funding-note">
-      Projekt je sufinancirala Europska unija iz Europskog socijalnog fonda. Izrada internet
-      stranice sufinancirana je u okviru Operativnog programa Učinkoviti ljudski potencijali iz
-      Europskog socijalnog fonda. Sadržaj komunikacije isključiva je odgovornost Udruge Ri Rock.
-      <a href="https://strukturnifondovi.hr" target="_blank" rel="noopener noreferrer"
-        >www.strukturnifondovi.hr</a
-      >
-    </p>
+  <section class="supported-by" aria-labelledby="supported-by-label">
+    <h2 id="supported-by-label" class="col-label">uz potporu</h2>
     <ul class="supporters-logos">
+      <li class="eu">
+        <img
+          src="/images/logos/eu-sufinancira.webp"
+          alt="Sufinancira Europska unija"
+          width="787"
+          height="200"
+          loading="lazy"
+        />
+      </li>
       {#each supporters as { name, src, href } (name)}
         <li>
           <a {href} target="_blank" rel="noopener noreferrer" title={name}>
@@ -127,7 +129,13 @@
         </li>
       {/each}
     </ul>
-  </div>
+    <p class="funding-note">
+      Financirano sredstvima Europske unije. Izneseni stavovi i mišljenja su stavovi i mišljenja
+      autora i ne moraju se podudarati sa stavovima i mišljenjima Europske unije ili Europske
+      izvršne agencije za obrazovanje i kulturu (EACEA). Ni Europska unija ni EACEA ne mogu se
+      smatrati odgovornima za njih.
+    </p>
+  </section>
 </footer>
 
 <style>
@@ -270,34 +278,27 @@
   .supported-by {
     display: flex;
     flex-direction: column;
-    gap: 1.75rem;
+    gap: 1.25rem;
     background: var(--color-white);
     color: var(--color-black);
-    padding: 1.75rem 1rem 2rem;
+    padding: 1.5rem 1rem 1.75rem;
   }
 
-  .funding-note {
-    max-width: 62ch;
-    font-size: var(--text-body);
-    line-height: 1.6;
+  .supported-by .col-label {
+    margin-bottom: 0;
   }
 
-  .funding-note a {
-    color: inherit;
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  .funding-note a:hover {
-    color: var(--color-brand);
-  }
-
+  /* svi logotipi na istoj visini; EU znak odvojen crtom jer nosi izjavu ispod */
   .supporters-logos {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 1rem 1.5rem;
+    gap: 1.25rem 1.75rem;
+  }
+
+  .supporters-logos .eu {
+    flex-basis: 100%;
   }
 
   .supporters-logos a {
@@ -308,10 +309,19 @@
 
   .supporters-logos img {
     display: block;
-    height: 3.5rem;
+    height: 3rem;
     width: auto;
-    max-width: 10rem;
+    max-width: 100%;
     object-fit: contain;
+  }
+
+  .funding-note {
+    max-width: 88ch;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.15);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: rgba(0, 0, 0, 0.75);
   }
 
   .logo-placeholder {
@@ -352,7 +362,17 @@
     }
 
     .supported-by {
-      padding: 1.75rem 1.5rem 2rem;
+      padding: 1.5rem 1.5rem 1.75rem;
+    }
+
+    .supporters-logos .eu {
+      flex-basis: auto;
+      padding-right: 1.75rem;
+      border-right: 1px solid rgba(0, 0, 0, 0.15);
+    }
+
+    .supporters-logos img {
+      height: 3.5rem;
     }
   }
 
@@ -373,17 +393,15 @@
     }
 
     .supported-by {
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      gap: 3rem;
-      padding: 2rem;
+      padding: 1.75rem 2rem 2rem;
     }
 
     .supporters-logos {
-      justify-content: flex-end;
-      gap: 1rem 2rem;
-      flex-shrink: 0;
+      gap: 1.25rem 2.25rem;
+    }
+
+    .supporters-logos .eu {
+      padding-right: 2.25rem;
     }
 
     .signoff-line {
@@ -395,6 +413,30 @@
     .signoff-line span + span::before {
       content: '···';
       margin-right: 0.75em;
+    }
+  }
+
+  /* ── Široki ekran (1280px+) ── */
+  @media (min-width: 1280px) {
+    /* izjava uz logotipe umjesto ispod njih */
+    .supported-by {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      column-gap: 2.25rem;
+    }
+
+    .supported-by .col-label {
+      grid-column: 1 / -1;
+    }
+
+    .funding-note {
+      justify-self: start;
+      padding-top: 0;
+      padding-left: 2.25rem;
+      border-top: 0;
+      border-left: 1px solid rgba(0, 0, 0, 0.15);
+      max-width: 72ch;
     }
   }
 </style>
