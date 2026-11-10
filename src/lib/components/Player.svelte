@@ -19,7 +19,7 @@
 
   // A pause now keeps the element loaded (see pauseStream), so it can last a long
   // time. Past this the buffer counts as stale and we seek to the live edge —
-  // kept low because maxLiveSyncPlaybackRate absorbs drift at only 0.1s/s.
+  // kept low because nothing else pulls a resumed stream back towards live.
   const LIVE_RESYNC_AFTER_MS = 1500;
   const RESYNC_TIMEOUT_MS = 4000; // stop waiting for a live edge and unmute regardless
   const LIVE_EDGE_MARGIN_S = 3; // native HLS only — hls.liveSyncPosition has its own
@@ -209,9 +209,11 @@
         maxMaxBufferLength: 30,
         backBufferLength: 30,
         liveDurationInfinity: true,
-        // Small drift (a short pause, a stall) is eased out by nudging the rate
-        // rather than seeking — inaudible, unlike a jump.
-        maxLiveSyncPlaybackRate: 1.1,
+        // No live-sync rate nudging (hls.js default, stated so it stays off). With 4 s
+        // segments the measured latency saws by 4 s on every playlist refresh, so the
+        // rate never settled — it flipped 1/1.05/1.1 every 2-3 s, which Firefox plays
+        // as an audible stutter on each change.
+        maxLiveSyncPlaybackRate: 1,
       });
       let mediaErrorRecovered = false;
 
@@ -512,7 +514,10 @@
 
   // --- Now-playing polling ---
 
-  let nowPlayingText = ''; // last seen "artist - title" string, used to detect changes
+  let nowPlayingText = ''; // last seen song.text from the JSON (includes the album)
+  // Last seen radioroza.txt body. It's only "artist - title", so it can't be compared
+  // against song.text — compare it with its own previous value instead.
+  let simpleText = '';
   let isFetching = false;
   let artworkRequestId = 0;
 
@@ -558,7 +563,9 @@
     try {
       const res = await fetch(NOW_PLAYING_SIMPLE_URL, { cache: 'no-store' });
       const text = (await res.text()).trim();
-      if (text && text !== nowPlayingText) refreshNowPlaying();
+      if (!text || text === simpleText) return;
+      simpleText = text;
+      refreshNowPlaying();
     } catch {
       // transient polling errors are fine — the next tick will retry
     }
@@ -715,6 +722,7 @@
     if (!playerState.isLive) {
       // Reset so the next return to live re-fetches even if the song is unchanged
       nowPlayingText = '';
+      simpleText = '';
       artworkRequestId += 1;
       artwork = null;
       untrack(teardownMediaSession);
