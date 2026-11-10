@@ -397,7 +397,7 @@ export const shows: Show[] = [
 
     Emisija se emitira jednom mjesečno, zadnjeg četvrtka u mjesecu, u 18h.
 
-    Sve dosadašnje epizode pronađite na MixCloudu Radija Rože. Za sve prijedloge, komentare, ideje...obratite nam se na mail: redakcija.radioroza@gmail.com`,
+    Sve dosadašnje epizode pronađite na MixCloudu Radija Rože. Za sve prijedloge, komentare, ideje...obratite nam se na mail: radio.rozari@gmail.com`,
     image: '/images/shows/rijecki_dir.jpg',
     authors: ['Ana Galant', 'Marija Rađa'],
     playlist_url: 'https://www.mixcloud.com/RadioRoza/playlists/rije%C4%8Dki-%C4%91ir/',
