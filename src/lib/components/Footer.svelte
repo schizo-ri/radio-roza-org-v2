@@ -13,11 +13,7 @@
     { href: '/kontakt', label: 'Kontakt' },
   ];
 
-  const emails = [
-    'redakcija.radioroza@gmail.com',
-    'glazba.radioroza@gmail.com',
-    'radio.rozari@gmail.com',
-  ];
+  const emails = ['glazba.radioroza@gmail.com', 'radio.rozari@gmail.com'];
 
   const socials = [
     { href: 'https://facebook.com/radiorozha', label: 'FB', title: 'Facebook' },

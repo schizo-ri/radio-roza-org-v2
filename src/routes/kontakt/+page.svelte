@@ -16,9 +16,6 @@
   <section class="contact-section">
     <h2 class="section-title">e-mail</h2>
     <dl class="contact-list">
-      <dt>Redakcija</dt>
-      <dd><a href="mailto:redakcija.radioroza@gmail.com">redakcija.radioroza@gmail.com</a></dd>
-
       <dt>Glazbeno uredništvo</dt>
       <dd><a href="mailto:glazba.radioroza@gmail.com">glazba.radioroza@gmail.com</a></dd>
 
@@ -34,11 +31,6 @@
       <div class="person-card">
         <h3 class="person-name">Davor Popdankovski</h3>
         <p class="person-role">Glavni urednik</p>
-      </div>
-
-      <div class="person-card">
-        <h3 class="person-name">Sebastijan Tomažin</h3>
-        <p class="person-role">Audio tehničar i tonac</p>
       </div>
 
       <div class="person-card">
